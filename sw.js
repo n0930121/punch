@@ -1,8 +1,8 @@
 // UCHINO 打卡系統 — service worker
 // 打卡頁一律走網路（確保拿到最新版、打卡一定送到後端）；
 // 只有圖示這類靜態檔做快取，離線時頁面才至少打得開並提示沒有網路。
-const CACHE = 'uc-punch-v1';
-const STATIC = ['icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'manifest.json'];
+const CACHE = 'uc-punch-v2';
+const STATIC = ['icons/icon-192-v2.png', 'icons/icon-512-v2.png', 'icons/apple-touch-icon-v2.png', 'manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)).then(() => self.skipWaiting()));
