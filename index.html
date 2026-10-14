@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#E8E2DA">
+<meta name="theme-color" content="#D9DFE4">
 <title>櫃點打卡</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,8 +12,8 @@
 <style>
   /* ── 莫蘭迪色票 ── */
   :root {
-    --bg:        #E8E2DA;   /* 燕麥灰 */
-    --bg-deep:   #DDD5CB;
+    --bg:        #D9DFE4;   /* 灰藍 */
+    --bg-deep:   #D0D7DD;
     --paper:     #F5F1EB;   /* 米白紙 */
     --ink:       #4A4541;   /* 深灰褐 */
     --ink-soft:  #7D756D;
@@ -38,8 +38,8 @@
   body {
     min-height: 100vh; color: var(--ink); background: var(--bg);
     background-image:
-      radial-gradient(120% 60% at 100% 0%, #EFE7DE 0%, transparent 60%),
-      radial-gradient(90% 50% at 0% 100%, #DFD8CF 0%, transparent 60%);
+      radial-gradient(120% 60% at 100% 0%, #E5EAEE 0%, transparent 60%),
+      radial-gradient(90% 50% at 0% 100%, #D0D7DD 0%, transparent 60%);
     font-family: "Noto Sans TC", -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
     font-weight: 400; letter-spacing: .02em;
   }
@@ -147,7 +147,7 @@
 
   .hidden { display: none !important; }
   .overlay { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;
-             gap: 14px; background: rgba(232,226,218,.82); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+             gap: 14px; background: rgba(217,223,228,.82); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
              color: var(--ink-soft); font-size: 15px; letter-spacing: .1em; }
   .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--hair); border-top-color: var(--clay);
              animation: spin .9s linear infinite; }
