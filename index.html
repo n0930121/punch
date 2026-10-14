@@ -75,6 +75,12 @@
   .store { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--ink-soft);
            background: var(--bg); padding: 5px 11px; border-radius: 999px; }
   .store svg { width: 13px; height: 13px; }
+  .store.pick { position: relative; cursor: pointer; padding: 7px 12px 7px 11px; font-size: 14px; color: var(--ink); max-width: 100%; }
+  .store.pick .chev { width: 12px; height: 12px; margin-left: 2px; color: var(--ink-faint); }
+  .store.pick.empty { background: var(--rose-tint); color: #8E6B63; }
+  .store.pick select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; cursor: pointer; }
+  .store-hint { font-size: 11px; color: var(--ink-faint); margin: 8px 2px 0; letter-spacing: .05em; }
+  ul.today .where { display: block; font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
   .clock { margin-top: 22px; display: flex; align-items: baseline; gap: 6px; }
   .clock .hm { font-family: "Michroma", sans-serif; font-weight: 400; font-size: clamp(42px, 13.5vw, 58px); line-height: 1; letter-spacing: 0; }
   .clock .s  { font-family: "Michroma", sans-serif; font-size: clamp(16px, 5vw, 20px); color: var(--ink-faint); }
@@ -197,10 +203,14 @@
   <div id="punchView" class="hidden">
     <section class="card hero">
       <div class="greet"><span id="greetWord">您好</span>，<b id="staffName"></b></div>
-      <div class="store">
+      <!-- 櫃點：櫃姐自己選（點一下跳出選單） -->
+      <label class="store pick" id="storePick">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-        <span id="staffStore"></span>
-      </div>
+        <span id="staffStore">請選擇櫃點</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        <select id="storeSel" aria-label="選擇櫃點"></select>
+      </label>
+      <div class="store-hint" id="storeHint">今天在哪個櫃上班？點上方可切換</div>
       <div class="clock"><span class="hm" id="clockHM">--:--</span><span class="s" id="clockS">--</span></div>
       <div class="date" id="clockDate"></div>
     </section>
@@ -360,7 +370,7 @@ async function loadStatus() {
   if (r.state === 'disabled') return showState('stop', esc(r.message || '帳號已停用'));
 
   $('staffName').textContent = r.name;
-  $('staffStore').textContent = r.store || '未指定櫃點';
+  setupStores(r);
   $('photoCard').classList.toggle('hidden', !requirePhoto);
   renderToday(r.today);
   $('stateView').classList.add('hidden');
@@ -372,13 +382,14 @@ async function loadStatus() {
 async function doPunch(type) {
   if (busy) return;
   if (requirePhoto && !photoData) return showMsg('err', '請先拍攝櫃位照片');
+  if (!currentStore()) return showMsg('err', '請先選擇今天的櫃點');
   busy = true; updateButtons();
   try {
     overlay('定位中');
     const pos = await getLocation();
     overlay('送出中');
     const r = await api({
-      action: 'punch', type,
+      action: 'punch', type, store: storeMode === 'pick' ? currentStore() : '',
       lat: pos ? pos.lat : '', lng: pos ? pos.lng : '', accuracy: pos ? pos.acc : '',
       photo: photoData, ua: navigator.userAgent,
     });
@@ -478,13 +489,61 @@ const demoToday = [];
 async function demoApi(p) {
   await new Promise(r => setTimeout(r, 500));
   if (p.action === 'status') {
-    return { ok: true, state: 'active', name: '王小美', store: '示範櫃點 A', requirePhoto: true, today: demoToday };
+    return { ok: true, state: 'active', name: '王小美', store: '', requirePhoto: true, today: demoToday,
+             stores: ['UCHINO - SOGO復興', 'UCHINO - 新光南西', 'UCHINO - 信義A8', 'Berkemann - SOGO復興', 'Berkemann - 信義A8', 'IWATA - SOGO復興', 'HASSIA - 新光南西'],
+             defaultStore: 'UCHINO - 信義A8' };
   }
   const now = new Date();
   const t = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-  demoToday.push({ type: p.type, time: t, verdict: p.lat === '' ? '無定位' : '正常' });
+  demoToday.push({ type: p.type, time: t, verdict: p.lat === '' ? '無定位' : '正常', store: p.store });
   return { ok: true, type: p.type, time: t, verdict: demoToday.at(-1).verdict,
            message: p.type + '打卡成功 ' + t, today: demoToday };
+}
+
+/* ---------- 櫃點選擇 ---------- */
+let storeMode = 'fixed';   // 'pick'：櫃姐自己選；'fixed'：舊版後端，照人員表的櫃點
+
+function setupStores(r) {
+  const sel = $('storeSel');
+  if (!r.stores || !r.stores.length) {           // 舊版後端：沒有櫃點清單
+    storeMode = 'fixed';
+    sel.classList.add('hidden'); $('storeHint').classList.add('hidden');
+    $('storePick').querySelector('.chev').style.display = 'none';
+    $('staffStore').textContent = r.store || '未指定櫃點';
+    return;
+  }
+  storeMode = 'pick';
+  // 依品牌分組：「UCHINO - SOGO復興」→ 群組 UCHINO、選項 SOGO復興
+  const groups = {};
+  r.stores.forEach(name => {
+    const i = name.indexOf(' - ');
+    const g = i > 0 ? name.slice(0, i) : '其他';
+    (groups[g] = groups[g] || []).push(name);
+  });
+  sel.innerHTML = '<option value="">請選擇櫃點</option>' + Object.keys(groups).map(g =>
+    '<optgroup label="' + esc(g) + '">' + groups[g].map(n => {
+      const i = n.indexOf(' - ');
+      return '<option value="' + esc(n) + '">' + esc(i > 0 ? n.slice(i + 3) : n) + '</option>';
+    }).join('') + '</optgroup>').join('');
+  let def = r.defaultStore || '';
+  try { def = localStorage.getItem('lastStore') || def; } catch (e) {}
+  if (r.stores.indexOf(def) < 0) def = '';
+  sel.value = def;
+  sel.onchange = () => {
+    try { localStorage.setItem('lastStore', sel.value); } catch (e) {}
+    showStore(); hideMsg(); updateButtons();
+  };
+  showStore();
+}
+
+function currentStore() {
+  return storeMode === 'pick' ? $('storeSel').value : 'fixed';
+}
+
+function showStore() {
+  const v = $('storeSel').value;
+  $('staffStore').textContent = v || '請選擇櫃點';
+  $('storePick').classList.toggle('empty', !v);
 }
 
 /* ---------- 畫面 ---------- */
@@ -497,7 +556,7 @@ function bindUI() {
 }
 
 function updateButtons() {
-  const off = busy || (requirePhoto && !photoData);
+  const off = busy || (requirePhoto && !photoData) || !currentStore();
   $('btnIn').disabled = off;
   $('btnOut').disabled = off;
   // 提示下一步該按哪個
@@ -517,7 +576,7 @@ function renderToday(list) {
   if (!list || !list.length) { ul.innerHTML = '<li class="empty">今天還沒有打卡紀錄</li>'; return; }
   ul.innerHTML = list.map(x =>
     '<li><span class="bullet ' + (x.type === '上班' ? 'in' : 'out') + '"></span>' +
-    '<span class="type">' + esc(x.type) + '</span>' +
+    '<span class="type">' + esc(x.type) + (x.store ? '<span class="where">' + esc(x.store) + '</span>' : '') + '</span>' +
     '<span class="tag' + (x.verdict && x.verdict !== '正常' ? ' bad' : '') + '">' + esc(x.verdict || '') + '</span>' +
     '<span class="time">' + esc(x.time) + '</span></li>'
   ).join('');
