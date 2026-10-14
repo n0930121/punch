@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E9DCD8">
+<title>UC 打卡查詢</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/q-icon-32.png">
+<link rel="apple-touch-icon" href="icons/q-apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="UC 打卡查詢">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
+<style>
+  /* ── 莫蘭迪・豆沙玫瑰（與打卡 App 的灰藍區分） ── */
+  :root {
+    --bg: #E9DCD8; --bg-2: #F1E7E4; --bg-3: #E1D2CD;
+    --paper: #FBF7F6; --ink: #4B3F3D; --ink-soft: #7E6E6B; --ink-faint: #B2A29E; --hair: #EFE4E1;
+    --rose: #B88E87; --rose-deep: #9C726B; --rose-tint: #F3E6E3;
+    --sage: #8E9C8A; --sage-deep: #6F7E6B; --sage-tint: #E6EBE2;
+    --mist: #8D9AAA; --mist-deep: #6E7B8D; --mist-tint: #E3E7EC;
+    --amber: #B9895A; --amber-tint: #F5EADF;
+    --radius: 22px;
+    --shadow: 0 1px 1px rgba(75,63,61,.04), 0 8px 24px -12px rgba(75,63,61,.2);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body { min-height: 100vh; color: var(--ink); background: var(--bg);
+         background-image: radial-gradient(120% 60% at 100% 0%, var(--bg-2) 0%, transparent 60%),
+                           radial-gradient(90% 50% at 0% 100%, var(--bg-3) 0%, transparent 60%);
+         background-attachment: fixed;
+         font-family: "Noto Sans TC", -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; letter-spacing: .02em; }
+  main { max-width: 520px; margin: 0 auto; padding: 18px 16px calc(96px + env(safe-area-inset-bottom)); }
+  .num { font-family: "Michroma", sans-serif; letter-spacing: 0; }
+  .hidden { display: none !important; }
+
+  .demo { font-size: 12px; text-align: center; color: var(--ink-soft); padding: 7px 10px; margin-bottom: 14px;
+          border: 1px dashed var(--ink-faint); border-radius: 999px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin: 4px 4px 16px; }
+  .brand { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 15px; letter-spacing: .25em; color: var(--ink-soft); }
+  .brand::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--rose); margin-right: 9px; vertical-align: 2px; }
+  .pill { font-size: 12px; padding: 5px 12px; border-radius: 999px; background: var(--paper); color: var(--ink-soft); }
+  .pill.admin { background: var(--rose-tint); color: var(--rose-deep); }
+
+  .card { background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 14px; }
+  h1 { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 22px; margin: 2px 4px 4px; letter-spacing: .08em; }
+  .sub { font-size: 13px; color: var(--ink-soft); margin: 0 4px 16px; letter-spacing: .1em; }
+
+  /* 今日 */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--paper); border-radius: 18px; box-shadow: var(--shadow); padding: 14px 6px 12px; text-align: center; }
+  .stat .v { font-family: "Michroma", sans-serif; font-size: 24px; line-height: 1.1; }
+  .stat .k { font-size: 12px; color: var(--ink-soft); margin-top: 6px; letter-spacing: .1em; }
+  .stat.working .v { color: var(--sage-deep); } .stat.off .v { color: var(--mist-deep); }
+  .stat.none .v { color: var(--ink-faint); } .stat.abn .v { color: var(--amber); }
+  .stat.abn.has { background: var(--amber-tint); }
+
+  .people { padding: 6px 18px; }
+  .person { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 14px 0; border-top: 1px solid var(--hair); }
+  .person:first-child { border-top: 0; }
+  .person .nm { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .person .st { font-size: 12px; color: var(--ink-soft); grid-column: 1; }
+  .person .tm { grid-row: 1 / span 2; grid-column: 2; text-align: right; align-self: center; font-size: 14px; color: var(--ink-soft); line-height: 1.7; }
+  .person .tm b { font-weight: 400; color: var(--ink); }
+  .person .ab { grid-column: 1 / -1; font-size: 12px; color: var(--amber); background: var(--amber-tint); border-radius: 10px; padding: 6px 10px; line-height: 1.6; }
+  .state { font-size: 11px; padding: 2px 9px; border-radius: 999px; font-weight: 400; letter-spacing: .05em; }
+  .state.working { background: var(--sage-tint); color: var(--sage-deep); }
+  .state.off { background: var(--mist-tint); color: var(--mist-deep); }
+  .state.none { background: var(--hair); color: var(--ink-faint); }
+
+  /* 篩選 */
+  .filters { padding: 16px 16px 14px; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: -2px -2px 0; padding: 2px; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex: none; border: 0; font-family: inherit; font-size: 13px; padding: 8px 14px; border-radius: 999px;
+          background: var(--bg-2); color: var(--ink-soft); cursor: pointer; letter-spacing: .05em; }
+  .chip.on { background: var(--rose); color: #fff; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .row.one { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .field span { font-size: 11px; color: var(--ink-faint); letter-spacing: .1em; padding-left: 4px; }
+  select, input[type=date], input[type=month] {
+    width: 100%; min-width: 0; font-family: inherit; font-size: 15px; color: var(--ink); background: var(--bg-2);
+    border: 0; border-radius: 14px; padding: 11px 12px; appearance: none; -webkit-appearance: none; }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B2A29E' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+           background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; padding-right: 30px; }
+  .toggle { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding: 4px 4px 0; font-size: 14px; color: var(--ink-soft); cursor: pointer; }
+  .sw { width: 44px; height: 26px; border-radius: 999px; background: var(--hair); position: relative; transition: background .2s; flex: none; }
+  .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.15); transition: transform .2s; }
+  .toggle.on .sw { background: var(--amber); } .toggle.on .sw::after { transform: translateX(18px); }
+
+  .bar { display: flex; align-items: center; justify-content: space-between; margin: 4px 6px 10px; font-size: 13px; color: var(--ink-soft); }
+  .btn { border: 0; font-family: inherit; font-size: 13px; padding: 8px 14px; border-radius: 999px; background: var(--paper);
+         color: var(--rose-deep); box-shadow: var(--shadow); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .btn svg { width: 14px; height: 14px; }
+
+  /* 紀錄列表 */
+  .day { padding: 4px 18px 6px; }
+  .day h3 { margin: 0; padding: 14px 0 6px; font-size: 13px; font-weight: 500; color: var(--ink-soft); letter-spacing: .12em;
+            display: flex; justify-content: space-between; }
+  .rec { display: grid; grid-template-columns: 54px 1fr auto; gap: 2px 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--hair); }
+  .rec .t { font-family: "Michroma", sans-serif; font-size: 14px; grid-row: 1 / span 2; }
+  .rec .who { font-size: 15px; display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .rec .where { font-size: 12px; color: var(--ink-faint); grid-column: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rec .tags { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+  .rec .ph { grid-row: 1 / span 2; grid-column: 3; width: 38px; height: 38px; border-radius: 12px; background: var(--bg-2);
+             display: grid; place-items: center; color: var(--rose-deep); }
+  .rec .ph svg { width: 18px; height: 18px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.in { background: var(--sage); } .dot.out { background: var(--mist); }
+  .tag { font-size: 11px; padding: 2px 9px; border-radius: 999px; background: var(--sage-tint); color: var(--sage-deep); }
+  .tag.bad { background: var(--rose-tint); color: var(--rose-deep); }
+  .tag.warn { background: var(--amber-tint); color: var(--amber); }
+
+  /* 工時 */
+  .month { display: flex; align-items: center; justify-content: space-between; padding: 12px 10px; }
+  .month .m { font-family: "Michroma", sans-serif; font-size: 20px; }
+  .arrow { border: 0; background: var(--bg-2); width: 40px; height: 40px; border-radius: 50%; color: var(--ink-soft); cursor: pointer; display: grid; place-items: center; }
+  .arrow svg { width: 18px; height: 18px; }
+  .hp { padding: 16px 18px 6px; }
+  .hp-top { display: flex; align-items: baseline; justify-content: space-between; cursor: pointer; }
+  .hp-top .nm { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 17px; letter-spacing: .06em; }
+  .hp-top .chev { width: 16px; height: 16px; color: var(--ink-faint); transition: transform .2s; }
+  .hp.open .hp-top .chev { transform: rotate(180deg); }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 10px; }
+  .kpi { background: var(--bg-2); border-radius: 14px; padding: 10px 8px; text-align: center; }
+  .kpi .v { font-family: "Michroma", sans-serif; font-size: 17px; }
+  .kpi .k { font-size: 11px; color: var(--ink-soft); margin-top: 4px; letter-spacing: .1em; }
+  .kpi.miss .v { color: var(--rose-deep); }
+  .dlist { display: none; padding-bottom: 6px; }
+  .hp.open .dlist { display: block; }
+  .drow { display: grid; grid-template-columns: 74px 1fr auto; gap: 2px 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--hair); font-size: 14px; }
+  .drow .d { color: var(--ink-soft); font-size: 13px; }
+  .drow .io { font-family: "Michroma", sans-serif; font-size: 13px; }
+  .drow .io i { font-style: normal; color: var(--ink-faint); margin: 0 4px; }
+  .drow .h { font-family: "Michroma", sans-serif; font-size: 13px; text-align: right; }
+  .drow .s { grid-column: 2 / -1; font-size: 11px; color: var(--ink-faint); display: flex; gap: 6px; align-items: center; }
+
+  .empty { text-align: center; color: var(--ink-faint); font-size: 14px; padding: 36px 16px; line-height: 1.8; }
+  .empty .ico { width: 56px; height: 56px; margin: 0 auto 10px; border-radius: 50%; background: var(--bg-2); display: grid; place-items: center; color: var(--rose); }
+  .empty .ico svg { width: 26px; height: 26px; }
+  .note { font-size: 12px; color: var(--ink-faint); text-align: center; margin: 4px 0 14px; }
+
+  /* 底部分頁 */
+  nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; padding: 8px 16px calc(10px + env(safe-area-inset-bottom));
+        background: linear-gradient(transparent, rgba(233,220,216,.95) 30%); }
+  nav .tabs { max-width: 420px; margin: 0 auto; display: flex; background: var(--paper); border-radius: 999px; box-shadow: var(--shadow); padding: 6px; }
+  nav button { flex: 1; border: 0; background: none; font-family: inherit; font-size: 13px; color: var(--ink-faint); padding: 8px 0 6px;
+               border-radius: 999px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; letter-spacing: .1em; }
+  nav button svg { width: 20px; height: 20px; }
+  nav button.on { background: var(--rose-tint); color: var(--rose-deep); }
+
+  .state-view { text-align: center; padding: 52px 24px; color: var(--ink-soft); font-size: 15px; line-height: 1.8; }
+  .state-view .ico { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: var(--bg-2); display: grid; place-items: center; color: var(--rose); }
+  .state-view .ico svg { width: 28px; height: 28px; }
+  .spinner { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--hair); border-top-color: var(--rose); animation: spin .9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading { display: flex; justify-content: center; padding: 30px 0; }
+
+  .install { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 14px; border-radius: 18px;
+             background: var(--paper); box-shadow: var(--shadow); font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .install img { width: 44px; height: 44px; flex: none; border-radius: 12px; }
+  .install b { color: var(--ink); font-weight: 500; font-size: 14px; }
+  .install .go { margin-left: auto; flex: none; padding: 8px 14px; border-radius: 999px; font-size: 13px; border: 0; background: var(--rose); color: #fff; font-family: inherit; }
+  .install .x { flex: none; border: 0; background: none; color: var(--ink-faint); padding: 4px; font-size: 18px; cursor: pointer; }
+</style>
+</head>
+<body>
+<main>
+  <div id="demoBar" class="demo hidden">預覽模式・資料為示範，非真實紀錄</div>
+
+  <header>
+    <div class="brand">UC 打卡查詢</div>
+    <div class="pill hidden" id="rolePill"></div>
+  </header>
+
+  <div id="installBar" class="install hidden">
+    <img src="icons/q-icon-192.png" alt="">
+    <div><b>安裝到手機桌面</b><br><span id="installHow"></span></div>
+    <button class="go hidden" id="installBtn">安裝</button>
+    <button class="x" id="installClose" aria-label="關閉">×</button>
+  </div>
+
+  <div id="stateView" class="card state-view">
+    <div class="ico"><div class="spinner"></div></div>
+    <div>載入中</div>
+  </div>
+
+  <!-- 今日（主管） -->
+  <section id="tab-today" class="hidden">
+    <h1>今日出勤</h1>
+    <div class="sub num" id="todayDate"></div>
+    <div class="stats">
+      <div class="stat working"><div class="v" id="cWorking">0</div><div class="k">上班中</div></div>
+      <div class="stat off"><div class="v" id="cOff">0</div><div class="k">已下班</div></div>
+      <div class="stat none"><div class="v" id="cNone">0</div><div class="k">未打卡</div></div>
+      <div class="stat abn" id="statAbn"><div class="v" id="cAbn">0</div><div class="k">異常</div></div>
+    </div>
+    <div class="card people" id="peopleList"></div>
+    <div class="note">回到 App 或切換分頁時會自動更新</div>
+  </section>
+
+  <!-- 紀錄 -->
+  <section id="tab-records" class="hidden">
+    <h1 id="recTitle">打卡紀錄</h1>
+    <div class="sub" id="recSub">依日期、人員、櫃點查詢</div>
+    <div class="card filters">
+      <div class="chips" id="rangeChips">
+        <button class="chip on" data-r="today">今天</button>
+        <button class="chip" data-r="yesterday">昨天</button>
+        <button class="chip" data-r="7d">近 7 天</button>
+        <button class="chip" data-r="month">本月</button>
+        <button class="chip" data-r="lastmonth">上個月</button>
+        <button class="chip" data-r="custom">自訂</button>
+      </div>
+      <div class="row hidden" id="customRange">
+        <label class="field"><span>從</span><input type="date" id="fFrom"></label>
+        <label class="field"><span>到</span><input type="date" id="fTo"></label>
+      </div>
+      <div class="row admin-only">
+        <label class="field"><span>人員</span><select id="fName"><option value="">全部人員</option></select></label>
+        <label class="field"><span>櫃點</span><select id="fStore"><option value="">全部櫃點</option></select></label>
+      </div>
+      <div class="toggle admin-only" id="fAbn"><span>只看異常紀錄</span><span class="sw"></span></div>
+    </div>
+    <div class="bar"><span id="recCount"></span>
+      <button class="btn" id="recExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>匯出</button>
+    </div>
+    <div id="recList"></div>
+  </section>
+
+  <!-- 工時 -->
+  <section id="tab-hours" class="hidden">
+    <h1 id="hrTitle">工時統計</h1>
+    <div class="sub">每天以第一筆上班到最後一筆下班計算</div>
+    <div class="card month">
+      <button class="arrow" id="mPrev" aria-label="上個月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <div class="m" id="mLabel"></div>
+      <button class="arrow" id="mNext" aria-label="下個月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="card filters admin-only" style="padding:12px 16px">
+      <div class="row one" style="margin:0">
+        <label class="field"><span>人員</span><select id="hName"><option value="">全部人員</option></select></label>
+      </div>
+    </div>
+    <div class="bar"><span id="hrCount"></span>
+      <button class="btn" id="hrExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>匯出</button>
+    </div>
+    <div id="hrList"></div>
+  </section>
+</main>
+
+<nav class="hidden" id="nav">
+  <div class="tabs">
+    <button data-tab="today" class="admin-only">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>今日</button>
+    <button data-tab="records">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>紀錄</button>
+    <button data-tab="hours">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4M8.5 14h3M8.5 17h6"/></svg>工時</button>
+  </div>
+</nav>
+
+<script>
+/* ===== 設定（與打卡 App 相同） ===== */
+const LIFF_ID = '2012013365-WKHpgfeS';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxESEJ8gfFwQofHSGNUUr4hoCup0WOSjhejmHw4lvyKegq4WYOcSVInVtFQeUOJpTDulg/exec';
+/* ================================== */
+const DEMO = new URLSearchParams(location.search).has('demo');
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const WEEK = '日一二三四五六';
+let ME = null, curTab = '', range = 'today', abnOnly = false, month = '', lastRecs = [], lastHours = [];
+
+/* ---------- 啟動 ---------- */
+(async function start() {
+  bindUI();
+  try {
+    if (DEMO) $('demoBar').classList.remove('hidden');
+    else {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href.split('#')[0] }); return; }
+    }
+    setupInstallBar();
+    const r = await api({ action: 'q_me' });
+    if (!r.ok) return showState(r.message || '讀取失敗');
+    ME = r.me;
+    document.body.classList.toggle('is-admin', ME.admin);
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !ME.admin));
+    $('rolePill').textContent = ME.admin ? '主管・' + ME.name : ME.name;
+    $('rolePill').classList.toggle('admin', ME.admin);
+    $('rolePill').classList.remove('hidden');
+    if (!ME.admin) { $('recTitle').textContent = '我的打卡紀錄'; $('recSub').textContent = '只顯示您自己的紀錄'; $('hrTitle').textContent = '我的工時'; }
+    fillSelect($('fName'), r.staff, '全部人員');
+    fillSelect($('hName'), r.staff, '全部人員');
+    fillSelect($('fStore'), r.stores, '全部櫃點');
+    const now = new Date(); month = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+    $('fFrom').value = $('fTo').value = ymd(now);
+    $('stateView').classList.add('hidden');
+    $('nav').classList.remove('hidden');
+    let tab = ME.admin ? 'today' : 'records';
+    try { tab = sessionStorage.getItem('qTab') || tab; } catch (e) {}
+    if (tab === 'today' && !ME.admin) tab = 'records';
+    showTab(tab);
+  } catch (e) {
+    showState('無法啟動：' + esc(e.message || e));
+  }
+})();
+
+function fillSelect(sel, list, allLabel) {
+  sel.innerHTML = '<option value="">' + allLabel + '</option>' + (list || []).map(n => '<option>' + esc(n) + '</option>').join('');
+}
+
+function showTab(tab) {
+  curTab = tab;
+  try { sessionStorage.setItem('qTab', tab); } catch (e) {}
+  ['today', 'records', 'hours'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== tab));
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  window.scrollTo(0, 0);
+  if (tab === 'today') loadToday();
+  if (tab === 'records') loadRecords();
+  if (tab === 'hours') loadHours();
+}
+
+/* ---------- 今日 ---------- */
+async function loadToday() {
+  $('peopleList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const r = await api({ action: 'q_today' });
+  if (!r.ok) return $('peopleList').innerHTML = emptyBox(r.message);
+  const d = new Date(r.date + 'T00:00:00');
+  $('todayDate').textContent = r.date.replace(/-/g, '.') + '　週' + WEEK[d.getDay()];
+  $('cWorking').textContent = r.counts.working; $('cOff').textContent = r.counts.off;
+  $('cNone').textContent = r.counts.none; $('cAbn').textContent = r.counts.abnormal;
+  $('statAbn').classList.toggle('has', r.counts.abnormal > 0);
+  const label = { working: '上班中', off: '已下班', none: '未打卡' };
+  $('peopleList').innerHTML = r.people.length ? r.people.map(p =>
+    '<div class="person"><div class="nm">' + esc(p.name) + '<span class="state ' + p.state + '">' + label[p.state] + '</span></div>' +
+    '<div class="st">' + (p.store ? esc(p.store) : '—') + '</div>' +
+    '<div class="tm">上 <b class="num">' + (p.inTime || '--:--') + '</b><br>下 <b class="num">' + (p.outTime || '--:--') + '</b></div>' +
+    (p.abnormal.length ? '<div class="ab">' + p.abnormal.map(esc).join('<br>') + '</div>' : '') + '</div>'
+  ).join('') : emptyBox('還沒有已開通的人員');
+}
+
+/* ---------- 紀錄 ---------- */
+function rangeDates() {
+  const t = new Date(); t.setHours(0, 0, 0, 0);
+  const add = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  if (range === 'today') return [t, t];
+  if (range === 'yesterday') { const y = add(t, -1); return [y, y]; }
+  if (range === '7d') return [add(t, -6), t];
+  if (range === 'month') return [new Date(t.getFullYear(), t.getMonth(), 1), t];
+  if (range === 'lastmonth') return [new Date(t.getFullYear(), t.getMonth() - 1, 1), new Date(t.getFullYear(), t.getMonth(), 0)];
+  return [new Date($('fFrom').value + 'T00:00:00'), new Date($('fTo').value + 'T00:00:00')];
+}
+
+async function loadRecords() {
+  const [f, t] = rangeDates();
+  $('recList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  $('recCount').textContent = '';
+  const r = await api({ action: 'q_records', from: ymd(f), to: ymd(t),
+                        name: $('fName').value, store: $('fStore').value, abnormal: abnOnly });
+  if (!r.ok) return $('recList').innerHTML = emptyBox(r.message);
+  lastRecs = r.records || [];
+  $('recCount').textContent = r.message ? r.message : '共 ' + lastRecs.length + ' 筆' + (r.truncated ? '（只顯示最近 1500 筆）' : '');
+  if (!lastRecs.length) return $('recList').innerHTML = '<div class="card">' + emptyBox(abnOnly ? '這段期間沒有異常紀錄 🎉' : '這段期間沒有打卡紀錄') + '</div>';
+  const groups = {};
+  lastRecs.forEach(x => (groups[x.date] = groups[x.date] || []).push(x));
+  $('recList').innerHTML = Object.keys(groups).map(date => {
+    const d = new Date(date + 'T00:00:00');
+    return '<div class="card day"><h3><span class="num">' + date.slice(5).replace('-', '.') + '</span><span>週' + WEEK[d.getDay()] + '・' + groups[date].length + ' 筆</span></h3>' +
+      groups[date].map(recRow).join('') + '</div>';
+  }).join('');
+}
+
+function recRow(x) {
+  const bad = x.verdict && x.verdict !== '正常';
+  const tags = '<span class="tag' + (bad ? ' bad' : '') + '">' + esc(x.verdict || '—') + '</span>' +
+    (x.warn ? x.warn.split('、').map(w => '<span class="tag warn">' + esc(w) + '</span>').join('') : '');
+  const ph = x.photo ? '<a class="ph" href="' + esc(x.photo) + '" target="_blank" rel="noopener" aria-label="查看照片">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 16l-5-5-8 8"/></svg></a>' : '<span></span>';
+  return '<div class="rec"><div class="t">' + esc(x.time) + '</div>' +
+    '<div class="who"><span class="dot ' + (x.type === '上班' ? 'in' : 'out') + '"></span>' + esc(x.type) + (ME.admin ? '・' + esc(x.name) : '') + '</div>' +
+    ph + '<div class="where">' + esc(x.store) + '</div><div class="tags">' + tags + '</div></div>';
+}
+
+/* ---------- 工時 ---------- */
+async function loadHours() {
+  $('mLabel').textContent = month.replace('-', '.');
+  $('hrList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  $('hrCount').textContent = '';
+  const r = await api({ action: 'q_hours', month: month, name: $('hName').value });
+  if (!r.ok) return $('hrList').innerHTML = emptyBox(r.message);
+  lastHours = r.people || [];
+  $('hrCount').textContent = lastHours.length ? lastHours.length + ' 位' : '';
+  if (!lastHours.length) return $('hrList').innerHTML = '<div class="card">' + emptyBox('這個月還沒有打卡紀錄') + '</div>';
+  const single = lastHours.length === 1;
+  $('hrList').innerHTML = lastHours.map(p =>
+    '<div class="card hp' + (single ? ' open' : '') + '"><div class="hp-top"><span class="nm">' + esc(p.name) + '</span>' +
+    '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>' +
+    '<div class="kpis"><div class="kpi"><div class="v">' + p.workDays + '</div><div class="k">出勤天數</div></div>' +
+    '<div class="kpi"><div class="v">' + p.totalHours + '</div><div class="k">總工時</div></div>' +
+    '<div class="kpi' + (p.missing ? ' miss' : '') + '"><div class="v">' + p.missing + '</div><div class="k">缺卡</div></div></div>' +
+    '<div class="dlist">' + p.days.map(dayRow).join('') + '</div></div>'
+  ).join('');
+  document.querySelectorAll('.hp-top').forEach(el => el.onclick = () => el.parentElement.classList.toggle('open'));
+}
+
+function dayRow(d) {
+  const dt = new Date(d.date + 'T00:00:00');
+  const flag = d.flag ? '<span class="tag ' + (d.flag === '上班中' ? '' : 'bad') + '">' + esc(d.flag) + '</span>' : '';
+  return '<div class="drow"><div class="d">' + d.date.slice(5).replace('-', '/') + ' 週' + WEEK[dt.getDay()] + '</div>' +
+    '<div class="io">' + (d.in || '--:--') + '<i>→</i>' + (d.out || '--:--') + '</div>' +
+    '<div class="h">' + (d.hours !== null ? d.hours + 'h' : '') + '</div>' +
+    '<div class="s">' + esc(d.store || '') + ' ' + flag + (d.abnormal ? '<span class="tag warn">有異常</span>' : '') + '</div></div>';
+}
+
+/* ---------- 匯出 CSV（Excel 可直接開） ---------- */
+function downloadCSV(name, rows) {
+  const csv = '﻿' + rows.map(r => r.map(v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function exportRecords() {
+  if (!lastRecs.length) return;
+  const head = ['日期', '時間', '姓名', '櫃點', '類別', '位置判定'].concat(ME.admin ? ['距離(m)', 'GPS誤差(m)', '警示', '照片'] : []);
+  const rows = lastRecs.map(x => [x.date, x.time, x.name, x.store, x.type, x.verdict].concat(ME.admin ? [x.distance, x.accuracy, x.warn, x.photo] : []));
+  const [f, t] = rangeDates();
+  downloadCSV('打卡紀錄_' + ymd(f) + '_' + ymd(t) + '.csv', [head].concat(rows));
+}
+function exportHours() {
+  if (!lastHours.length) return;
+  const rows = [['姓名', '日期', '上班', '下班', '工時(h)', '櫃點', '備註']];
+  lastHours.forEach(p => {
+    p.days.forEach(d => rows.push([p.name, d.date, d.in, d.out, d.hours, d.store, d.flag]));
+    rows.push([p.name + ' 合計', '', '', '', p.totalHours, '出勤 ' + p.workDays + ' 天', '缺卡 ' + p.missing]);
+  });
+  downloadCSV('工時_' + month + '.csv', rows);
+}
+
+/* ---------- UI ---------- */
+function bindUI() {
+  document.querySelectorAll('nav button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+  document.querySelectorAll('#rangeChips .chip').forEach(c => c.onclick = () => {
+    range = c.dataset.r;
+    document.querySelectorAll('#rangeChips .chip').forEach(x => x.classList.toggle('on', x === c));
+    $('customRange').classList.toggle('hidden', range !== 'custom');
+    loadRecords();
+  });
+  ['fFrom', 'fTo', 'fName', 'fStore'].forEach(id => $(id).onchange = loadRecords);
+  $('fAbn').onclick = () => { abnOnly = !abnOnly; $('fAbn').classList.toggle('on', abnOnly); loadRecords(); };
+  $('hName').onchange = loadHours;
+  $('mPrev').onclick = () => shiftMonth(-1);
+  $('mNext').onclick = () => shiftMonth(1);
+  $('recExport').onclick = exportRecords;
+  $('hrExport').onclick = exportHours;
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && curTab === 'today') loadToday(); });
+}
+function shiftMonth(n) {
+  const [y, m] = month.split('-').map(Number);
+  const d = new Date(y, m - 1 + n, 1);
+  month = d.getFullYear() + '-' + pad(d.getMonth() + 1);
+  loadHours();
+}
+function emptyBox(msg) {
+  return '<div class="empty"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></div>' + esc(msg || '') + '</div>';
+}
+function showState(html) {
+  $('stateView').classList.remove('hidden');
+  $('stateView').innerHTML = '<div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg></div><div>' + html + '</div>';
+}
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+/* ---------- 後端 ---------- */
+async function api(payload) {
+  if (DEMO) return demoApi(payload);
+  try {
+    const dec = liff.getDecodedIDToken();
+    if (dec && dec.exp * 1000 < Date.now() + 60000) return relogin();
+  } catch (e) {}
+  payload.idToken = liff.getIDToken();
+  try {
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+    const r = await res.json();
+    if (r.code === 'AUTH') return relogin();
+    if (r.message && /尚未開通/.test(r.message)) showState(esc(r.message) + '<br><small>請先在打卡 App 完成登記並由主管開通</small>');
+    return r;
+  } catch (e) {
+    return { ok: false, message: '網路錯誤，請稍後再試' };
+  }
+}
+function relogin() {
+  let last = 0;
+  try { last = Number(sessionStorage.getItem('reloginAt') || 0); } catch (e) {}
+  if (Date.now() - last < 120000) return { ok: false, message: 'LINE 登入驗證沒有通過，請關閉後重新開啟' };
+  try { sessionStorage.setItem('reloginAt', String(Date.now())); } catch (e) {}
+  try { liff.logout(); } catch (e) {}
+  liff.login({ redirectUri: location.href.split('#')[0] });
+  return new Promise(() => {});
+}
+
+/* ---------- 安裝提示 ---------- */
+let installEvt = null;
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('installBtn').classList.remove('hidden'); $('installHow').textContent = '點右邊「安裝」，桌面就會出現圖示'; });
+function setupInstallBar() {
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  let inLine = false; try { inLine = !DEMO && liff.isInClient(); } catch (e) {}
+  let dismissed = false; try { dismissed = localStorage.getItem('qInstallDismissed') === '1'; } catch (e) {}
+  if (standalone || inLine || dismissed || DEMO) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  $('installHow').textContent = ios ? '在 Safari 點下方「分享」⬆，再選「加入主畫面」' : '點瀏覽器右上角「⋮」，選「安裝應用程式」或「加到主畫面」';
+  $('installBar').classList.remove('hidden');
+  $('installBtn').onclick = async () => { if (!installEvt) return; installEvt.prompt(); const r = await installEvt.userChoice; if (r.outcome === 'accepted') $('installBar').classList.add('hidden'); installEvt = null; };
+  $('installClose').onclick = () => { $('installBar').classList.add('hidden'); try { localStorage.setItem('qInstallDismissed', '1'); } catch (e) {} };
+}
+
+/* ---------- 預覽模式假資料（網址加 ?demo=1，或 ?demo=staff 看櫃姐畫面） ---------- */
+function demoApi(p) {
+  const asStaff = new URLSearchParams(location.search).get('demo') === 'staff';
+  const today = ymd(new Date());
+  const people = ['王小美', '林佳慧', '陳怡君', '張雅婷', '李珮瑜', '黃詩涵'];
+  const me = asStaff ? { name: '王小美', admin: false } : { name: 'Ryan', admin: true };
+  return new Promise(res => setTimeout(() => {
+    if (p.action === 'q_me') return res({ ok: true, me, staff: asStaff ? ['王小美'] : people,
+      stores: ['UCHINO - SOGO復興', 'UCHINO - 信義A8', 'Berkemann - SOGO復興', 'HASSIA - 新光南西', 'IKEUCHI - 板橋大遠百'] });
+    if (p.action === 'q_today') return res({ ok: true, me, date: today, counts: { working: 3, off: 1, none: 2, abnormal: 2 }, people: [
+      { name: '王小美', state: 'working', inTime: '10:52', outTime: '', store: 'UCHINO - SOGO復興', abnormal: [] },
+      { name: '林佳慧', state: 'working', inTime: '10:55', outTime: '', store: 'Berkemann - SOGO復興', abnormal: [] },
+      { name: '陳怡君', state: 'working', inTime: '11:08', outTime: '', store: 'HASSIA - 新光南西', abnormal: ['11:08 上班：櫃點不符：UCHINO - 新光南西'] },
+      { name: '張雅婷', state: 'off', inTime: '09:58', outTime: '14:02', store: 'UCHINO - 信義A8', abnormal: ['14:02 下班：定位可疑（誤差3m）'] },
+      { name: '李珮瑜', state: 'none', inTime: '', outTime: '', store: '', abnormal: [] },
+      { name: '黃詩涵', state: 'none', inTime: '', outTime: '', store: '', abnormal: [] }] });
+    if (p.action === 'q_records') {
+      let recs = [
+        { date: today, time: '14:02', name: '張雅婷', store: 'UCHINO - 信義A8', type: '下班', verdict: '正常', distance: 42, accuracy: 3, warn: '定位可疑（誤差3m）', photo: '#' },
+        { date: today, time: '11:08', name: '陳怡君', store: 'HASSIA - 新光南西', type: '上班', verdict: '櫃點不符：UCHINO - 新光南西', distance: 12, accuracy: 35, warn: '', photo: '#' },
+        { date: today, time: '10:55', name: '林佳慧', store: 'Berkemann - SOGO復興', type: '上班', verdict: '正常', distance: 60, accuracy: 28, warn: '', photo: '#' },
+        { date: today, time: '10:52', name: '王小美', store: 'UCHINO - SOGO復興', type: '上班', verdict: '正常', distance: 38, accuracy: 41, warn: '', photo: '#' },
+        { date: today, time: '09:58', name: '張雅婷', store: 'UCHINO - 信義A8', type: '上班', verdict: '正常', distance: 55, accuracy: 30, warn: '', photo: '#' }];
+      if (asStaff) recs = recs.filter(r => r.name === '王小美').map(r => ({ date: r.date, time: r.time, name: r.name, store: r.store, type: r.type, verdict: r.verdict }));
+      if (p.abnormal) recs = recs.filter(r => r.verdict !== '正常' || r.warn);
+      if (p.name) recs = recs.filter(r => r.name === p.name);
+      return res({ ok: true, me, records: recs });
+    }
+    if (p.action === 'q_hours') {
+      const mk = (name, base) => {
+        const days = []; let total = 0, miss = 0;
+        for (let i = 1; i <= 12; i++) {
+          if (i % 7 === 3) continue;
+          const d = p.month + '-' + pad(i); const flag = i === 6 && base ? '缺下班卡' : '';
+          const h = flag ? null : Math.round((9 + ((i * base) % 5) / 10) * 10) / 10;
+          if (h) total += h; if (flag) miss++;
+          days.push({ date: d, in: '10:5' + (i % 9), out: flag ? '' : '21:' + pad(30 + (i % 20)), hours: h, flag, store: 'UCHINO - SOGO復興', abnormal: !asStaff && i === 9 });
+        }
+        return { name, days: days.reverse(), workDays: days.length, totalHours: Math.round(total * 10) / 10, missing: miss };
+      };
+      return res({ ok: true, me, month: p.month, people: asStaff || p.name ? [mk(p.name || '王小美', 3)] : people.slice(0, 4).map((n, i) => mk(n, i)) });
+    }
+    res({ ok: false, message: '未知' });
+  }, 350));
+}
+</script>
+</body>
+</html>
