@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#E9DCD8">
+<meta name="theme-color" content="#DCD3E0">
 <title>UC 打卡查詢</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/q-icon-32.png">
@@ -16,11 +16,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
-  /* ── 莫蘭迪・豆沙玫瑰（與打卡 App 的灰藍區分） ── */
+  /* ── 莫蘭迪・紫芋（與打卡 App 的灰藍區分） ── */
   :root {
-    --bg: #E9DCD8; --bg-2: #F1E7E4; --bg-3: #E1D2CD;
-    --paper: #FBF7F6; --ink: #4B3F3D; --ink-soft: #7E6E6B; --ink-faint: #B2A29E; --hair: #EFE4E1;
-    --rose: #B88E87; --rose-deep: #9C726B; --rose-tint: #F3E6E3;
+    --bg: #DCD3E0; --bg-2: #E8E1EB; --bg-3: #D1C6D7;
+    --paper: #FAF8FB; --ink: #463F4B; --ink-soft: #776E7E; --ink-faint: #ACA3B3; --hair: #ECE6EF;
+    --rose: #9A88A6; --rose-deep: #7C6A89; --rose-tint: #EEE7F2;
+    --bad: #A3706A; --bad-tint: #F3E5E3;
     --sage: #8E9C8A; --sage-deep: #6F7E6B; --sage-tint: #E6EBE2;
     --mist: #8D9AAA; --mist-deep: #6E7B8D; --mist-tint: #E3E7EC;
     --amber: #B9895A; --amber-tint: #F5EADF;
@@ -113,7 +114,7 @@
   .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
   .dot.in { background: var(--sage); } .dot.out { background: var(--mist); }
   .tag { font-size: 11px; padding: 2px 9px; border-radius: 999px; background: var(--sage-tint); color: var(--sage-deep); }
-  .tag.bad { background: var(--rose-tint); color: var(--rose-deep); }
+  .tag.bad { background: var(--bad-tint); color: var(--bad); }
   .tag.warn { background: var(--amber-tint); color: var(--amber); }
 
   /* 工時 */
@@ -130,7 +131,7 @@
   .kpi { background: var(--bg-2); border-radius: 14px; padding: 10px 8px; text-align: center; }
   .kpi .v { font-family: "Michroma", sans-serif; font-size: 17px; }
   .kpi .k { font-size: 11px; color: var(--ink-soft); margin-top: 4px; letter-spacing: .1em; }
-  .kpi.miss .v { color: var(--rose-deep); }
+  .kpi.miss .v { color: var(--bad); }
   .dlist { display: none; padding-bottom: 6px; }
   .hp.open .dlist { display: block; }
   .drow { display: grid; grid-template-columns: 74px 1fr auto; gap: 2px 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--hair); font-size: 14px; }
@@ -147,7 +148,7 @@
 
   /* 底部分頁 */
   nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; padding: 8px 16px calc(10px + env(safe-area-inset-bottom));
-        background: linear-gradient(transparent, rgba(233,220,216,.95) 30%); }
+        background: linear-gradient(transparent, rgba(220,211,224,.95) 30%); }
   nav .tabs { max-width: 420px; margin: 0 auto; display: flex; background: var(--paper); border-radius: 999px; box-shadow: var(--shadow); padding: 6px; }
   nav button { flex: 1; border: 0; background: none; font-family: inherit; font-size: 13px; color: var(--ink-faint); padding: 8px 0 6px;
                border-radius: 999px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; letter-spacing: .1em; }
