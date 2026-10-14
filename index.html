@@ -79,7 +79,9 @@
   .store.pick .chev { width: 12px; height: 12px; margin-left: 2px; color: var(--ink-faint); }
   .store.pick.empty { background: var(--rose-tint); color: #8E6B63; }
   .store.pick select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; cursor: pointer; }
-  .store-hint { font-size: 11px; color: var(--ink-faint); margin: 8px 2px 0; letter-spacing: .05em; }
+  .store-hint { font-size: 12px; color: var(--ink-faint); margin: 8px 2px 0; letter-spacing: .04em; line-height: 1.5; }
+  .store-hint.warn { color: #8E6B63; }
+  .store-hint a { color: var(--mist-deep); text-decoration: underline; cursor: pointer; white-space: nowrap; }
   ul.today .where { display: block; font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
   .clock { margin-top: 22px; display: flex; align-items: baseline; gap: 6px; }
   .clock .hm { font-family: "Michroma", sans-serif; font-weight: 400; font-size: clamp(42px, 13.5vw, 58px); line-height: 1; letter-spacing: 0; }
@@ -173,6 +175,20 @@
   .install .go { margin-left: auto; flex: none; padding: 8px 14px; border-radius: 999px; font-size: 13px; letter-spacing: .05em;
                  background: var(--mist); color: #fff; box-shadow: none; flex-direction: row; }
   .install .x { flex: none; background: none; box-shadow: none; color: var(--ink-faint); padding: 4px; font-size: 18px; }
+  .cam { position: fixed; inset: 0; z-index: 20; background: #1E2226; display: flex; flex-direction: column; }
+  .cam video { flex: 1; width: 100%; object-fit: cover; min-height: 0; }
+  .cam-top { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between;
+             padding: calc(12px + env(safe-area-inset-top)) 16px 12px; color: #fff; font-size: 14px; letter-spacing: .1em;
+             background: linear-gradient(rgba(0,0,0,.45), transparent); }
+  .cam-top span:last-child { width: 36px; }
+  .cam-x { background: rgba(255,255,255,.18); box-shadow: none; width: 36px; height: 36px; padding: 0; border-radius: 50%;
+           font-size: 22px; color: #fff; display: grid; place-items: center; }
+  .cam-bar { display: flex; align-items: center; justify-content: space-around; padding: 22px 24px calc(26px + env(safe-area-inset-bottom)); background: #1E2226; }
+  .cam-side { width: 52px; height: 52px; }
+  .flip { background: rgba(255,255,255,.14); box-shadow: none; border-radius: 50%; padding: 0; display: grid; place-items: center; color: #fff; }
+  .flip svg { width: 26px; height: 26px; }
+  .shutter { width: 74px; height: 74px; padding: 0; border-radius: 50%; background: #F5F7F8; box-shadow: 0 0 0 5px rgba(255,255,255,.35); }
+  .shutter:active { transform: scale(.92); }
   footer { text-align: center; font-size: 11px; color: var(--ink-faint); letter-spacing: .15em; margin-top: 18px; }
 </style>
 </head>
@@ -218,7 +234,7 @@
     <div id="msg" class="msg"></div>
 
     <section class="card photo-wrap" id="photoCard">
-      <label class="photo" id="photoBox" for="photoInput">
+      <div class="photo" id="photoBox" role="button" tabindex="0">
         <span class="thumb" id="photoThumb">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
         </span>
@@ -227,7 +243,7 @@
           <div class="t2" id="photoT2">請拍到櫃位招牌或櫃台</div>
         </span>
         <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-      </label>
+      </div>
       <input id="photoInput" type="file" accept="image/*" capture="environment" class="hidden">
     </section>
 
@@ -281,6 +297,18 @@
 
   <footer>時間以系統伺服器為準</footer>
 </main>
+
+<div id="cam" class="cam hidden">
+  <video id="camVideo" playsinline autoplay muted></video>
+  <div class="cam-top"><button class="cam-x" id="camClose" aria-label="關閉">×</button><span>對準櫃位拍照</span><span></span></div>
+  <div class="cam-bar">
+    <span class="cam-side"></span>
+    <button class="shutter" id="camShot" aria-label="拍照"></button>
+    <button class="cam-side flip" id="camFlip" aria-label="切換鏡頭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><path d="M9 13.5a3 3 0 0 1 5.2-2M15 13.5a3 3 0 0 1-5.2 2"/><path d="M14.5 9.8l-.3 1.7 1.7.3M9.5 17.2l.3-1.7-1.7-.3"/></svg>
+    </button>
+  </div>
+</div>
 
 <div id="overlay" class="overlay hidden">
   <div class="spinner"></div>
@@ -391,7 +419,7 @@ async function doPunch(type) {
     const r = await api({
       action: 'punch', type, store: storeMode === 'pick' ? currentStore() : '',
       lat: pos ? pos.lat : '', lng: pos ? pos.lng : '', accuracy: pos ? pos.acc : '',
-      photo: photoData, ua: navigator.userAgent,
+      photo: photoData, photoSource: photoSource, deviceId: deviceId(), ua: navigator.userAgent,
     });
     if (!r.ok) {
       showMsg('err', esc(r.message || '打卡失敗，請再試一次'));
@@ -426,9 +454,82 @@ function getLocation() {
   });
 }
 
-/* ---------- 照片：縮到 1280px、JPEG 壓縮 ---------- */
+/* ---------- 頁面內相機（不能從相簿選照片） ---------- */
+let camStream = null, camFacing = 'environment', photoSource = '';
+
+async function openCamera() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return fallbackPicker();
+  try {
+    await startStream();
+    $('cam').classList.remove('hidden');
+  } catch (e) {
+    // 使用者拒絕相機權限、或這個瀏覽器不支援 → 改用系統相機，但只收「剛拍的」照片
+    fallbackPicker();
+  }
+}
+
+async function startStream() {
+  stopStream();
+  camStream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: camFacing, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+  const v = $('camVideo');
+  v.srcObject = camStream;
+  v.style.transform = camFacing === 'user' ? 'scaleX(-1)' : '';
+  await v.play().catch(() => {});
+}
+
+function stopStream() {
+  if (camStream) camStream.getTracks().forEach(t => t.stop());
+  camStream = null;
+}
+
+function closeCamera() { stopStream(); $('cam').classList.add('hidden'); }
+
+function snapPhoto() {
+  const v = $('camVideo');
+  if (!v.videoWidth) return;
+  const max = 1280, scale = Math.min(1, max / Math.max(v.videoWidth, v.videoHeight));
+  const c = document.createElement('canvas');
+  c.width = Math.round(v.videoWidth * scale); c.height = Math.round(v.videoHeight * scale);
+  const ctx = c.getContext('2d');
+  if (camFacing === 'user') { ctx.translate(c.width, 0); ctx.scale(-1, 1); }
+  ctx.drawImage(v, 0, 0, c.width, c.height);
+  setPhoto(c.toDataURL('image/jpeg', 0.7), 'camera');
+  closeCamera();
+}
+
+function fallbackPicker() {
+  showMsg('warn', '無法直接開啟相機，請在接下來的畫面<b>現場拍照</b><small>不能使用相簿裡的舊照片</small>');
+  $('photoInput').click();
+}
+
+function setPhoto(dataUrl, source) {
+  photoData = dataUrl; photoSource = source;
+  $('photoThumb').style.backgroundImage = 'url(' + photoData + ')';
+  $('photoBox').classList.add('has');
+  $('photoT1').textContent = '照片已備妥';
+  $('photoT2').textContent = '點此可重拍';
+  updateButtons();
+}
+
+/* 每支手機一組固定的裝置代碼（存在這支手機上） */
+function deviceId() {
+  let id = '';
+  try { id = localStorage.getItem('deviceId') || ''; } catch (e) {}
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+    try { localStorage.setItem('deviceId', id); } catch (e) {}
+  }
+  return id;
+}
+
+/* ---------- 照片（備用：系統相機）：只收 3 分鐘內剛拍的 ---------- */
 async function onPhoto(file) {
   if (!file) return;
+  if (file.lastModified && Date.now() - file.lastModified > 3 * 60 * 1000) {
+    $('photoInput').value = '';
+    return showMsg('err', '這張不是剛拍的照片，請現場重新拍攝');
+  }
   overlay('處理照片');
   try {
     const img = await loadImage(file);
@@ -438,11 +539,7 @@ async function onPhoto(file) {
     c.width = Math.round(img.width * scale);
     c.height = Math.round(img.height * scale);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-    photoData = c.toDataURL('image/jpeg', 0.7);
-    $('photoThumb').style.backgroundImage = 'url(' + photoData + ')';
-    $('photoBox').classList.add('has');
-    $('photoT1').textContent = '照片已備妥';
-    $('photoT2').textContent = '點此可重拍';
+    setPhoto(c.toDataURL('image/jpeg', 0.7), 'file');
     hideMsg();
   } catch (e) {
     showMsg('err', '照片讀取失敗，請重拍');
@@ -463,7 +560,7 @@ function loadImage(file) {
 }
 
 function clearPhoto() {
-  photoData = null;
+  photoData = null; photoSource = '';
   $('photoInput').value = '';
   $('photoThumb').style.backgroundImage = '';
   $('photoBox').classList.remove('has');
@@ -506,6 +603,14 @@ async function demoApi(p) {
   if (p.action === 'status') {
     return { ok: true, state: 'active', name: '王小美', store: '', requirePhoto: true, today: demoToday,
              stores: ['UCHINO - SOGO復興', 'UCHINO - 新光南西', 'UCHINO - 信義A8', 'Berkemann - SOGO復興', 'Berkemann - 信義A8', 'IWATA - SOGO復興', 'HASSIA - 新光南西'],
+             storeList: [
+               { name: 'UCHINO - SOGO復興', lat: 25.0411353, lng: 121.542942, radius: 300 },
+               { name: 'UCHINO - 新光南西', lat: 25.0523201, lng: 121.5210989, radius: 300 },
+               { name: 'UCHINO - 信義A8', lat: 25.0382241, lng: 121.5667909, radius: 300 },
+               { name: 'Berkemann - SOGO復興', lat: 25.0411353, lng: 121.542942, radius: 300 },
+               { name: 'Berkemann - 信義A8', lat: 25.0382241, lng: 121.5667909, radius: 300 },
+               { name: 'IWATA - SOGO復興', lat: 25.0411353, lng: 121.542942, radius: 300 },
+               { name: 'HASSIA - 新光南西', lat: 25.0523201, lng: 121.5210989, radius: 300 }],
              defaultStore: 'UCHINO - 信義A8' };
   }
   const now = new Date();
@@ -515,8 +620,11 @@ async function demoApi(p) {
            message: p.type + '打卡成功 ' + t, today: demoToday };
 }
 
-/* ---------- 櫃點選擇 ---------- */
-let storeMode = 'fixed';   // 'pick'：櫃姐自己選；'fixed'：舊版後端，照人員表的櫃點
+/* ---------- 櫃點選擇：定位決定百貨，櫃姐只選品牌櫃 ---------- */
+let storeMode = 'fixed';   // 'pick'：依定位選櫃；'fixed'：舊版後端，照人員表的櫃點
+let allStores = [];        // [{name, lat, lng, radius}]
+let defaultStore = '';
+let locating = false;
 
 function setupStores(r) {
   const sel = $('storeSel');
@@ -528,27 +636,76 @@ function setupStores(r) {
     return;
   }
   storeMode = 'pick';
-  // 依品牌分組：「UCHINO - SOGO復興」→ 群組 UCHINO、選項 SOGO復興
-  const groups = {};
-  r.stores.forEach(name => {
-    const i = name.indexOf(' - ');
-    const g = i > 0 ? name.slice(0, i) : '其他';
-    (groups[g] = groups[g] || []).push(name);
-  });
-  sel.innerHTML = '<option value="">請選擇櫃點</option>' + Object.keys(groups).map(g =>
-    '<optgroup label="' + esc(g) + '">' + groups[g].map(n => {
-      const i = n.indexOf(' - ');
-      return '<option value="' + esc(n) + '">' + esc(i > 0 ? n.slice(i + 3) : n) + '</option>';
-    }).join('') + '</optgroup>').join('');
-  let def = r.defaultStore || '';
-  try { def = localStorage.getItem('lastStore') || def; } catch (e) {}
-  if (r.stores.indexOf(def) < 0) def = '';
-  sel.value = def;
+  allStores = r.storeList && r.storeList.length ? r.storeList
+            : r.stores.map(n => ({ name: n, lat: null, lng: null, radius: 0 }));
+  defaultStore = r.defaultStore || '';
+  try { defaultStore = localStorage.getItem('lastStore') || defaultStore; } catch (e) {}
   sel.onchange = () => {
     try { localStorage.setItem('lastStore', sel.value); } catch (e) {}
     showStore(); hideMsg(); updateButtons();
   };
-  showStore();
+  $('storeHint').onclick = e => { if (e.target.dataset.relocate) locateStores(); };
+  locateStores();
+}
+
+// 開頁先定位，只列出「目前位置範圍內」的櫃點
+async function locateStores() {
+  if (locating) return;
+  locating = true;
+  fillStores([], '');
+  $('staffStore').textContent = '定位中…';
+  setHint('正在確認您在哪一家百貨…', '');
+  updateButtons();
+  const pos = await getLocation();
+  locating = false;
+
+  if (!pos) {
+    fillStores(allStores, defaultStore);
+    setHint('無法定位，打卡會被標記「無定位」　<a data-relocate="1">重新定位</a>', 'warn');
+  } else {
+    const near = allStores
+      .filter(s => s.lat !== null)
+      .map(s => Object.assign({ d: distM(pos.lat, pos.lng, s.lat, s.lng) }, s))
+      .filter(s => s.d <= s.radius)
+      .sort((a, b) => a.d - b.d);
+    if (near.length) {
+      const pick = near.length === 1 ? near[0].name
+                 : (near.some(s => s.name === defaultStore) ? defaultStore : '');
+      fillStores(near, pick);
+      const mall = branchOf(near[0].name);
+      setHint(near.length === 1 ? '已依定位自動選擇櫃點'
+                                : '您在「' + esc(mall) + '」，請選擇今天的品牌櫃', '');
+    } else {
+      fillStores(allStores, defaultStore);
+      setHint('您目前不在任何櫃點附近，打卡會被標記「不在櫃點」　<a data-relocate="1">重新定位</a>', 'warn');
+    }
+  }
+  showStore(); updateButtons();
+}
+
+function fillStores(list, selected) {
+  const sel = $('storeSel');
+  const groups = {};
+  list.forEach(s => { const g = brandOf(s.name); (groups[g] = groups[g] || []).push(s.name); });
+  sel.innerHTML = '<option value="">請選擇櫃點</option>' + Object.keys(groups).map(g =>
+    '<optgroup label="' + esc(g) + '">' + groups[g].map(n =>
+      '<option value="' + esc(n) + '">' + esc(branchOf(n)) + '</option>').join('') + '</optgroup>').join('');
+  sel.value = list.some(s => s.name === selected) ? selected : '';
+}
+
+function brandOf(n)  { const i = n.indexOf(' - '); return i > 0 ? n.slice(0, i) : '其他'; }
+function branchOf(n) { const i = n.indexOf(' - '); return i > 0 ? n.slice(i + 3) : n; }
+
+function distM(lat1, lng1, lat2, lng2) {
+  const R = 6371000, r = d => d * Math.PI / 180;
+  const a = Math.sin(r(lat2 - lat1) / 2) ** 2 + Math.cos(r(lat1)) * Math.cos(r(lat2)) * Math.sin(r(lng2 - lng1) / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function setHint(html, kind) {
+  const h = $('storeHint');
+  h.innerHTML = html;
+  h.classList.toggle('warn', kind === 'warn');
 }
 
 function currentStore() {
@@ -556,6 +713,7 @@ function currentStore() {
 }
 
 function showStore() {
+  if (locating) return;
   const v = $('storeSel').value;
   $('staffStore').textContent = v || '請選擇櫃點';
   $('storePick').classList.toggle('empty', !v);
@@ -566,12 +724,19 @@ let lastType = null;
 
 function bindUI() {
   $('photoInput').addEventListener('change', e => onPhoto(e.target.files[0]));
+  $('photoBox').addEventListener('click', openCamera);
+  $('camShot').addEventListener('click', snapPhoto);
+  $('camClose').addEventListener('click', closeCamera);
+  $('camFlip').addEventListener('click', async () => {
+    camFacing = camFacing === 'environment' ? 'user' : 'environment';
+    try { await startStream(); } catch (e) {}
+  });
   $('btnIn').addEventListener('click', () => doPunch('上班'));
   $('btnOut').addEventListener('click', () => doPunch('下班'));
 }
 
 function updateButtons() {
-  const off = busy || (requirePhoto && !photoData) || !currentStore();
+  const off = busy || locating || (requirePhoto && !photoData) || !currentStore();
   $('btnIn').disabled = off;
   $('btnOut').disabled = off;
   // 提示下一步該按哪個
@@ -592,7 +757,7 @@ function renderToday(list) {
   ul.innerHTML = list.map(x =>
     '<li><span class="bullet ' + (x.type === '上班' ? 'in' : 'out') + '"></span>' +
     '<span class="type">' + esc(x.type) + (x.store ? '<span class="where">' + esc(x.store) + '</span>' : '') + '</span>' +
-    '<span class="tag' + (x.verdict && x.verdict !== '正常' ? ' bad' : '') + '">' + esc(x.verdict || '') + '</span>' +
+    '<span class="tag' + (x.verdict && x.verdict !== '正常' ? ' bad' : '') + '">' + esc(String(x.verdict || '').split('：')[0]) + '</span>' +
     '<span class="time">' + esc(x.time) + '</span></li>'
   ).join('');
   updateButtons();
