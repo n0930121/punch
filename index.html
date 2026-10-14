@@ -474,15 +474,30 @@ function clearPhoto() {
 /* ---------- 後端呼叫 ---------- */
 async function api(payload) {
   if (DEMO) return demoApi(payload);
+  // 送出前先看 ID token 有沒有過期（從桌面 App 開啟時常會拿到舊的）
+  try {
+    const dec = liff.getDecodedIDToken();
+    if (dec && dec.exp * 1000 < Date.now() + 60000) return relogin();
+  } catch (e) {}
   payload.idToken = liff.getIDToken();
   // 不設 Content-Type（預設 text/plain），避免跨網域預檢，Apps Script 才收得到
   const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
   const r = await res.json();
-  if (r.code === 'AUTH' && liff.isLoggedIn()) {
-    // ID token 過期：重新登入一次
-    liff.logout(); liff.login({ redirectUri: location.href });
-  }
+  if (r.code === 'AUTH') return relogin();
   return r;
+}
+
+// 重新登入，但 2 分鐘內只自動做一次，避免無限循環
+function relogin() {
+  let last = 0;
+  try { last = Number(sessionStorage.getItem('reloginAt') || 0); } catch (e) {}
+  if (Date.now() - last < 120000) {
+    return { ok: false, message: 'LINE 登入驗證沒有通過，請關閉後重新開啟；如果一直出現，請通知主管檢查系統設定' };
+  }
+  try { sessionStorage.setItem('reloginAt', String(Date.now())); } catch (e) {}
+  try { liff.logout(); } catch (e) {}
+  liff.login({ redirectUri: location.href.split('#')[0] });
+  return new Promise(() => {});   // 正在跳轉，不再往下執行
 }
 
 const demoToday = [];
