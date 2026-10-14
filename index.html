@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E8E2DA">
+<title>櫃點打卡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
+<style>
+  /* ── 莫蘭迪色票 ── */
+  :root {
+    --bg:        #E8E2DA;   /* 燕麥灰 */
+    --bg-deep:   #DDD5CB;
+    --paper:     #F5F1EB;   /* 米白紙 */
+    --ink:       #4A4541;   /* 深灰褐 */
+    --ink-soft:  #7D756D;
+    --ink-faint: #A69D93;
+    --hair:      #E0D8CE;
+
+    --sage:      #8E9C8A;   /* 鼠尾草綠：上班 */
+    --sage-deep: #77866F;
+    --sage-tint: #E3E7DF;
+    --mist:      #8D9AAA;   /* 霧藍：下班 */
+    --mist-deep: #76849A;
+    --mist-tint: #E1E5EA;
+    --rose:      #B8968F;   /* 乾燥玫瑰：提醒 */
+    --rose-tint: #F0E4E0;
+    --clay:      #A98F7A;   /* 陶土：裝飾 */
+
+    --radius: 22px;
+    --shadow: 0 1px 1px rgba(74,69,65,.04), 0 8px 24px -12px rgba(74,69,65,.18);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh; color: var(--ink); background: var(--bg);
+    background-image:
+      radial-gradient(120% 60% at 100% 0%, #EFE7DE 0%, transparent 60%),
+      radial-gradient(90% 50% at 0% 100%, #DFD8CF 0%, transparent 60%);
+    font-family: "Noto Sans TC", -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    font-weight: 400; letter-spacing: .02em;
+  }
+  main { max-width: 460px; margin: 0 auto; padding: 20px 16px calc(28px + env(safe-area-inset-bottom)); }
+
+  .demo { font-size: 12px; text-align: center; color: var(--ink-soft); padding: 7px 10px; margin-bottom: 14px;
+          border: 1px dashed var(--ink-faint); border-radius: 999px; }
+
+  /* 頁首 */
+  header { display: flex; align-items: center; justify-content: space-between; margin: 4px 4px 18px; }
+  .brand { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 15px; letter-spacing: .25em; color: var(--ink-soft); }
+  .brand::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+                   background: var(--clay); margin-right: 9px; vertical-align: 2px; }
+  .status-pill { font-size: 12px; padding: 5px 12px; border-radius: 999px; background: var(--paper); color: var(--ink-soft); }
+  .status-pill.on  { background: var(--sage-tint); color: var(--sage-deep); }
+  .status-pill.off { background: var(--mist-tint); color: var(--mist-deep); }
+
+  .card { background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 14px; }
+
+  /* 主卡：問候＋時鐘 */
+  .hero { padding: 24px 22px 22px; position: relative; overflow: hidden; }
+  .hero::after { content: ""; position: absolute; right: -40px; top: -40px; width: 150px; height: 150px; border-radius: 50%;
+                 background: radial-gradient(circle, rgba(169,143,122,.16), transparent 70%); }
+  .greet { font-size: 14px; color: var(--ink-soft); }
+  .greet b { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 22px; color: var(--ink); margin-left: 4px; letter-spacing: .08em; }
+  .store { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--ink-soft);
+           background: var(--bg); padding: 5px 11px; border-radius: 999px; }
+  .store svg { width: 13px; height: 13px; }
+  .clock { margin-top: 22px; display: flex; align-items: baseline; gap: 6px; }
+  .clock .hm { font-weight: 300; font-size: 64px; line-height: 1; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+  .clock .s  { font-weight: 300; font-size: 22px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  .date { margin-top: 8px; font-size: 13px; color: var(--ink-soft); letter-spacing: .12em; }
+
+  /* 訊息 */
+  .msg { display: none; align-items: flex-start; gap: 10px; padding: 14px 16px; border-radius: 16px; margin-bottom: 14px;
+         font-size: 15px; line-height: 1.55; animation: rise .35s ease; }
+  .msg.show { display: flex; }
+  .msg .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; margin-top: 8px; }
+  .msg small { display: block; font-size: 13px; opacity: .85; }
+  .msg.ok   { background: var(--sage-tint); color: var(--sage-deep); } .msg.ok .dot { background: var(--sage); }
+  .msg.warn { background: var(--rose-tint); color: #8E6B63; }       .msg.warn .dot { background: var(--rose); }
+  .msg.err  { background: var(--rose-tint); color: #8A5149; }       .msg.err .dot { background: #A9665C; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* 照片 */
+  .photo-wrap { padding: 14px; }
+  .photo { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 16px;
+           border: 1.5px dashed var(--ink-faint); cursor: pointer; transition: background .2s; }
+  .photo:active { background: var(--bg); }
+  .photo .thumb { flex: none; width: 64px; height: 64px; border-radius: 14px; background: var(--bg) center/cover no-repeat;
+                  display: grid; place-items: center; color: var(--ink-soft); }
+  .photo .thumb svg { width: 26px; height: 26px; }
+  .photo .t1 { font-size: 15px; font-weight: 500; }
+  .photo .t2 { font-size: 12px; color: var(--ink-soft); margin-top: 3px; line-height: 1.5; }
+  .photo.has { border-style: solid; border-color: var(--sage); background: #EEF0EA; }
+  .photo.has .thumb svg { display: none; }
+  .photo .check { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%;
+                  background: var(--sage); color: #fff; display: none; place-items: center; }
+  .photo.has .check { display: grid; }
+  .photo .check svg { width: 14px; height: 14px; }
+
+  /* 按鈕 */
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  button { appearance: none; border: 0; font-family: inherit; cursor: pointer; color: #FBF9F6; border-radius: var(--radius);
+           padding: 22px 0 18px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+           box-shadow: var(--shadow); transition: transform .12s, filter .2s, opacity .2s; }
+  button svg { width: 26px; height: 26px; opacity: .9; }
+  button .row { display: flex; align-items: center; gap: 8px; }
+  button .cute { width: 34px; height: 34px; opacity: 1; flex: none; filter: drop-shadow(0 2px 2px rgba(60,55,50,.18)); }
+  button.in  .cute { animation: bob 2.4s ease-in-out infinite; }
+  button.out .cute { animation: sway 3s ease-in-out infinite; transform-origin: 50% 60%; }
+  button:disabled .cute { animation: none; }
+  @keyframes bob  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  @keyframes sway { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+  button .lbl { font-size: 18px; font-weight: 500; letter-spacing: .18em; }
+  button .sub { font-size: 11px; letter-spacing: .2em; opacity: .75; }
+  button.in  { background: linear-gradient(160deg, var(--sage), var(--sage-deep)); }
+  button.out { background: linear-gradient(160deg, var(--mist), var(--mist-deep)); }
+  button:active:not(:disabled) { transform: scale(.97); }
+  button:disabled { filter: saturate(.3); opacity: .5; cursor: default; }
+  button.suggest { outline: 2px solid rgba(255,255,255,.7); outline-offset: -6px; }
+
+  /* 今日紀錄 */
+  .today-card { padding: 18px 20px 8px; }
+  .today-card h2 { margin: 0 0 6px; font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 14px;
+                   letter-spacing: .25em; color: var(--ink-soft); }
+  ul.today { list-style: none; padding: 0; margin: 0; }
+  ul.today li { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-top: 1px solid var(--hair); }
+  ul.today li:first-child { border-top: 0; }
+  ul.today .bullet { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  ul.today .bullet.in { background: var(--sage); } ul.today .bullet.out { background: var(--mist); }
+  ul.today .type { font-size: 15px; }
+  ul.today .time { margin-left: auto; font-size: 17px; font-variant-numeric: tabular-nums; }
+  .tag { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--sage-tint); color: var(--sage-deep); }
+  .tag.bad { background: var(--rose-tint); color: #8E6B63; }
+  .empty { color: var(--ink-faint); font-size: 14px; justify-content: center; }
+
+  /* 狀態畫面 */
+  .state { text-align: center; padding: 52px 24px; color: var(--ink-soft); font-size: 15px; line-height: 1.8; }
+  .state .ico { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: var(--bg);
+                display: grid; place-items: center; color: var(--clay); }
+  .state .ico svg { width: 28px; height: 28px; }
+  .state b { font-family: "Noto Serif TC", serif; color: var(--ink); font-size: 18px; }
+  .state small { color: var(--ink-faint); }
+
+  .hidden { display: none !important; }
+  .overlay { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;
+             gap: 14px; background: rgba(232,226,218,.82); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+             color: var(--ink-soft); font-size: 15px; letter-spacing: .1em; }
+  .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--hair); border-top-color: var(--clay);
+             animation: spin .9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  footer { text-align: center; font-size: 11px; color: var(--ink-faint); letter-spacing: .15em; margin-top: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <div id="demoBar" class="demo hidden">預覽模式・未連接 LINE 與後端，資料不會寫入</div>
+
+  <header>
+    <div class="brand">櫃點打卡</div>
+    <div class="status-pill hidden" id="statusPill">尚未上班</div>
+  </header>
+
+  <!-- 載入 / 待審核 / 錯誤 -->
+  <div id="stateView" class="card state">
+    <div class="ico"><div class="spinner" style="width:26px;height:26px"></div></div>
+    <div>載入中</div>
+  </div>
+
+  <!-- 打卡主畫面 -->
+  <div id="punchView" class="hidden">
+    <section class="card hero">
+      <div class="greet"><span id="greetWord">您好</span>，<b id="staffName"></b></div>
+      <div class="store">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span id="staffStore"></span>
+      </div>
+      <div class="clock"><span class="hm" id="clockHM">--:--</span><span class="s" id="clockS">--</span></div>
+      <div class="date" id="clockDate"></div>
+    </section>
+
+    <div id="msg" class="msg"></div>
+
+    <section class="card photo-wrap" id="photoCard">
+      <label class="photo" id="photoBox" for="photoInput">
+        <span class="thumb" id="photoThumb">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+        </span>
+        <span>
+          <div class="t1" id="photoT1">拍攝櫃位照片</div>
+          <div class="t2" id="photoT2">請拍到櫃位招牌或櫃台</div>
+        </span>
+        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+      </label>
+      <input id="photoInput" type="file" accept="image/*" capture="environment" class="hidden">
+    </section>
+
+    <div class="btns">
+      <button class="in" id="btnIn">
+        <span class="row">
+          <!-- 笑臉小太陽 -->
+          <svg class="cute" viewBox="0 0 40 40" aria-hidden="true">
+            <g stroke="#F6E7C8" stroke-width="3" stroke-linecap="round">
+              <path d="M20 3v4M20 33v4M3 20h4M33 20h4M8 8l2.8 2.8M29.2 29.2L32 32M8 32l2.8-2.8M29.2 10.8L32 8"/>
+            </g>
+            <circle cx="20" cy="20" r="10.5" fill="#F8EBCB"/>
+            <circle cx="16.3" cy="18.6" r="1.4" fill="#5E574F"/>
+            <circle cx="23.7" cy="18.6" r="1.4" fill="#5E574F"/>
+            <circle cx="16.8" cy="18.1" r=".45" fill="#fff"/>
+            <circle cx="24.2" cy="18.1" r=".45" fill="#fff"/>
+            <ellipse cx="13.6" cy="22.3" rx="2.2" ry="1.4" fill="#E7B4A8"/>
+            <ellipse cx="26.4" cy="22.3" rx="2.2" ry="1.4" fill="#E7B4A8"/>
+            <path d="M17.6 22.4q2.4 2.6 4.8 0" fill="none" stroke="#5E574F" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <span class="lbl">上班</span>
+        </span>
+        <span class="sub">CLOCK IN</span>
+      </button>
+      <button class="out" id="btnOut">
+        <span class="row">
+          <!-- 想睡覺的小月亮 -->
+          <svg class="cute" viewBox="0 0 40 40" aria-hidden="true">
+            <path d="M24.5 6.5A13.5 13.5 0 1 0 33.5 28 11 11 0 0 1 24.5 6.5z" fill="#F3EEDC"/>
+            <path d="M12.2 21q1.8 1.6 3.6 0M18.8 23.2q1.8 1.6 3.6 0" fill="none" stroke="#5E574F" stroke-width="1.4" stroke-linecap="round"/>
+            <ellipse cx="11.4" cy="25.2" rx="2" ry="1.3" fill="#E7B4A8"/>
+            <ellipse cx="23.8" cy="27" rx="2" ry="1.3" fill="#E7B4A8"/>
+            <path d="M16.3 27.6q1.3 1 2.6 0" fill="none" stroke="#5E574F" stroke-width="1.2" stroke-linecap="round"/>
+            <g fill="none" stroke="#F3EEDC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M29 6.5h4.5L29 11h4.5"/>
+              <path d="M34.5 14.5h3l-3 3h3"/>
+            </g>
+            <circle cx="6" cy="9" r="1.2" fill="#F3EEDC"/>
+          </svg>
+          <span class="lbl">下班</span>
+        </span>
+        <span class="sub">CLOCK OUT</span>
+      </button>
+    </div>
+
+    <section class="card today-card">
+      <h2>今日紀錄</h2>
+      <ul class="today" id="todayList"><li class="empty">尚無紀錄</li></ul>
+    </section>
+  </div>
+
+  <footer>時間以系統伺服器為準</footer>
+</main>
+
+<div id="overlay" class="overlay hidden">
+  <div class="spinner"></div>
+  <div id="overlayText">處理中</div>
+</div>
+
+<script>
+/* ===== 設定：部署後填入這兩個值 ===== */
+const LIFF_ID = '2012013365-WKHpgfeS';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxESEJ8gfFwQofHSGNUUr4hoCup0WOSjhejmHw4lvyKegq4WYOcSVInVtFQeUOJpTDulg/exec';
+/* ================================== */
+
+// 網址加 ?demo=1，或還沒填設定時，進入預覽模式
+const DEMO = new URLSearchParams(location.search).has('demo') || LIFF_ID.startsWith('請填入');
+
+const $ = id => document.getElementById(id);
+const ICON = {
+  pending: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  stop:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 18L18 6"/></svg>',
+  warn:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg>',
+};
+let requirePhoto = true;
+let photoData = null;
+let busy = false;
+
+/* ---------- 啟動 ---------- */
+(async function start() {
+  startClock();
+  bindUI();
+  try {
+    if (DEMO) {
+      $('demoBar').classList.remove('hidden');
+    } else {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+    }
+    await loadStatus();
+  } catch (e) {
+    showState('warn', '無法啟動：' + esc(e.message || e) + '<br><small>請關閉後重新開啟</small>');
+  }
+})();
+
+async function loadStatus() {
+  const r = await api({ action: 'status' });
+  if (!r.ok) return showState('warn', esc(r.message || '讀取失敗'));
+  requirePhoto = r.requirePhoto !== false;
+
+  if (r.state === 'pending') {
+    return showState('pending', '<b>' + esc(r.lineName || '') + '</b> 您好<br>' + esc(r.message || '已送出登記') +
+      '<br><small>主管開通後，重新開啟此頁即可打卡</small>');
+  }
+  if (r.state === 'disabled') return showState('stop', esc(r.message || '帳號已停用'));
+
+  $('staffName').textContent = r.name;
+  $('staffStore').textContent = r.store || '未指定櫃點';
+  $('photoCard').classList.toggle('hidden', !requirePhoto);
+  renderToday(r.today);
+  $('stateView').classList.add('hidden');
+  $('punchView').classList.remove('hidden');
+  updateButtons();
+}
+
+/* ---------- 打卡 ---------- */
+async function doPunch(type) {
+  if (busy) return;
+  if (requirePhoto && !photoData) return showMsg('err', '請先拍攝櫃位照片');
+  busy = true; updateButtons();
+  try {
+    overlay('定位中');
+    const pos = await getLocation();
+    overlay('送出中');
+    const r = await api({
+      action: 'punch', type,
+      lat: pos ? pos.lat : '', lng: pos ? pos.lng : '', accuracy: pos ? pos.acc : '',
+      photo: photoData, ua: navigator.userAgent,
+    });
+    if (!r.ok) {
+      showMsg('err', esc(r.message || '打卡失敗，請再試一次'));
+    } else {
+      let text = esc(r.message);
+      let kind = 'ok';
+      if (r.duplicate) kind = 'warn';
+      else if (r.verdict && r.verdict !== '正常') {
+        kind = 'warn';
+        text += '<small>位置：' + esc(r.verdict) + '（已記錄，不影響打卡）</small>';
+      }
+      showMsg(kind, text);
+      renderToday(r.today);
+      clearPhoto();
+    }
+  } catch (e) {
+    showMsg('err', '網路錯誤，請確認連線後再試一次<small>' + esc(e.message || e) + '</small>');
+  } finally {
+    overlay(null);
+    busy = false; updateButtons();
+  }
+}
+
+function getLocation() {
+  return new Promise(resolve => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }),
+      () => resolve(null),  // 拒絕或失敗：照樣打卡，後端標記「無定位」
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
+    );
+  });
+}
+
+/* ---------- 照片：縮到 1280px、JPEG 壓縮 ---------- */
+async function onPhoto(file) {
+  if (!file) return;
+  overlay('處理照片');
+  try {
+    const img = await loadImage(file);
+    const max = 1280;
+    const scale = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * scale);
+    c.height = Math.round(img.height * scale);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    photoData = c.toDataURL('image/jpeg', 0.7);
+    $('photoThumb').style.backgroundImage = 'url(' + photoData + ')';
+    $('photoBox').classList.add('has');
+    $('photoT1').textContent = '照片已備妥';
+    $('photoT2').textContent = '點此可重拍';
+    hideMsg();
+  } catch (e) {
+    showMsg('err', '照片讀取失敗，請重拍');
+  } finally {
+    overlay(null);
+    updateButtons();
+  }
+}
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+function clearPhoto() {
+  photoData = null;
+  $('photoInput').value = '';
+  $('photoThumb').style.backgroundImage = '';
+  $('photoBox').classList.remove('has');
+  $('photoT1').textContent = '拍攝櫃位照片';
+  $('photoT2').textContent = '請拍到櫃位招牌或櫃台';
+}
+
+/* ---------- 後端呼叫 ---------- */
+async function api(payload) {
+  if (DEMO) return demoApi(payload);
+  payload.idToken = liff.getIDToken();
+  // 不設 Content-Type（預設 text/plain），避免跨網域預檢，Apps Script 才收得到
+  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+  const r = await res.json();
+  if (r.code === 'AUTH' && liff.isLoggedIn()) {
+    // ID token 過期：重新登入一次
+    liff.logout(); liff.login({ redirectUri: location.href });
+  }
+  return r;
+}
+
+const demoToday = [];
+async function demoApi(p) {
+  await new Promise(r => setTimeout(r, 500));
+  if (p.action === 'status') {
+    return { ok: true, state: 'active', name: '王小美', store: '示範櫃點 A', requirePhoto: true, today: demoToday };
+  }
+  const now = new Date();
+  const t = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  demoToday.push({ type: p.type, time: t, verdict: p.lat === '' ? '無定位' : '正常' });
+  return { ok: true, type: p.type, time: t, verdict: demoToday.at(-1).verdict,
+           message: p.type + '打卡成功 ' + t, today: demoToday };
+}
+
+/* ---------- 畫面 ---------- */
+let lastType = null;
+
+function bindUI() {
+  $('photoInput').addEventListener('change', e => onPhoto(e.target.files[0]));
+  $('btnIn').addEventListener('click', () => doPunch('上班'));
+  $('btnOut').addEventListener('click', () => doPunch('下班'));
+}
+
+function updateButtons() {
+  const off = busy || (requirePhoto && !photoData);
+  $('btnIn').disabled = off;
+  $('btnOut').disabled = off;
+  // 提示下一步該按哪個
+  $('btnIn').classList.toggle('suggest', !off && lastType !== '上班');
+  $('btnOut').classList.toggle('suggest', !off && lastType === '上班');
+}
+
+function renderToday(list) {
+  const ul = $('todayList');
+  lastType = list && list.length ? list[list.length - 1].type : null;
+  const pill = $('statusPill');
+  pill.classList.remove('hidden', 'on', 'off');
+  if (lastType === '上班') { pill.textContent = '上班中'; pill.classList.add('on'); }
+  else if (lastType === '下班') { pill.textContent = '已下班'; pill.classList.add('off'); }
+  else pill.textContent = '尚未上班';
+
+  if (!list || !list.length) { ul.innerHTML = '<li class="empty">今天還沒有打卡紀錄</li>'; return; }
+  ul.innerHTML = list.map(x =>
+    '<li><span class="bullet ' + (x.type === '上班' ? 'in' : 'out') + '"></span>' +
+    '<span class="type">' + esc(x.type) + '</span>' +
+    '<span class="tag' + (x.verdict && x.verdict !== '正常' ? ' bad' : '') + '">' + esc(x.verdict || '') + '</span>' +
+    '<span class="time">' + esc(x.time) + '</span></li>'
+  ).join('');
+  updateButtons();
+}
+
+function startClock() {
+  const days = '日一二三四五六';
+  const p = n => String(n).padStart(2, '0');
+  const tick = () => {
+    const d = new Date(), h = d.getHours();
+    $('clockHM').textContent = p(h) + ':' + p(d.getMinutes());
+    $('clockS').textContent = p(d.getSeconds());
+    $('clockDate').textContent = d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + '　星期' + days[d.getDay()];
+    $('greetWord').textContent = h < 11 ? '早安' : h < 18 ? '午安' : '晚安';
+  };
+  tick(); setInterval(tick, 1000);
+}
+
+function showState(icon, html) {
+  $('punchView').classList.add('hidden');
+  $('stateView').classList.remove('hidden');
+  $('stateView').innerHTML = '<div class="ico">' + (ICON[icon] || '') + '</div><div>' + html + '</div>';
+}
+function showMsg(kind, html) {
+  const m = $('msg'); m.className = 'msg show ' + kind;
+  m.innerHTML = '<span class="dot"></span><div>' + html + '</div>';
+}
+function hideMsg() { $('msg').className = 'msg'; }
+function overlay(text) {
+  $('overlay').classList.toggle('hidden', !text);
+  if (text) $('overlayText').textContent = text;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+</script>
+</body>
+</html>
