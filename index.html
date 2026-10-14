@@ -3,6 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+/* 手機被設成「電腦版網站」時，畫面會被縮成一半。偵測到就自動放大回手機尺寸 */
+(function fitPhone() {
+  function apply() {
+    var sw = Math.min(screen.width, screen.height), iw = window.innerWidth;
+    var touch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+    var z = 1;
+    if (touch && sw < 600 && iw > sw * 1.25) z = iw / sw;
+    document.documentElement.style.zoom = z === 1 ? '' : String(z);
+  }
+  apply();
+  window.addEventListener('resize', function () { document.documentElement.style.zoom = ''; apply(); });
+})();
+</script>
+
 <meta name="theme-color" content="#D9DFE4">
 <title>UC 打卡系統</title>
 <link rel="manifest" href="manifest.json">
