@@ -7,7 +7,7 @@
 <title>櫃點打卡</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪色票 ── */
@@ -69,9 +69,10 @@
            background: var(--bg); padding: 5px 11px; border-radius: 999px; }
   .store svg { width: 13px; height: 13px; }
   .clock { margin-top: 22px; display: flex; align-items: baseline; gap: 6px; }
-  .clock .hm { font-weight: 300; font-size: 64px; line-height: 1; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
-  .clock .s  { font-weight: 300; font-size: 22px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
-  .date { margin-top: 8px; font-size: 13px; color: var(--ink-soft); letter-spacing: .12em; }
+  .clock .hm { font-family: "Michroma", sans-serif; font-weight: 400; font-size: clamp(42px, 13.5vw, 58px); line-height: 1; letter-spacing: 0; }
+  .clock .s  { font-family: "Michroma", sans-serif; font-size: clamp(16px, 5vw, 20px); color: var(--ink-faint); }
+  .date { margin-top: 12px; font-size: 13px; color: var(--ink-soft); letter-spacing: .12em; }
+  .date .num { font-family: "Michroma", sans-serif; font-size: 12px; letter-spacing: .1em; }
 
   /* 訊息 */
   .msg { display: none; align-items: flex-start; gap: 10px; padding: 14px 16px; border-radius: 16px; margin-bottom: 14px;
@@ -132,7 +133,7 @@
   ul.today .bullet { width: 10px; height: 10px; border-radius: 50%; flex: none; }
   ul.today .bullet.in { background: var(--sage); } ul.today .bullet.out { background: var(--mist); }
   ul.today .type { font-size: 15px; }
-  ul.today .time { margin-left: auto; font-size: 17px; font-variant-numeric: tabular-nums; }
+  ul.today .time { margin-left: auto; font-family: "Michroma", sans-serif; font-size: 15px; }
   .tag { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--sage-tint); color: var(--sage-deep); }
   .tag.bad { background: var(--rose-tint); color: #8E6B63; }
   .empty { color: var(--ink-faint); font-size: 14px; justify-content: center; }
@@ -473,7 +474,7 @@ function startClock() {
     const d = new Date(), h = d.getHours();
     $('clockHM').textContent = p(h) + ':' + p(d.getMinutes());
     $('clockS').textContent = p(d.getSeconds());
-    $('clockDate').textContent = d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + '　星期' + days[d.getDay()];
+    $('clockDate').innerHTML = '<span class="num">' + d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + '</span>　星期' + days[d.getDay()];
     $('greetWord').textContent = h < 11 ? '早安' : h < 18 ? '午安' : '晚安';
   };
   tick(); setInterval(tick, 1000);
