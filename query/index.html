@@ -5,12 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#DCD3E0">
 <title>UC 打卡查詢</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/q-icon-32.png">
-<link rel="apple-touch-icon" href="icons/q-apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../icons/icon-32-v4.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon-v4.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="UC 打卡查詢">
+<meta name="apple-mobile-web-app-title" content="UC 打卡系統">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
@@ -44,6 +42,10 @@
   header { display: flex; align-items: center; justify-content: space-between; margin: 4px 4px 16px; }
   .brand { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 18px; letter-spacing: .25em; color: var(--ink-soft); }
   .brand::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--rose); margin-right: 9px; vertical-align: 2px; }
+  .back { display: inline-flex; align-items: center; gap: 2px; font-size: 14px; padding: 6px 13px 6px 8px; border-radius: 999px;
+          background: var(--paper); color: var(--ink-soft); text-decoration: none; box-shadow: var(--shadow); letter-spacing: .08em; }
+  .back svg { width: 16px; height: 16px; }
+  header .brand { margin-right: auto; margin-left: 12px; }
   .pill { font-size: 14px; padding: 5px 12px; border-radius: 999px; background: var(--paper); color: var(--ink-soft); }
   .pill.admin { background: var(--rose-tint); color: var(--rose-deep); }
 
@@ -175,16 +177,11 @@
   <div id="demoBar" class="demo hidden">預覽模式・資料為示範，非真實紀錄</div>
 
   <header>
-    <div class="brand">UC 打卡查詢</div>
+    <a class="back" href="../" aria-label="回打卡">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>打卡</a>
+    <div class="brand">打卡查詢</div>
     <div class="pill hidden" id="rolePill"></div>
   </header>
-
-  <div id="installBar" class="install hidden">
-    <img src="icons/q-icon-192.png" alt="">
-    <div><b>安裝到手機桌面</b><br><span id="installHow"></span></div>
-    <button class="go hidden" id="installBtn">安裝</button>
-    <button class="x" id="installClose" aria-label="關閉">×</button>
-  </div>
 
   <div id="stateView" class="card state-view">
     <div class="ico"><div class="spinner"></div></div>
@@ -287,7 +284,6 @@ let ME = null, curTab = '', range = 'today', abnOnly = false, month = '', lastRe
       await liff.init({ liffId: LIFF_ID });
       if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href.split('#')[0] }); return; }
     }
-    setupInstallBar();
     const r = await api({ action: 'q_me' });
     if (!r.ok) return showState(r.message || '讀取失敗');
     ME = r.me;
@@ -506,21 +502,10 @@ function relogin() {
   return new Promise(() => {});
 }
 
-/* ---------- 安裝提示 ---------- */
-let installEvt = null;
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('installBtn').classList.remove('hidden'); $('installHow').textContent = '點右邊「安裝」，桌面就會出現圖示'; });
-function setupInstallBar() {
-  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  let inLine = false; try { inLine = !DEMO && liff.isInClient(); } catch (e) {}
-  let dismissed = false; try { dismissed = localStorage.getItem('qInstallDismissed') === '1'; } catch (e) {}
-  if (standalone || inLine || dismissed || DEMO) return;
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  $('installHow').textContent = ios ? '在 Safari 點下方「分享」⬆，再選「加入主畫面」' : '點瀏覽器右上角「⋮」，選「安裝應用程式」或「加到主畫面」';
-  $('installBar').classList.remove('hidden');
-  $('installBtn').onclick = async () => { if (!installEvt) return; installEvt.prompt(); const r = await installEvt.userChoice; if (r.outcome === 'accepted') $('installBar').classList.add('hidden'); installEvt = null; };
-  $('installClose').onclick = () => { $('installBar').classList.add('hidden'); try { localStorage.setItem('qInstallDismissed', '1'); } catch (e) {} };
-}
+/* 舊版曾經註冊過獨立的 service worker，這裡把它移除（現在由打卡 App 的統一管理） */
+if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => {
+  if (/\/query\/$/.test(r.scope)) r.unregister();
+})).catch(() => {});
 
 /* ---------- 預覽模式假資料（網址加 ?demo=1，或 ?demo=staff 看櫃姐畫面） ---------- */
 function demoApi(p) {
