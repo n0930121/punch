@@ -14,11 +14,11 @@
   :root {
     --bg:        #D9DFE4;   /* 灰藍 */
     --bg-deep:   #D0D7DD;
-    --paper:     #F5F1EB;   /* 米白紙 */
-    --ink:       #4A4541;   /* 深灰褐 */
-    --ink-soft:  #7D756D;
-    --ink-faint: #A69D93;
-    --hair:      #E0D8CE;
+    --paper:     #F5F7F8;   /* 霧白 */
+    --ink:       #3F474D;   /* 深藍灰 */
+    --ink-soft:  #6E7A84;
+    --ink-faint: #A3AEB7;
+    --hair:      #E3E8EC;
 
     --sage:      #8E9C8A;   /* 鼠尾草綠：上班 */
     --sage-deep: #77866F;
@@ -28,7 +28,7 @@
     --mist-tint: #E1E5EA;
     --rose:      #B8968F;   /* 乾燥玫瑰：提醒 */
     --rose-tint: #F0E4E0;
-    --clay:      #A98F7A;   /* 陶土：裝飾 */
+    --clay:      #8D9AAA;   /* 霧藍：裝飾 */
 
     --radius: 22px;
     --shadow: 0 1px 1px rgba(74,69,65,.04), 0 8px 24px -12px rgba(74,69,65,.18);
@@ -62,7 +62,7 @@
   /* 主卡：問候＋時鐘 */
   .hero { padding: 24px 22px 22px; position: relative; overflow: hidden; }
   .hero::after { content: ""; position: absolute; right: -40px; top: -40px; width: 150px; height: 150px; border-radius: 50%;
-                 background: radial-gradient(circle, rgba(169,143,122,.16), transparent 70%); }
+                 background: radial-gradient(circle, rgba(141,154,170,.18), transparent 70%); }
   .greet { font-size: 14px; color: var(--ink-soft); }
   .greet b { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 22px; color: var(--ink); margin-left: 4px; letter-spacing: .08em; }
   .store { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--ink-soft);
@@ -95,7 +95,7 @@
   .photo .thumb svg { width: 26px; height: 26px; }
   .photo .t1 { font-size: 15px; font-weight: 500; }
   .photo .t2 { font-size: 12px; color: var(--ink-soft); margin-top: 3px; line-height: 1.5; }
-  .photo.has { border-style: solid; border-color: var(--sage); background: #EEF0EA; }
+  .photo.has { border-style: solid; border-color: var(--sage); background: #EEF2F4; }
   .photo.has .thumb svg { display: none; }
   .photo .check { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%;
                   background: var(--sage); color: #fff; display: none; place-items: center; }
