@@ -650,7 +650,13 @@ let ME = null, curTab = '', range = 'today', abnOnly = false, month = '', lastRe
     STORES = r.stores || [];
     $('fixOpen').classList.remove('hidden');
     if (ME.admin) { badgeN.staff = r.pending || 0; badgeN.fix = r.fixPending || 0; setPendBadge(); }
-    if (new URLSearchParams(location.search).has('fix')) { tab = 'records'; setTimeout(openFixForm, 300); }
+    let wantFix = new URLSearchParams(location.search).has('fix');
+    try { if (sessionStorage.getItem('openFix')) { wantFix = true; sessionStorage.removeItem('openFix'); } } catch (e) {}
+    if (wantFix) {
+      tab = 'records';
+      setTimeout(openFixForm, 400);
+      try { history.replaceState(null, '', location.pathname + location.search.replace(/[?&]fix=1/, '').replace(/^&/, '?')); } catch (e) {}
+    }
     showTab(tab);
   } catch (e) {
     showState('無法啟動：' + esc(e.message || e));

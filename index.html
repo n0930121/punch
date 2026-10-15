@@ -1293,6 +1293,8 @@ function openGuide() {
   w.querySelector('.gv-x').onclick = close;
   w.onclick = e => { if (e.target === w) close(); };
 }
+// 申請補卡連結：先記下「要開表單」，就算 LINE 登入轉址把網址參數洗掉也不會失效
+document.getElementById('fixLink').addEventListener('click', () => { try { sessionStorage.setItem('openFix', '1'); } catch (e) {} });
 document.getElementById('guideOpen').onclick = () => { try { navigator.vibrate && navigator.vibrate(6); } catch (e) {} openGuide(); };
 
 function setHint(html, kind) {
