@@ -93,6 +93,73 @@
   .drow .pbtn svg { width: 16px; height: 16px; }
   .person .ab, .drow .s { grid-column: 1 / -1; }
   .drow .s { grid-column: 2 / 4; }
+  /* ════════ 改版 ════════ */
+  .fadein { animation: fin .35s ease both; }
+  @keyframes fin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .sk { display: inline-block; border-radius: 6px; background: linear-gradient(90deg, var(--bg-2) 0%, #F4EFF6 50%, var(--bg-2) 100%);
+        background-size: 200% 100%; animation: shim 1.2s linear infinite; vertical-align: middle; }
+  @keyframes shim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  .sk.av { width: 34px; height: 34px; border-radius: 50%; margin-right: 10px; }
+  .sk-card { padding: 20px; }
+  .av { width: 34px; height: 34px; border-radius: 50%; display: inline-grid; place-items: center; flex: none; margin-right: 10px;
+        font-size: 15px; font-weight: 600; letter-spacing: 0; font-family: "Noto Sans TC", sans-serif; }
+  .av.sm { width: 26px; height: 26px; font-size: 12px; margin-right: 8px; }
+  .person { grid-template-columns: 40px 1fr auto auto; column-gap: 10px; }
+  .person .pav { grid-row: 1 / span 2; grid-column: 1; margin: 0; width: 40px; height: 40px; font-size: 16px; align-self: center; }
+  .person .nm { grid-column: 2; align-items: center; min-width: 0; flex-wrap: nowrap; }
+  .person .st { grid-column: 2; display: block; font-size: 13px; }
+  .person .tm { grid-column: 3; font-size: 15px; }
+  .person .pbtn { grid-column: 4; }
+  .person .nmx { white-space: nowrap; word-break: keep-all; flex: none; }
+  .person .nm { white-space: nowrap; }
+  @media (max-width: 400px) {
+    .person { grid-template-columns: 34px minmax(0, 1fr) auto auto; column-gap: 8px; }
+    .person .pav { width: 34px; height: 34px; font-size: 14px; }
+    .person .nm { font-size: 17px; gap: 6px; }
+    .person .state { font-size: 12px; padding: 2px 7px; }
+    .person .tm { font-size: 13px; }
+    .person .pbtn { width: 40px; height: 40px; }
+  }
+  .person .nm { overflow: hidden; }
+  .person .state.s2 { display: none; }
+  @media (max-width: 370px) {
+    .person .state.s1 { display: none; }
+    .person .state.s2 { display: inline-block; margin: 0; }
+    .person .st { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; overflow: visible; white-space: normal; }
+    .person .st .sto { white-space: normal; word-break: keep-all; overflow-wrap: anywhere; line-height: 1.4; }
+  }
+  .person .state { white-space: nowrap; flex: none; }
+  .person .st { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .person .tm { white-space: nowrap; }
+  .ratio { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: var(--hair); margin: 2px 2px 8px; gap: 2px; }
+  .ratio span { flex: 0; transition: flex .6s ease; } .ratio .w { background: var(--sage); } .ratio .o { background: var(--mist); } .ratio .n { background: #D6CEDB; }
+  .ratio-lg { display: flex; gap: 14px; font-size: 12px; color: var(--ink-soft); margin: 0 4px 16px; align-items: center; }
+  .ratio-lg i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  .ratio-lg i.w { background: var(--sage); } .ratio-lg i.o { background: var(--mist); } .ratio-lg i.n { background: #D6CEDB; }
+  .ratio-lg .r { margin-left: auto; font-weight: 600; color: var(--ink); }
+  .chart { padding: 18px 18px 10px; }
+  .chart-h { font-size: 14px; color: var(--ink-soft); letter-spacing: .15em; margin-bottom: 8px; }
+  .hbar { display: grid; grid-template-columns: auto 64px 1fr 44px; align-items: center; gap: 6px; padding: 7px 0; }
+  .hb-n { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hb-t { height: 10px; border-radius: 99px; background: var(--bg-2); overflow: hidden; }
+  .hb-t span { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #B7A9C2, var(--rose-deep)); }
+  .hb-v { font-size: 13px; text-align: right; }
+  .hp-top .nm { display: flex; align-items: center; }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 6px 0 8px; }
+  .cal .cw { font-size: 11px; color: var(--ink-faint); text-align: center; padding-bottom: 2px; }
+  .cal .cd { aspect-ratio: 1; border-radius: 10px; display: grid; place-items: center; font-size: 12px; font-family: "Michroma", sans-serif;
+             background: var(--bg-2); color: var(--ink-faint); position: relative; }
+  .cal .cd.fut { background: transparent; color: #CFC6D4; }
+  .cal .cd.now { box-shadow: inset 0 0 0 2px var(--rose); }
+  .cal .cd.miss { box-shadow: inset 0 0 0 2px var(--bad); background: var(--bad-tint); color: var(--bad); }
+  .cal .cd.live { background: var(--sage-tint); color: var(--sage-deep); }
+  .cal .cd.abn::after { content: ""; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
+  .cal-lg { display: flex; gap: 12px; font-size: 11px; color: var(--ink-soft); margin-bottom: 8px; flex-wrap: wrap; }
+  .cal-lg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+  .cal-lg .l1 { background: rgba(111,126,107,.3); } .cal-lg .l2 { background: rgba(111,126,107,.8); }
+  .cal-lg .lm { box-shadow: inset 0 0 0 2px var(--bad); background: var(--bad-tint); } .cal-lg .la { background: var(--amber); border-radius: 50%; }
+  .stat { border-radius: var(--radius-md, 16px); }
+
   /* 照片視窗 */
   .pm { position: fixed; inset: 0; z-index: 30; background: rgba(40,34,46,.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
         display: flex; align-items: flex-end; justify-content: center; }
@@ -242,6 +309,8 @@
       <div class="stat none"><div class="v" id="cNone">0</div><div class="k">未打卡</div></div>
       <div class="stat abn" id="statAbn"><div class="v" id="cAbn">0</div><div class="k">異常</div></div>
     </div>
+    <div class="ratio" id="ratioBar"><span class="w"></span><span class="o"></span><span class="n"></span></div>
+    <div class="ratio-lg"><span><i class="w"></i>上班中</span><span><i class="o"></i>已下班</span><span><i class="n"></i>未打卡</span><span class="r" id="ratioTxt"></span></div>
     <div class="card people" id="peopleList"></div>
     <div class="note">回到 App 或切換分頁時會自動更新</div>
   </section>
@@ -368,9 +437,27 @@ function showTab(tab) {
   if (tab === 'hours') loadHours();
 }
 
+/* ---------- 骨架畫面（讀取中） ---------- */
+function skel(kind) {
+  const line = (w, h) => '<i class="sk" style="width:' + w + ';height:' + (h || 12) + 'px"></i>';
+  if (kind === 'people') return Array(5).fill(0).map(() =>
+    '<div class="person sk-row"><i class="sk av pav"></i><div class="nm">' + line('38%', 15) + '</div><div class="st">' + line('52%') + '</div><div class="tm">' + line('62px', 14) + '<br>' + line('62px', 14) + '</div></div>').join('');
+  return Array(3).fill(0).map(() => '<div class="card sk-card">' + line('30%', 14) + '<div style="height:14px"></div>' + line('90%') + '<div style="height:10px"></div>' + line('70%') + '<div style="height:10px"></div>' + line('80%') + '</div>').join('');
+}
+
+/* ---------- 人員頭像（姓名第一個字＋固定配色） ---------- */
+const AV_COLORS = [['#E3E7DF', '#6F7E6B'], ['#E3E7EC', '#6E7B8D'], ['#F3E5E3', '#A3706A'], ['#EEE7F2', '#7C6A89'], ['#F3ECDF', '#9A7B55'], ['#E0ECEA', '#5E827C']];
+function avatar(name, cls) {
+  const n = String(name || '?').trim(); let h = 0;
+  for (const ch of n) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  const c = AV_COLORS[h % AV_COLORS.length];
+  const ch = /^[A-Za-z]/.test(n) ? n[0].toUpperCase() : Array.from(n)[0];
+  return '<span class="av ' + (cls || '') + '" style="background:' + c[0] + ';color:' + c[1] + '">' + esc(ch) + '</span>';
+}
+
 /* ---------- 今日 ---------- */
 async function loadToday() {
-  $('peopleList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  $('peopleList').innerHTML = skel('people');
   const r = await api({ action: 'q_today' });
   if (!r.ok) return $('peopleList').innerHTML = emptyBox(r.message);
   const d = new Date(r.date + 'T00:00:00');
@@ -378,10 +465,13 @@ async function loadToday() {
   $('cWorking').textContent = r.counts.working; $('cOff').textContent = r.counts.off;
   $('cNone').textContent = r.counts.none; $('cAbn').textContent = r.counts.abnormal;
   $('statAbn').classList.toggle('has', r.counts.abnormal > 0);
+  const tot = r.counts.working + r.counts.off + r.counts.none || 1, bar = $('ratioBar').children;
+  bar[0].style.flex = r.counts.working; bar[1].style.flex = r.counts.off; bar[2].style.flex = r.counts.none;
+  $('ratioTxt').textContent = '到班率 ' + Math.round((r.counts.working + r.counts.off) / tot * 100) + '%';
   const label = { working: '上班中', off: '已下班', none: '未打卡' };
   $('peopleList').innerHTML = r.people.length ? r.people.map(p =>
-    '<div class="person"><div class="nm">' + esc(p.name) + '<span class="state ' + p.state + '">' + label[p.state] + '</span></div>' +
-    '<div class="st">' + (p.store ? esc(p.store) : '—') + '</div>' +
+    '<div class="person fadein">' + avatar(p.name, 'pav') + '<div class="nm"><span class="nmx">' + esc(p.name) + '</span><span class="state s1 ' + p.state + '">' + label[p.state] + '</span></div>' +
+    '<div class="st"><span class="state s2 ' + p.state + '">' + label[p.state] + '</span><span class="sto">' + (p.store ? esc(p.store) : '尚未選櫃點') + '</span></div>' +
     '<div class="tm">上 <b class="num">' + (p.inTime || '--:--') + '</b><br>下 <b class="num">' + (p.outTime || '--:--') + '</b></div>' +
     photoBtn(p.name + '・今天', [{ label: '上班', time: p.inTime, id: p.inPhoto }, { label: '下班', time: p.outTime, id: p.outPhoto }]) +
     (p.abnormal.length ? '<div class="ab">' + p.abnormal.map(esc).join('<br>') + '</div>' : '') + '</div>'
@@ -402,7 +492,7 @@ function rangeDates() {
 
 async function loadRecords() {
   const [f, t] = rangeDates();
-  $('recList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  $('recList').innerHTML = skel('cards');
   $('recCount').textContent = '';
   const r = await api({ action: 'q_records', from: ymd(f), to: ymd(t),
                         name: $('fName').value, store: $('fStore').value, abnormal: abnOnly });
@@ -414,7 +504,7 @@ async function loadRecords() {
   lastRecs.forEach(x => (groups[x.date] = groups[x.date] || []).push(x));
   $('recList').innerHTML = Object.keys(groups).map(date => {
     const d = new Date(date + 'T00:00:00');
-    return '<div class="card day"><h3><span class="num">' + date.slice(5).replace('-', '.') + '</span><span>週' + WEEK[d.getDay()] + '・' + groups[date].length + ' 筆</span></h3>' +
+    return '<div class="card day fadein"><h3><span class="num">' + date.slice(5).replace('-', '.') + '</span><span>週' + WEEK[d.getDay()] + '・' + groups[date].length + ' 筆</span></h3>' +
       groups[date].map(recRow).join('') + '</div>';
   }).join('');
 }
@@ -432,7 +522,7 @@ function recRow(x) {
 /* ---------- 工時 ---------- */
 async function loadHours() {
   $('mLabel').textContent = month.replace('-', '.');
-  $('hrList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  $('hrList').innerHTML = skel('cards');
   $('hrCount').textContent = '';
   const r = await api({ action: 'q_hours', month: month, name: $('hName').value });
   if (!r.ok) return $('hrList').innerHTML = emptyBox(r.message);
@@ -440,15 +530,43 @@ async function loadHours() {
   $('hrCount').textContent = lastHours.length ? lastHours.length + ' 位' : '';
   if (!lastHours.length) return $('hrList').innerHTML = '<div class="card">' + emptyBox('這個月還沒有打卡紀錄') + '</div>';
   const single = lastHours.length === 1;
-  $('hrList').innerHTML = lastHours.map(p =>
-    '<div class="card hp' + (single ? ' open' : '') + '"><div class="hp-top"><span class="nm">' + esc(p.name) + '</span>' +
+  const maxH = Math.max.apply(null, lastHours.map(p => p.totalHours).concat([1]));
+  const overview = single ? '' : '<div class="card chart fadein"><div class="chart-h">本月總工時</div>' +
+    lastHours.slice().sort((a, b) => b.totalHours - a.totalHours).map(p =>
+      '<div class="hbar">' + avatar(p.name, 'sm') + '<span class="hb-n">' + esc(p.name) + '</span>' +
+      '<span class="hb-t"><span style="width:' + (p.totalHours / maxH * 100) + '%"></span></span>' +
+      '<span class="hb-v num">' + p.totalHours + '</span></div>').join('') + '</div>';
+  $('hrList').innerHTML = overview + lastHours.map(p =>
+    '<div class="card hp fadein' + (single ? ' open' : '') + '"><div class="hp-top"><span class="nm">' + avatar(p.name) + esc(p.name) + '</span>' +
     '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>' +
     '<div class="kpis"><div class="kpi"><div class="v">' + p.workDays + '</div><div class="k">出勤天數</div></div>' +
     '<div class="kpi"><div class="v">' + p.totalHours + '</div><div class="k">總工時</div></div>' +
     '<div class="kpi' + (p.missing ? ' miss' : '') + '"><div class="v">' + p.missing + '</div><div class="k">缺卡</div></div></div>' +
-    '<div class="dlist">' + p.days.map(d => (curHoursName = p.name, dayRow(d))).join('') + '</div></div>'
+    '<div class="dlist">' + calendar(p) + p.days.map(d => (curHoursName = p.name, dayRow(d))).join('') + '</div></div>'
   ).join('');
   document.querySelectorAll('.hp-top').forEach(el => el.onclick = () => el.parentElement.classList.toggle('open'));
+}
+
+/* 月曆：每天依工時深淺上色，缺卡紅框、有異常加橘點 */
+function calendar(p) {
+  const [y, m] = month.split('-').map(Number);
+  const first = new Date(y, m - 1, 1).getDay(), days = new Date(y, m, 0).getDate();
+  const map = {}; p.days.forEach(d => map[Number(d.date.slice(8))] = d);
+  const today = new Date(), isCur = today.getFullYear() === y && today.getMonth() + 1 === m;
+  let cells = '日一二三四五六'.split('').map(w => '<span class="cw">' + w + '</span>').join('');
+  for (let i = 0; i < first; i++) cells += '<span></span>';
+  for (let d = 1; d <= days; d++) {
+    const x = map[d]; let cls = 'cd', style = '';
+    if (x) {
+      if (x.hours) { const a = Math.min(1, x.hours / 10); style = 'background:rgba(111,126,107,' + (0.18 + a * 0.62).toFixed(2) + ');color:' + (a > .55 ? '#fff' : 'var(--ink)'); }
+      if (x.flag && x.flag !== '上班中') cls += ' miss';
+      if (x.flag === '上班中') cls += ' live';
+      if (x.abnormal) cls += ' abn';
+    } else if (isCur && d > today.getDate()) cls += ' fut';
+    if (isCur && d === today.getDate()) cls += ' now';
+    cells += '<span class="' + cls + '" style="' + style + '">' + d + '</span>';
+  }
+  return '<div class="cal">' + cells + '</div><div class="cal-lg"><span><i class="l1"></i>工時短</span><span><i class="l2"></i>工時長</span><span><i class="lm"></i>缺卡</span><span><i class="la"></i>有異常</span></div>';
 }
 
 function dayRow(d) {

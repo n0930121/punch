@@ -227,6 +227,116 @@
   .retry { margin-top: 14px; border: 0; font-family: inherit; font-size: 15px; padding: 10px 22px; border-radius: 999px;
            background: var(--mist); color: #fff; box-shadow: none; display: inline-block; letter-spacing: .1em; }
   .slow { margin-top: 12px; font-size: 13px; color: var(--ink-faint); line-height: 1.7; }
+
+  /* ════════ 改版：統一規格 ════════
+     圓角 22 / 16 / 12；間距 8 的倍數；陰影兩級 */
+  :root { --r-lg: 22px; --r-md: 16px; --r-sm: 12px;
+          --shadow-lg: 0 2px 4px rgba(63,71,77,.05), 0 18px 40px -18px rgba(63,71,77,.28); }
+  .card { margin-bottom: 16px; }
+  .rise { animation: rise .45s cubic-bezier(.2,.7,.2,1) both; }
+
+  /* 主卡 */
+  .hero { padding: 22px 22px 20px; }
+  .greet { font-size: 14px; }
+  .clock { margin-top: 14px; }
+  .date { margin-top: 10px; }
+  .work { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--hair); animation: rise .4s ease both; }
+  .work-row { display: flex; align-items: baseline; justify-content: space-between; font-size: 13px; color: var(--ink-soft); }
+  .work-lbl b { font-weight: 600; color: var(--sage-deep); font-size: 15px; margin-left: 2px; }
+  .live { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--sage); margin-right: 8px; vertical-align: 1px;
+          box-shadow: 0 0 0 0 rgba(142,156,138,.6); animation: pulse 2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(142,156,138,.55); } 70% { box-shadow: 0 0 0 8px rgba(142,156,138,0); } 100% { box-shadow: 0 0 0 0 rgba(142,156,138,0); } }
+  .work-since .num { font-family: "Michroma", sans-serif; font-size: 12px; color: var(--ink); }
+  .bar { height: 8px; border-radius: 99px; background: var(--hair); margin-top: 10px; overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, #A9B6A5, var(--sage-deep)); transition: width .8s ease; }
+  .work-scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-faint); margin-top: 5px; font-family: "Michroma", sans-serif; }
+
+  /* 三步驟 */
+  .steps { padding: 20px 20px 8px; }
+  .step { display: grid; grid-template-columns: 30px 1fr; gap: 14px; position: relative; padding-bottom: 20px; }
+  .step:not(:last-child)::before { content: ""; position: absolute; left: 14px; top: 34px; bottom: 4px; width: 2px; border-radius: 2px; background: var(--hair); }
+  .step.done:not(:last-child)::before { background: linear-gradient(var(--sage), var(--hair)); }
+  .badge { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 600;
+           background: var(--bg); color: var(--ink-faint); transition: background .3s, color .3s, box-shadow .3s; }
+  .badge .ck { width: 15px; height: 15px; display: none; }
+  .step.active .badge { background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+  .step.done .badge { background: var(--sage); color: #fff; }
+  .step.done .badge .n { display: none; } .step.done .badge .ck { display: block; }
+  .step-title { font-size: 13px; color: var(--ink-soft); letter-spacing: .12em; margin: 5px 0 10px; }
+  .step.active .step-title { color: var(--ink); font-weight: 500; }
+  .store { margin-top: 0; }
+  .store.pick { padding: 9px 14px 9px 12px; font-size: 15px; border-radius: var(--r-sm); }
+
+  .photo { padding: 12px; border-radius: var(--r-md); gap: 14px; }
+  .photo .thumb { width: 58px; height: 58px; border-radius: var(--r-sm); }
+  .photo .t1 { font-size: 15px; }
+  .photo .photo-txt { flex: 1; min-width: 0; }
+  .photo .retake { white-space: nowrap; flex: none; margin-left: auto; font-size: 12px; color: var(--ink-soft); background: var(--paper); padding: 5px 11px; border-radius: 99px; display: none; }
+  .photo.has { border-color: transparent; background: var(--sage-tint); }
+  .photo.has .retake { display: inline-block; }
+  .photo.has .t1 { color: var(--sage-deep); }
+
+  /* 主按鈕（一次只有一顆大的）＋ 次要文字連結 */
+  .btns { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+  .btns button.primary { flex-direction: row; justify-content: center; gap: 12px; padding: 18px 16px; border-radius: var(--r-md);
+                         box-shadow: var(--shadow-lg); min-height: 68px; }
+  .btns button.primary .lbl { font-size: 19px; letter-spacing: .2em; text-indent: .2em; }
+  .btns button.primary .sub { font-size: 10px; margin-left: 2px; align-self: center; }
+  .btns button.primary .cute { width: 36px; height: 36px; }
+  .btns button.secondary { background: none !important; box-shadow: none; color: var(--ink-soft); padding: 6px 0 2px; flex-direction: row;
+                           justify-content: center; gap: 6px; font-size: 13px; }
+  .btns button.secondary .cute, .btns button.secondary .sub { display: none; }
+  .btns button.secondary .lbl { font-size: 13px; font-weight: 400; letter-spacing: .08em; text-decoration: underline; text-underline-offset: 3px; }
+  .btns button.secondary .lbl::before { content: "要改打"; text-decoration: none; display: inline-block; margin-right: 2px; }
+  .btns button.secondary:disabled { filter: none; opacity: .45; }
+  .btns button.primary:disabled { box-shadow: none; }
+  button.suggest { outline: none; }
+
+  /* 今日紀錄：時間軸 */
+  .today-card { padding: 20px 20px 10px; }
+  ul.today li { position: relative; padding: 12px 0 12px 22px; border-top: 0; }
+  ul.today li:not(.empty)::before { content: ""; position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; background: var(--hair); }
+  ul.today li:not(.empty):first-child::before { top: 50%; } ul.today li:not(.empty):last-child::before { bottom: 50%; }
+  ul.today li:only-child::before { display: none; }
+  ul.today .bullet { position: absolute; left: 0; top: 50%; margin-top: -5px; box-shadow: 0 0 0 3px var(--paper); }
+  ul.today .time { font-size: 16px; }
+
+  /* 啟動畫面 */
+  .splash { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--bg);
+            background-image: radial-gradient(120% 60% at 100% 0%, #E5EAEE 0%, transparent 60%), radial-gradient(90% 50% at 0% 100%, #D0D7DD 0%, transparent 60%);
+            transition: opacity .45s ease, visibility .45s; }
+  .splash.out { opacity: 0; visibility: hidden; }
+  .sp-in { text-align: center; padding: 24px; }
+  .sp-logo { width: 104px; height: 104px; border-radius: 30px; box-shadow: var(--shadow-lg); animation: float 2.6s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .sp-name { margin-top: 22px; font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 22px; letter-spacing: .3em; text-indent: .3em; }
+  .sp-sub { margin-top: 6px; font-size: 12px; color: var(--ink-soft); letter-spacing: .25em; text-indent: .25em; }
+  .sp-dots { display: flex; gap: 6px; justify-content: center; margin-top: 28px; }
+  .sp-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--mist); animation: dot 1.2s ease-in-out infinite; }
+  .sp-dots i:nth-child(2) { animation-delay: .15s; } .sp-dots i:nth-child(3) { animation-delay: .3s; }
+  @keyframes dot { 0%,80%,100% { opacity: .25; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
+  .sp-text { margin-top: 12px; font-size: 13px; color: var(--ink-soft); letter-spacing: .1em; }
+
+  /* 打卡成功 */
+  .okview { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px;
+          background: rgba(245,247,248,.96); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade .25s ease; cursor: pointer; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .done-in { text-align: center; max-width: 320px; }
+  .done-mascot svg { width: 92px; height: 92px; animation: pop .6s cubic-bezier(.2,1.6,.4,1) both; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .done-check { width: 46px; height: 46px; margin: 6px auto 0; display: block; }
+  .done-check circle { fill: none; stroke: var(--sage); stroke-width: 3; stroke-dasharray: 145; stroke-dashoffset: 145; animation: draw .6s .15s ease forwards; }
+  .done-check path { fill: none; stroke: var(--sage-deep); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round;
+                     stroke-dasharray: 40; stroke-dashoffset: 40; animation: draw .4s .6s ease forwards; }
+  .okview.out-type .done-check circle { stroke: var(--mist); } .okview.out-type .done-check path { stroke: var(--mist-deep); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .done-title { margin-top: 14px; font-size: 20px; font-weight: 600; letter-spacing: .15em; text-indent: .15em; }
+  .done-time { margin-top: 10px; font-family: "Michroma", sans-serif; font-size: 44px; line-height: 1; }
+  .done-store { margin-top: 12px; font-size: 14px; color: var(--ink-soft); }
+  .done-word { margin-top: 18px; font-family: "Noto Serif TC", serif; font-size: 17px; color: var(--sage-deep); letter-spacing: .12em; }
+  .okview.out-type .done-word { color: var(--mist-deep); }
+  .done-note { margin-top: 14px; font-size: 13px; color: #8E6B63; background: var(--rose-tint); padding: 8px 14px; border-radius: 99px; display: inline-block; }
+  .done-tap { margin-top: 30px; font-size: 12px; color: var(--ink-faint); letter-spacing: .15em; }
   footer { text-align: center; font-size: 11px; color: var(--ink-faint); letter-spacing: .15em; margin-top: 18px; }
 </style>
 </head>
@@ -251,49 +361,69 @@
     <button class="x" id="installClose" aria-label="關閉">×</button>
   </div>
 
-  <!-- 載入 / 待審核 / 錯誤 -->
-  <div id="stateView" class="card state">
-    <div class="ico"><div class="spinner" style="width:26px;height:26px"></div></div>
-    <div>載入中</div>
-  </div>
+  <!-- 待審核 / 錯誤 -->
+  <div id="stateView" class="card state hidden"></div>
 
   <!-- 打卡主畫面 -->
   <div id="punchView" class="hidden">
-    <section class="card hero">
+    <section class="card hero rise">
       <div class="greet"><span id="greetWord">您好</span>，<b id="staffName"></b></div>
-      <!-- 櫃點：櫃姐自己選（點一下跳出選單） -->
-      <label class="store pick" id="storePick">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-        <span id="staffStore">請選擇櫃點</span>
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        <select id="storeSel" aria-label="選擇櫃點"></select>
-      </label>
-      <div class="store-hint" id="storeHint">今天在哪個櫃上班？點上方可切換</div>
       <div class="clock"><span class="hm" id="clockHM">--:--</span><span class="s" id="clockS">--</span></div>
       <div class="date" id="clockDate"></div>
+      <!-- 上班中：計時＋進度 -->
+      <div class="work hidden" id="workBox">
+        <div class="work-row">
+          <span class="work-lbl"><i class="live"></i>已上班 <b id="workDur">0 分</b></span>
+          <span class="work-since">自 <span class="num" id="workSince">--:--</span></span>
+        </div>
+        <div class="bar"><span id="workBar"></span></div>
+        <div class="work-scale"><span>0</span><span>4h</span><span>9h</span></div>
+      </div>
     </section>
 
     <div id="msg" class="msg"></div>
 
-    <section class="card photo-wrap" id="photoCard">
-      <div class="photo" id="photoBox" role="button" tabindex="0">
-        <span class="thumb" id="photoThumb">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
-        </span>
-        <span>
-          <div class="t1" id="photoT1">拍攝櫃位照片</div>
-          <div class="t2" id="photoT2">請拍到櫃位招牌或櫃台</div>
-        </span>
-        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+    <!-- 三步驟 -->
+    <section class="card steps rise" style="animation-delay:.06s">
+      <div class="step" id="step1">
+        <div class="badge"><span class="n">1</span><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <div class="step-body">
+          <div class="step-title">確認櫃點</div>
+          <label class="store pick" id="storePick">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            <span id="staffStore">請選擇櫃點</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            <select id="storeSel" aria-label="選擇櫃點"></select>
+          </label>
+          <div class="store-hint" id="storeHint">今天在哪個櫃上班？點上方可切換</div>
+        </div>
       </div>
-      <input id="photoInput" type="file" accept="image/*" capture="environment" class="hidden">
-    </section>
 
-    <div class="btns">
-      <button class="in" id="btnIn">
-        <span class="row">
-          <!-- 笑臉小太陽 -->
-          <svg class="cute" viewBox="0 0 40 40" aria-hidden="true">
+      <div class="step" id="photoCard">
+        <div class="badge"><span class="n">2</span><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <div class="step-body">
+          <div class="step-title">拍櫃位照片</div>
+          <div class="photo" id="photoBox" role="button" tabindex="0">
+            <span class="thumb" id="photoThumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+            </span>
+            <span class="photo-txt">
+              <div class="t1" id="photoT1">點這裡開相機</div>
+              <div class="t2" id="photoT2">請拍到櫃位招牌或櫃台</div>
+            </span>
+            <span class="retake">重拍</span>
+          </div>
+          <input id="photoInput" type="file" accept="image/*" capture="environment" class="hidden">
+        </div>
+      </div>
+
+      <div class="step" id="step3">
+        <div class="badge"><span class="n">3</span><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <div class="step-body">
+          <div class="step-title" id="step3Title">打卡</div>
+          <div class="btns" id="btns">
+            <button class="in" id="btnIn">
+              <svg class="cute" viewBox="0 0 40 40" aria-hidden="true">
             <g stroke="#F6E7C8" stroke-width="3" stroke-linecap="round">
               <path d="M20 3v4M20 33v4M3 20h4M33 20h4M8 8l2.8 2.8M29.2 29.2L32 32M8 32l2.8-2.8M29.2 10.8L32 8"/>
             </g>
@@ -306,14 +436,10 @@
             <ellipse cx="26.4" cy="22.3" rx="2.2" ry="1.4" fill="#E7B4A8"/>
             <path d="M17.6 22.4q2.4 2.6 4.8 0" fill="none" stroke="#5E574F" stroke-width="1.4" stroke-linecap="round"/>
           </svg>
-          <span class="lbl">上班</span>
-        </span>
-        <span class="sub">CLOCK IN</span>
-      </button>
-      <button class="out" id="btnOut">
-        <span class="row">
-          <!-- 想睡覺的小月亮 -->
-          <svg class="cute" viewBox="0 0 40 40" aria-hidden="true">
+              <span class="lbl">上班打卡</span><span class="sub">CLOCK IN</span>
+            </button>
+            <button class="out" id="btnOut">
+              <svg class="cute" viewBox="0 0 40 40" aria-hidden="true">
             <path d="M24.5 6.5A13.5 13.5 0 1 0 33.5 28 11 11 0 0 1 24.5 6.5z" fill="#F3EEDC"/>
             <path d="M12.2 21q1.8 1.6 3.6 0M18.8 23.2q1.8 1.6 3.6 0" fill="none" stroke="#5E574F" stroke-width="1.4" stroke-linecap="round"/>
             <ellipse cx="11.4" cy="25.2" rx="2" ry="1.3" fill="#E7B4A8"/>
@@ -325,13 +451,14 @@
             </g>
             <circle cx="6" cy="9" r="1.2" fill="#F3EEDC"/>
           </svg>
-          <span class="lbl">下班</span>
-        </span>
-        <span class="sub">CLOCK OUT</span>
-      </button>
-    </div>
+              <span class="lbl">下班打卡</span><span class="sub">CLOCK OUT</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <section class="card today-card">
+    <section class="card today-card rise" style="animation-delay:.12s">
       <h2>今日紀錄</h2>
       <ul class="today" id="todayList"><li class="empty">尚無紀錄</li></ul>
     </section>
@@ -339,6 +466,32 @@
 
   <footer>時間以系統伺服器為準</footer>
 </main>
+
+<!-- 啟動畫面 -->
+<div id="splash" class="splash">
+  <div class="sp-in">
+    <img src="icons/icon-512-v4.png" alt="" class="sp-logo">
+    <div class="sp-name">UC 打卡系統</div>
+    <div class="sp-sub">UCHINO・櫃點打卡</div>
+    <div class="sp-dots"><i></i><i></i><i></i></div>
+    <div class="sp-text" id="splashText">啟動中…</div>
+    <div class="slow hidden" id="slowHint">網路較慢，請再稍候一下…<br>商場 Wi-Fi 若需要先登入，請先完成登入或改用行動網路</div>
+  </div>
+</div>
+
+<!-- 打卡成功 -->
+<div id="done" class="okview hidden" role="dialog" aria-live="polite">
+  <div class="done-in">
+    <div class="done-mascot" id="doneMascot"></div>
+    <svg class="done-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23"/><path d="M15.5 27l7 7 14-15"/></svg>
+    <div class="done-title" id="doneTitle">上班打卡成功</div>
+    <div class="done-time num" id="doneTime">--:--</div>
+    <div class="done-store" id="doneStore"></div>
+    <div class="done-word" id="doneWord"></div>
+    <div class="done-note hidden" id="doneNote"></div>
+    <div class="done-tap">點一下回到畫面</div>
+  </div>
+</div>
 
 <div id="cam" class="cam hidden">
   <video id="camVideo" playsinline autoplay muted></video>
@@ -375,6 +528,8 @@ const ICON = {
 let requirePhoto = true;
 let photoData = null;
 let busy = false;
+let doneTimer = null, workStart = null, lastType = null;
+const SHIFT_HOURS = 9;
 
 /* ---------- 手機 App（PWA） ---------- */
 if ('serviceWorker' in navigator) {
@@ -413,11 +568,14 @@ function setupInstallBar() {
 const RETRY_BTN = '<br><button class="retry" onclick="location.reload()">重新載入</button>';
 let slowTimer = null;
 function setLoading(text) {
-  if ($('stateView').classList.contains('hidden')) return;
-  $('stateView').innerHTML = '<div class="ico"><div class="spinner" style="width:26px;height:26px"></div></div><div>' + text +
-    '</div><div class="slow hidden" id="slowHint">網路較慢，請再稍候一下…<br>商場 Wi-Fi 若需要先登入，請先完成登入或改用行動網路</div>';
+  $('splashText').textContent = text;
   clearTimeout(slowTimer);
-  slowTimer = setTimeout(() => { const h = $('slowHint'); if (h) h.classList.remove('hidden'); }, 8000);
+  slowTimer = setTimeout(() => $('slowHint').classList.remove('hidden'), 8000);
+}
+function hideSplash() {
+  clearTimeout(slowTimer);
+  const sp = $('splash'); if (!sp || sp.classList.contains('out')) return;
+  sp.classList.add('out'); setTimeout(() => sp.remove(), 500);
 }
 
 /* ---------- 啟動 ---------- */
@@ -464,6 +622,7 @@ async function loadStatus() {
   $('punchView').classList.remove('hidden');
   $('queryBtn').classList.remove('hidden');
   updateButtons();
+  hideSplash();
 }
 
 /* ---------- 打卡 ---------- */
@@ -517,6 +676,7 @@ async function doPunch(type, force) {
       showMsg(kind, text);
       renderToday(r.today);
       clearPhoto();
+      if (!r.duplicate) showDone(r.type || type, r.time, r.store || currentStore(), r.verdict);
     }
   } catch (e) {
     showMsg('err', e && e.name === 'AbortError'
@@ -634,8 +794,8 @@ function setPhoto(dataUrl, source) {
   photoData = dataUrl; photoSource = source; photoAt = new Date();
   $('photoThumb').style.backgroundImage = 'url(' + photoData + ')';
   $('photoBox').classList.add('has');
-  $('photoT1').textContent = '照片已備妥';
-  $('photoT2').textContent = '點此可重拍';
+  $('photoT1').textContent = '照片已拍好';
+  $('photoT2').textContent = '會連同打卡時間一起存檔';
   updateButtons();
 }
 
@@ -736,7 +896,7 @@ function clearPhoto() {
   $('photoInput').value = '';
   $('photoThumb').style.backgroundImage = '';
   $('photoBox').classList.remove('has');
-  $('photoT1').textContent = '拍攝櫃位照片';
+  $('photoT1').textContent = '點這裡開相機';
   $('photoT2').textContent = '請拍到櫃位招牌或櫃台';
 }
 
@@ -776,7 +936,8 @@ function relogin() {
   return new Promise(() => {});   // 正在跳轉，不再往下執行
 }
 
-const demoToday = [];
+const demoToday = new URLSearchParams(location.search).get('demo') === 'working'
+  ? [{ type: '上班', time: '10:52', verdict: '正常', store: 'UCHINO - 信義A8' }] : [];
 async function demoApi(p) {
   await new Promise(r => setTimeout(r, 500));
   if (p.action === 'status') {
@@ -906,8 +1067,37 @@ function showStore() {
   $('storePick').classList.toggle('empty', !v);
 }
 
+/* ---------- 打卡成功畫面 ---------- */
+function showDone(type, time, store, verdict) {
+  const d = $('done'), isIn = type === '上班';
+  d.classList.toggle('out-type', !isIn);
+  $('doneMascot').innerHTML = (isIn ? $('btnIn') : $('btnOut')).querySelector('.cute').outerHTML;
+  $('doneTitle').textContent = type + '打卡成功';
+  $('doneTime').textContent = time || '';
+  $('doneStore').textContent = store && store !== 'fixed' ? store : $('staffStore').textContent;
+  const h = new Date().getHours();
+  $('doneWord').textContent = isIn ? (h < 12 ? '早安，今天也加油！' : '今天也辛苦了，加油！') : '辛苦了，回家路上小心～';
+  const bad = verdict && verdict !== '正常';
+  $('doneNote').classList.toggle('hidden', !bad);
+  if (bad) $('doneNote').textContent = '位置：' + String(verdict).split('：')[0] + '（已記錄）';
+  d.classList.remove('hidden');
+  try { navigator.vibrate && navigator.vibrate([25, 40, 25]); } catch (e) {}
+  clearTimeout(doneTimer);
+  doneTimer = setTimeout(hideDone, 3500);
+}
+function hideDone() { clearTimeout(doneTimer); $('done').classList.add('hidden'); }
+
+/* ---------- 上班計時 ---------- */
+function updateWork() {
+  const box = $('workBox'); if (!box) return;
+  if (!workStart) { box.classList.add('hidden'); return; }
+  const mins = Math.max(0, Math.floor((Date.now() - workStart) / 60000));
+  $('workDur').textContent = (mins >= 60 ? Math.floor(mins / 60) + ' 小時 ' : '') + (mins % 60) + ' 分';
+  $('workBar').style.width = Math.min(100, mins / (SHIFT_HOURS * 60) * 100) + '%';
+  box.classList.remove('hidden');
+}
+
 /* ---------- 畫面 ---------- */
-let lastType = null;
 
 function bindUI() {
   $('photoInput').addEventListener('change', e => onPhoto(e.target.files[0]));
@@ -922,15 +1112,25 @@ function bindUI() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden && locDenied && storeMode === 'pick') locateStores(); });
   $('btnIn').addEventListener('click', () => doPunch('上班'));
   $('btnOut').addEventListener('click', () => doPunch('下班'));
+  $('done').addEventListener('click', hideDone);
 }
 
 function updateButtons() {
   const off = busy || locating || locDenied || (requirePhoto && !photoData) || !currentStore();
   $('btnIn').disabled = off;
   $('btnOut').disabled = off;
-  // 提示下一步該按哪個
-  $('btnIn').classList.toggle('suggest', !off && lastType !== '上班');
-  $('btnOut').classList.toggle('suggest', !off && lastType === '上班');
+  // 一次只有一顆主按鈕：沒上班 → 上班；上班中 → 下班
+  const wantIn = lastType !== '上班';
+  $('btnIn').classList.toggle('primary', wantIn);  $('btnIn').classList.toggle('secondary', !wantIn);
+  $('btnOut').classList.toggle('primary', !wantIn); $('btnOut').classList.toggle('secondary', wantIn);
+  const btns = $('btns'); if (btns && btns.firstElementChild !== (wantIn ? $('btnIn') : $('btnOut'))) btns.insertBefore(wantIn ? $('btnIn') : $('btnOut'), btns.firstElementChild);
+  // 三步驟狀態
+  const s1 = !!currentStore() && !locating, s2 = !requirePhoto || !!photoData;
+  const set = (el, done, active) => { if (!el) return; el.classList.toggle('done', done); el.classList.toggle('active', !done && active); };
+  set($('step1'), s1, true);
+  set($('photoCard'), s2 && !!photoData, s1);
+  set($('step3'), false, s1 && s2);
+  const t3 = $('step3Title'); if (t3) t3.textContent = wantIn ? '上班打卡' : '下班打卡';
 }
 
 function renderToday(list) {
@@ -942,7 +1142,14 @@ function renderToday(list) {
   else if (lastType === '下班') { pill.textContent = '已下班'; pill.classList.add('off'); }
   else pill.textContent = '尚未上班';
 
-  if (!list || !list.length) { ul.innerHTML = '<li class="empty">今天還沒有打卡紀錄</li>'; return; }
+  // 上班中 → 從最後一筆上班開始計時
+  workStart = null;
+  if (lastType === '上班') {
+    const t = String(list[list.length - 1].time || '').match(/(\d+):(\d+)/);
+    if (t) { const d = new Date(); d.setHours(Number(t[1]), Number(t[2]), 0, 0); workStart = d.getTime(); $('workSince').textContent = t[0]; }
+  }
+  updateWork();
+  if (!list || !list.length) { ul.innerHTML = '<li class="empty">今天還沒有打卡紀錄</li>'; updateButtons(); return; }
   ul.innerHTML = list.map(x =>
     '<li><span class="bullet ' + (x.type === '上班' ? 'in' : 'out') + '"></span>' +
     '<span class="type">' + esc(x.type) + (x.store ? '<span class="where">' + esc(x.store) + '</span>' : '') + '</span>' +
@@ -961,11 +1168,13 @@ function startClock() {
     $('clockS').textContent = p(d.getSeconds());
     $('clockDate').innerHTML = '<span class="num">' + d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + '</span>　星期' + days[d.getDay()];
     $('greetWord').textContent = h < 11 ? '早安' : h < 18 ? '午安' : '晚安';
+    if (d.getSeconds() === 0) updateWork();
   };
   tick(); setInterval(tick, 1000);
 }
 
 function showState(icon, html) {
+  hideSplash();
   $('punchView').classList.add('hidden');
   $('stateView').classList.remove('hidden');
   $('stateView').innerHTML = '<div class="ico">' + (ICON[icon] || '') + '</div><div>' + html + '</div>';
