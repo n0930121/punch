@@ -35,7 +35,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&display=optional" rel="stylesheet">
 <style>@font-face{font-family:"Michroma";src:url("../fonts/michroma.woff2") format("woff2");font-display:block}html{background:var(--bg,#D9DFE4)}@view-transition{navigation:auto}::view-transition-old(root){animation:vtOut .22s ease both}::view-transition-new(root){animation:vtIn .32s cubic-bezier(.2,.8,.2,1) both}@keyframes vtOut{to{opacity:0}}@keyframes vtIn{from{opacity:0;transform:translateY(10px)}}@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}</style>
 <link rel="prefetch" href="../">
-<script src="../theme.js?v=8"></script>
+<script src="../theme.js?v=9"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪・紫芋（與打卡 App 的灰藍區分） ── */
@@ -516,6 +516,39 @@
   .back::after, .thm-b::after, .drow .pbtn::after, .pm-x::after, .pbtn::after { content: ""; position: absolute; inset: -8px; }
   :focus-visible { outline: 2px solid var(--acc-deep, #64718A); outline-offset: 2px; border-radius: 10px; }
   .cal .cd.tap:focus-visible { outline-offset: 1px; }
+
+  /* ── 今日：數字格可點篩選、分組、時間軸頭尾與現在線 ── */
+  button.stat { border: 0; font: inherit; color: inherit; cursor: pointer; transition: transform .15s, box-shadow .2s, opacity .2s; }
+  button.stat:active { transform: scale(.96); }
+  .stats.filtering .stat:not(.sel) { opacity: .5; }
+  .stat.sel { box-shadow: inset 0 0 0 2px var(--ink-soft), var(--shadow); }
+  .pg-h { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; padding: 14px 2px 4px; font-size: 14px; color: var(--ink-soft); letter-spacing: .08em; border-top: 1px solid var(--hair); }
+  .pg-h:first-child { border-top: 0; }
+  .pg-h + .person { border-top: 0; }
+  .pg-h.tg { cursor: pointer; }
+  .pg-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--ink-faint); }
+  .pg-dot.working { background: var(--sage); } .pg-dot.off { background: var(--mist); } .pg-dot.leave { background: var(--rose); }
+  .pg-tg, .pg-clear { font-size: 13px; color: var(--rose-deep); background: var(--rose-tint); border: 0; border-radius: 999px; padding: 4px 11px; font-family: inherit; cursor: pointer; white-space: nowrap; letter-spacing: 0; }
+  .tl-scale .e { position: absolute; top: 0; opacity: .55; }
+  .tl-scale .e.l { left: 0; transform: none; } .tl-scale .e.r { right: 0; left: auto; transform: none; }
+  .tl-nowlbl { position: absolute; top: -13px; transform: translateX(-50%); font-style: normal; font-family: "Noto Sans TC", sans-serif; font-size: 10px; color: var(--sage-deep); white-space: nowrap; }
+  .tl-nl { position: absolute; top: -6px; bottom: -6px; width: 1.5px; margin-left: -.75px; background: color-mix(in srgb, var(--sage) 55%, transparent); border-radius: 1px; z-index: 0; }
+  .tl-seg { z-index: 1; } .tl-now { z-index: 2; }
+  .tl-head { padding-top: 22px; }
+  html.mq-min900 #peopleList .pg-h { grid-column: 1 / -1; }
+
+  /* ── 工時平均線、搜尋框 ── */
+  .chart-h { display: flex; justify-content: space-between; align-items: center; }
+  .avg-lg { font-size: 13px; color: var(--ink-soft); letter-spacing: 0; white-space: nowrap; }
+  .avg-lg i { display: inline-block; width: 2px; height: 12px; background: var(--ink-soft); margin-right: 6px; vertical-align: -1px; border-radius: 1px; }
+  .avg-lg b { font-weight: 400; color: var(--ink); }
+  .hb-t { position: relative; overflow: visible; }
+  .hb-t .avg { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: color-mix(in srgb, var(--ink-soft) 70%, transparent); border-radius: 1px; }
+  .srch { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 0 12px; height: 42px; border-radius: 12px; background: var(--bg-2); color: var(--ink-faint); }
+  .srch.card { margin: 0 0 14px; background: var(--paper); }
+  .srch svg { width: 18px; height: 18px; flex: none; }
+  .srch input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); outline: none; }
+  .srch input::placeholder { color: var(--ink-faint); }
 </style>
 </head>
 <body>
@@ -540,10 +573,10 @@
     <h1>今日出勤</h1>
     <div class="sub num" id="todayDate"></div>
     <div class="stats">
-      <div class="stat working"><div class="v" id="cWorking">0</div><div class="k">上班中</div></div>
-      <div class="stat off"><div class="v" id="cOff">0</div><div class="k">已下班</div></div>
-      <div class="stat none"><div class="v" id="cNone">0</div><div class="k">未打卡</div></div>
-      <div class="stat abn" id="statAbn"><div class="v" id="cAbn">0</div><div class="k">異常</div></div>
+      <button class="stat working" data-f="working" type="button"><div class="v" id="cWorking">0</div><div class="k">上班中</div></button>
+      <button class="stat off" data-f="off" type="button"><div class="v" id="cOff">0</div><div class="k">已下班</div></button>
+      <button class="stat none" data-f="none" type="button"><div class="v" id="cNone">0</div><div class="k">未打卡</div></button>
+      <button class="stat abn" data-f="abn" id="statAbn" type="button"><div class="v" id="cAbn">0</div><div class="k">異常</div></button>
     </div>
     <div class="ratio" id="ratioBar"><span class="w"></span><span class="o"></span><span class="n"></span></div>
     <div class="ratio-lg"><span><i class="w"></i>上班中</span><span><i class="o"></i>已下班</span><span><i class="n"></i>未打卡</span><span class="lvc hidden" id="leaveTxt"></span><span class="r" id="ratioTxt"></span></div>
@@ -595,6 +628,7 @@
       <div class="row one" style="margin:0">
         <label class="field"><span>人員</span><select id="hName"><option value="">全部人員</option></select></label>
       </div>
+      <div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="hSearch" type="search" placeholder="搜尋姓名" autocomplete="off"></div>
     </div>
     <div class="bar"><span id="hrCount"></span>
       <button class="btn" id="hrExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>匯出</button>
@@ -606,6 +640,7 @@
     <h1>人員管理</h1>
     <div class="sub">開通新登記、停用離職人員</div>
     <div id="fixAdmin"></div>
+    <div class="srch card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="sSearch" type="search" placeholder="搜尋姓名或 LINE 名稱" autocomplete="off"></div>
     <div id="staffList"></div>
     <div class="note">停用後不能打卡，過去的紀錄會保留</div>
   </section>
@@ -747,7 +782,17 @@ async function loadToday() {
   $('leaveTxt').classList.toggle('hidden', !r.counts.leave);
   bar[0].style.flex = r.counts.working; bar[1].style.flex = r.counts.off; bar[2].style.flex = r.counts.none;
   $('ratioTxt').textContent = '到班率 ' + Math.round((r.counts.working + r.counts.off) / tot * 100) + '%';
+  lastToday = r;
+  renderToday();
+}
+
+/* 今日名單：分組（上班中／已下班／未打卡／休假）、時間軸、點數字格篩選 */
+let lastToday = null, todayFilter = '', leaveOpen = false;
+function renderToday() {
+  const r = lastToday; if (!r) return;
   const label = { working: '上班中', off: '已下班', none: '未打卡', leave: '休假' };
+  document.querySelectorAll('.stats .stat').forEach(el => el.classList.toggle('sel', el.dataset.f === todayFilter));
+  document.querySelector('.stats').classList.toggle('filtering', !!todayFilter);
   // 時間軸範圍：預設 10:00–22:00，有人更早到或更晚走就自動放寬
   const toM = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : null; };
   const now = new Date(), nowM = now.getHours() * 60 + now.getMinutes();
@@ -756,21 +801,42 @@ async function loadToday() {
   if (r.people.some(p => p.state === 'working')) t1 = Math.max(t1, Math.ceil(nowM / 60) * 60);
   const pct = m => Math.max(0, Math.min(100, (m - t0) / (t1 - t0) * 100));
   const ticks = []; for (let h = Math.ceil(t0 / 60) + 1; h * 60 < t1; h++) if (h % 2 === 0) ticks.push(h);
+  const labTicks = ticks.filter(h => pct(h * 60) > 9 && pct(h * 60) < 91);   // 頭尾留給起訖時間，避免數字疊在一起
+  const showNow = nowM > t0 && nowM < t1;
   const tl = p => {
     const a = toM(p.inTime); if (a === null) return '';
     const b = p.state === 'working' ? nowM : toM(p.outTime); if (b === null) return '';
     return '<div class="tl"><div class="tl-tr">' + ticks.map(h => '<i style="left:' + pct(h * 60) + '%"></i>').join('') +
+      (showNow ? '<b class="tl-nl" style="left:' + pct(nowM) + '%"></b>' : '') +
       '<span class="tl-seg ' + p.state + '" style="left:' + pct(a) + '%;width:' + Math.max(1.5, pct(b) - pct(a)) + '%"></span>' +
       (p.state === 'working' ? '<span class="tl-now" style="left:' + pct(nowM) + '%"></span>' : '') + '</div></div>';
   };
-  $('tlScale').innerHTML = ticks.map(h => '<span style="left:' + pct(h * 60) + '%">' + h + '</span>').join('');
-  $('peopleList').innerHTML = r.people.length ? r.people.map(p =>
+  const hh = m => String(Math.floor(m / 60));
+  $('tlScale').innerHTML = '<span class="e l">' + hh(t0) + '</span>' + labTicks.map(h => '<span style="left:' + pct(h * 60) + '%">' + h + '</span>').join('') +
+    '<span class="e r">' + hh(t1) + '</span>' + (showNow ? '<em class="tl-nowlbl" style="left:' + pct(nowM) + '%">現在</em>' : '');
+  const row = p =>
     '<div class="person fadein">' + avatar(p.name, 'pav') + '<div class="nm"><span class="nmx">' + esc(p.name) + '</span><span class="state s1 ' + p.state + '">' + label[p.state] + '</span></div>' +
     '<div class="st"><span class="state s2 ' + p.state + '">' + label[p.state] + '</span><span class="sto">' + (p.store ? esc(p.store) : p.state === 'leave' ? '今日休假' : '尚未選擇櫃點') + '</span></div>' +
     '<div class="tm">上 <b class="num">' + (p.inTime || '--:--') + '</b><br>下 <b class="num">' + (p.outTime || '--:--') + '</b></div>' +
     photoBtn(p.name + '・今天', [{ label: '上班', time: p.inTime, id: p.inPhoto }, { label: '下班', time: p.outTime, id: p.outPhoto }]) + tl(p) +
-    (p.abnormal.length ? '<div class="ab">' + p.abnormal.map(abLine).join('') + '</div>' : '') + '</div>'
-  ).join('') : emptyBox('還沒有已開通的人員');
+    (p.abnormal.length ? '<div class="ab">' + p.abnormal.map(abLine).join('') + '</div>' : '') + '</div>';
+  if (!r.people.length) return $('peopleList').innerHTML = emptyBox('還沒有已開通的人員');
+  let list = r.people;
+  if (todayFilter === 'abn') list = list.filter(p => p.abnormal.length);
+  else if (todayFilter) list = list.filter(p => p.state === todayFilter);
+  if (todayFilter) {
+    $('peopleList').innerHTML = '<div class="pg-h only"><span>' + ({ working: '上班中', off: '已下班', none: '未打卡', abn: '有異常' })[todayFilter] + '・' + list.length + ' 人</span><button class="pg-clear" type="button">顯示全部</button></div>' +
+      (list.length ? list.map(row).join('') : emptyBox(todayFilter === 'abn' ? '今天沒有異常' : '沒有符合的人員', todayFilter === 'abn' ? 'happy' : 'calm'));
+  } else {
+    $('peopleList').innerHTML = ['working', 'off', 'none', 'leave'].map(st => {
+      const g = list.filter(p => p.state === st); if (!g.length) return '';
+      const fold = st === 'leave' && !leaveOpen;
+      return '<div class="pg-h' + (st === 'leave' ? ' tg' : '') + '" data-g="' + st + '"><span><i class="pg-dot ' + st + '"></i>' + label[st] + '・' + g.length + ' 人</span>' +
+        (st === 'leave' ? '<span class="pg-tg">' + (fold ? '展開' : '收合') + '</span>' : '') + '</div>' + (fold ? '' : g.map(row).join(''));
+    }).join('');
+  }
+  const clr = $('peopleList').querySelector('.pg-clear'); if (clr) clr.onclick = () => { buzz(6); todayFilter = ''; renderToday(); };
+  const tg = $('peopleList').querySelector('.pg-h.tg'); if (tg) tg.onclick = () => { buzz(6); leaveOpen = !leaveOpen; renderToday(); };
 }
 
 /* 異常說明：「11:08 上班」＋說明；小螢幕自動分兩行 */
@@ -884,10 +950,13 @@ async function loadHours() {
   if (!lastHours.length) return $('hrList').innerHTML = '<div class="card">' + emptyBox('這個月還沒有打卡紀錄', 'calm') + '</div>';
   const single = lastHours.length === 1;
   const maxH = Math.max.apply(null, lastHours.map(p => p.totalHours).concat([1]));
-  const overview = single ? '' : '<div class="card chart fadein"><div class="chart-h">本月總工時</div>' +
+  const worked = lastHours.filter(p => p.totalHours > 0);
+  const avgH = worked.length ? Math.round(worked.reduce((t, p) => t + p.totalHours, 0) / worked.length * 10) / 10 : 0;
+  const avgP = avgH / maxH * 100;
+  const overview = single ? '' : '<div class="card chart fadein"><div class="chart-h"><span>本月總工時</span>' + (avgH ? '<span class="avg-lg"><i></i>平均 <b class="num">' + avgH + '</b></span>' : '') + '</div>' +
     lastHours.slice().sort((a, b) => b.totalHours - a.totalHours).map(p =>
       '<div class="hbar">' + avatar(p.name, 'sm') + '<span class="hb-n">' + esc(p.name) + '</span>' +
-      '<span class="hb-t"><span data-w="' + (p.totalHours / maxH * 100) + '"></span></span>' +
+      '<span class="hb-t"><span data-w="' + (p.totalHours / maxH * 100) + '"></span>' + (avgH ? '<i class="avg" style="left:' + avgP + '%"></i>' : '') + '</span>' +
       '<span class="hb-v num" data-cnt="' + p.totalHours + '">0</span></div>').join('') + '</div>';
   $('hrList').innerHTML = overview + lastHours.map(p =>
     '<div class="card hp fadein' + (single ? ' open' : '') + '"><div class="hp-top"><span class="nm">' + avatar(p.name) + esc(p.name) + '</span>' +
@@ -1052,7 +1121,7 @@ async function doSetStaff(key, status, name) {
 }
 async function refreshNames() {
   const r = await api({ action: 'q_me' });
-  if (r.ok) { fillSelect($('fName'), r.staff, '全部人員'); fillSelect($('hName'), r.staff, '全部人員'); }
+  if (r.ok) { fillSelect($('fName'), r.staff, '全部人員'); fillSelect($('hName'), r.staff, '全部人員'); delete $('hName').dataset.all; $('hSearch').value = ''; }
 }
 
 /* ---------- 補卡申請 ---------- */
@@ -1231,10 +1300,28 @@ function bindUI() {
   setTimeout(fadeChk, 0); new MutationObserver(fadeChk).observe($('tab-records'), { attributes: true });
   $('fAbn').onclick = () => { buzz(8); abnOnly = !abnOnly; $('fAbn').classList.toggle('on', abnOnly); loadRecords(); };
   $('hName').onchange = loadHours;
+  // 工時：輸入姓名，人員選單只留符合的人；剛好一位就直接選他
+  $('hSearch').addEventListener('input', () => {
+    const q = $('hSearch').value.trim().toLowerCase(), sel = $('hName');
+    const all = sel.dataset.all ? JSON.parse(sel.dataset.all) : [...sel.options].slice(1).map(o => o.value);
+    sel.dataset.all = JSON.stringify(all);
+    const hit = q ? all.filter(n => n.toLowerCase().indexOf(q) >= 0) : all;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">' + (q ? '符合「' + esc(q) + '」' + hit.length + ' 位' : '全部人員') + '</option>' + hit.map(n => '<option>' + esc(n) + '</option>').join('');
+    if (hit.length === 1) { sel.value = hit[0]; if (cur !== hit[0]) loadHours(); }
+    else if (hit.indexOf(cur) >= 0) sel.value = cur;
+    else if (cur) { sel.value = ''; loadHours(); }
+  });
+  // 人員管理：即時篩選
+  $('sSearch').addEventListener('input', () => {
+    const q = $('sSearch').value.trim().toLowerCase();
+    $('staffList').querySelectorAll('.srow').forEach(r => { r.style.display = !q || r.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none'; });
+  });
   $('mPrev').onclick = () => shiftMonth(-1);
   $('mNext').onclick = () => shiftMonth(1);
   $('recExport').onclick = exportRecords;
   $('fixOpen').onclick = openFixForm;
+  document.querySelectorAll('.stats .stat').forEach(el => el.onclick = () => { buzz(8); todayFilter = todayFilter === el.dataset.f ? '' : el.dataset.f; renderToday(); });
   $('hrExport').onclick = exportHours;
   document.addEventListener('visibilitychange', () => { if (!document.hidden && curTab === 'today') loadToday(); });
   window.addEventListener('resize', moveIndicator);

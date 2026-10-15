@@ -63,7 +63,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&display=optional" rel="stylesheet">
 <style>@font-face{font-family:"Michroma";src:url("fonts/michroma.woff2") format("woff2");font-display:block}html{background:var(--bg,#D9DFE4)}@view-transition{navigation:auto}::view-transition-old(root){animation:vtOut .22s ease both}::view-transition-new(root){animation:vtIn .32s cubic-bezier(.2,.8,.2,1) both}@keyframes vtOut{to{opacity:0}}@keyframes vtIn{from{opacity:0;transform:translateY(10px)}}@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}</style>
 <link rel="prefetch" href="query/">
-<script src="theme.js?v=8"></script>
+<script src="theme.js?v=9"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪色票 ── */
@@ -569,6 +569,12 @@
   :focus-visible { outline: 2px solid var(--acc-deep, #64718A); outline-offset: 2px; border-radius: 10px; }
   .btns button.secondary { padding: 12px 0 8px; min-height: 44px; }
   .fix-link { padding: 6px 0; margin: -6px 0; }
+
+  /* ── 下班後的當日小結 ── */
+  .day-sum { display: flex; align-items: center; gap: 12px; margin: 6px 0 8px; padding: 12px 14px; border-radius: 16px; background: var(--mist-tint); }
+  .day-sum .ds-ic svg { width: 46px; height: 43px; display: block; }
+  .day-sum b { display: block; font-size: 17px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .day-sum span:not(.ds-ic) { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -695,6 +701,7 @@
 
     <section class="card today-card rise" style="animation-delay:.12s">
       <h2>今日紀錄<a class="fix-link" id="fixLink" href="query/?fix=1">漏打或打錯？申請補卡 ›</a></h2>
+      <div class="day-sum hidden" id="daySum"></div>
       <ul class="today" id="todayList"><li class="empty">尚無紀錄</li></ul>
     </section>
   </div>
@@ -1456,6 +1463,19 @@ function renderToday(list) {
     if (t) { const d = new Date(); d.setHours(Number(t[1]), Number(t[2]), 0, 0); workStart = d.getTime(); $('workSince').textContent = t[0]; }
   }
   updateWork();
+  // 下班後的當日小結：第一筆上班到最後一筆下班
+  const sum = $('daySum'); sum.classList.add('hidden');
+  if (lastType === '下班') {
+    const toM = t => { const m = String(t || '').match(/(\d+):(\d+)/); return m ? +m[1] * 60 + +m[2] : null; };
+    const fi = list.find(x => x.type === '上班'), lo = list[list.length - 1];
+    const a = fi && toM(fi.time), b = toM(lo.time);
+    if (a !== null && b !== null && b > a) {
+      const m = b - a;
+      sum.innerHTML = '<span class="ds-ic">' + (window.UC_MASCOT ? UC_MASCOT('out') : '') + '</span><div><b>今天上班 ' + (m >= 60 ? Math.floor(m / 60) + ' 小時 ' : '') + (m % 60) + ' 分</b>' +
+        '<span>' + esc(fi.time) + ' – ' + esc(lo.time) + '・辛苦了！</span></div>';
+      sum.classList.remove('hidden');
+    }
+  }
   if (!list || !list.length) { ul.innerHTML = '<li class="empty"><span class="em">' + (window.UC_MASCOT ? UC_MASCOT('sleep') : '') + '</span>今天還沒有打卡紀錄</li>'; updateButtons(); return; }
   ul.innerHTML = list.map(x =>
     '<li><span class="bullet ' + (x.type === '上班' ? 'in' : 'out') + '"></span>' +

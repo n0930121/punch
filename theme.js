@@ -79,7 +79,7 @@
       '--sage': tone(SEM.sage, 'solid'), '--sage-deep': tone(SEM.sage, 'text'), '--sage-tint': tone(SEM.sage, 'tint'),
       '--mist': tone(mi ? mi[0] : SEM.mist, 'solid'), '--mist-deep': tone(mi ? mi[0] : SEM.mist, 'text'), '--mist-tint': tone(mi ? mi[0] : SEM.mist, 'tint'),
       '--bad': hsl(hex2hsl(SEM.bad)[0], .45, .68), '--bad-tint': tone(SEM.bad, 'tint'),
-      '--amber': hsl(hex2hsl(SEM.amber)[0], .5, .66), '--amber-tint': tone(SEM.amber, 'tint'),
+      '--amber': hsl(hex2hsl(SEM.amber)[0], .42, .7), '--amber-tint': hsl(hex2hsl(SEM.amber)[0], .18, .2),
       '--shadow': '0 1px 1px rgba(0,0,0,.25), 0 10px 26px -12px rgba(0,0,0,.6)',
       '--shadow-lg': '0 2px 4px rgba(0,0,0,.3), 0 18px 40px -18px rgba(0,0,0,.7)'
     };
@@ -154,6 +154,8 @@
     'html[data-mode=dark] .store.pick.empty,html[data-mode=dark] .store-hint.warn,html[data-mode=dark] .msg.warn,html[data-mode=dark] .tag.bad,' +
       'html[data-mode=dark] .done-note,html[data-mode=dark] .ask-ico{color:var(--rose)}' +
     'html[data-mode=dark] .msg.err{color:#E8ABA2}' +
+    'html[data-mode=dark] .stat.abn.has{background:var(--paper);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--amber) 45%,transparent),var(--shadow)}' +
+    'html[data-mode=dark] .person .ab{border:1px solid color-mix(in srgb,var(--amber) 22%,transparent)}' +
     'html[data-mode=dark] .photo.has{background:var(--bg-2,var(--hair))}' +
     'html[data-mode=dark] .toast{background:var(--ink);color:var(--bg)}' +
     'html[data-mode=dark] .sw{background:var(--hair)}' +
