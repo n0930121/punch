@@ -400,6 +400,39 @@
     .status-pill { display: none !important; }
     .btns button.primary .sub { display: none; }
   }
+
+  /* ── 字級第二輪：開場畫面、確認櫃點、今日紀錄 ── */
+  .sp-logo { width: 116px; height: 116px; }
+  .sp-name { font-size: 27px; white-space: nowrap; }
+  .sp-sub { font-size: 16px; white-space: nowrap; }
+  .sp-text { font-size: 19px; margin-top: 14px; white-space: nowrap; }
+  .sp-dots i { width: 9px; height: 9px; }
+  .slow { font-size: 16px; }
+  .step-title { font-size: 16px; }
+  .store.pick { font-size: 17px; }
+  .store.pick svg { width: 15px; height: 15px; }
+  .store-hint { font-size: 15px; color: var(--ink-soft); line-height: 1.6; }
+  .store-hint .h1 { display: block; font-size: 16px; font-weight: 500; white-space: nowrap; }
+  .store-hint .h2 { display: block; font-size: 15px; white-space: nowrap; opacity: .9; }
+  .store-hint a.relo { display: inline-block; margin-top: 8px; padding: 6px 16px; border-radius: 999px; background: var(--paper);
+                       color: var(--ink); text-decoration: none; font-size: 15px; box-shadow: var(--shadow); white-space: nowrap; }
+  .today-card h2 { font-size: 18px; }
+  ul.today .type { font-size: 17px; white-space: nowrap; }
+  ul.today .time { font-size: 18px; white-space: nowrap; }
+  ul.today .where { font-size: 14px; }
+  ul.today .tag { font-size: 14px; }
+  ul.today li.empty { font-size: 16px; }
+  ul.today li > .type { min-width: 0; overflow: hidden; }
+  .step { grid-template-columns: 30px minmax(0, 1fr); }
+  .step-body { min-width: 0; }
+  .photo { max-width: 100%; }
+  #staffStore { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .store.pick svg { flex: none; }
+  @media (max-width: 370px) {
+    .store.pick { font-size: 16px; }
+    .store-hint .h1 { font-size: 15px; } .store-hint .h2 { font-size: 14px; }
+    .sp-name { letter-spacing: .2em; text-indent: .2em; }
+  }
 </style>
 </head>
 <body>
@@ -709,7 +742,7 @@ async function doPunch(type, force) {
     if (!pos && !force) {
       if (loc.err === 1 || loc.err === 0) {
         locDenied = true;
-        setHint('定位權限沒有開啟，無法打卡　<a data-relocate="1">重新定位</a>', 'warn');
+        setHint(hint2('定位權限沒有開啟', '必須開啟才能打卡', true), 'warn');
         return showMsg('err', LOC_GUIDE);
       }
       locFails++;
@@ -1066,10 +1099,10 @@ async function locateStores() {
     fillStores(allStores, defaultStore);
     if (loc.err === 1 || loc.err === 0) {
       locDenied = true;
-      setHint('定位權限沒有開啟，<b>必須開啟才能打卡</b>　<a data-relocate="1">重新定位</a>', 'warn');
+      setHint(hint2('定位權限沒有開啟', '必須開啟才能打卡', true), 'warn');
       showMsg('err', LOC_GUIDE);
     } else {
-      setHint('暫時抓不到位置，請移到靠門口或窗邊　<a data-relocate="1">重新定位</a>', 'warn');
+      setHint(hint2('暫時抓不到位置', '請移到靠門口或窗邊再試', true), 'warn');
     }
   } else {
     if (locDenied === false) hideMsg();
@@ -1087,7 +1120,7 @@ async function locateStores() {
                                 : '您在 ' + esc(mall) + '，請選品牌櫃', '');
     } else {
       fillStores(allStores, defaultStore);
-      setHint('您目前不在任何櫃點附近，打卡會被標記「不在櫃點」　<a data-relocate="1">重新定位</a>', 'warn');
+      setHint(hint2('您目前不在任何櫃點附近', '打卡會被標記「不在櫃點」', true), 'warn');
     }
   }
   showStore(); updateButtons();
@@ -1112,6 +1145,10 @@ function distM(lat1, lng1, lat2, lng2) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
+function hint2(main, sub, relocate) {
+  return '<span class="h1">' + main + '</span>' + (sub ? '<span class="h2">' + sub + '</span>' : '') +
+    (relocate ? '<a class="relo" data-relocate="1">重新定位</a>' : '');
+}
 function setHint(html, kind) {
   const h = $('storeHint');
   h.innerHTML = html;
