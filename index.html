@@ -30,6 +30,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
+<script src="theme.js"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪色票 ── */
@@ -60,8 +61,8 @@
   body {
     min-height: 100vh; color: var(--ink); background: var(--bg);
     background-image:
-      radial-gradient(120% 60% at 100% 0%, #E5EAEE 0%, transparent 60%),
-      radial-gradient(90% 50% at 0% 100%, #D0D7DD 0%, transparent 60%);
+      radial-gradient(120% 60% at 100% 0%, var(--bg-hi, #E5EAEE) 0%, transparent 60%),
+      radial-gradient(90% 50% at 0% 100%, var(--bg-deep) 0%, transparent 60%);
     font-family: "Noto Sans TC", -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
     font-weight: 400; letter-spacing: .02em;
   }
@@ -80,7 +81,7 @@
   .status-pill.off { background: var(--mist-tint); color: var(--mist-deep); }
   .head-r { display: flex; align-items: center; gap: 8px; }
   .q-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; padding: 6px 13px 6px 11px; border-radius: 999px;
-           background: #EEE7F2; color: #7C6A89; text-decoration: none; letter-spacing: .08em; box-shadow: var(--shadow); }
+           background: var(--acc-tint, #EEE7F2); color: var(--acc-deep, #7C6A89); text-decoration: none; letter-spacing: .08em; box-shadow: var(--shadow); }
   .q-btn svg { width: 15px; height: 15px; }
   .q-btn:active { transform: scale(.96); }
 
@@ -89,7 +90,7 @@
   /* 主卡：問候＋時鐘 */
   .hero { padding: 24px 22px 22px; position: relative; overflow: hidden; }
   .hero::after { content: ""; position: absolute; right: -40px; top: -40px; width: 150px; height: 150px; border-radius: 50%;
-                 background: radial-gradient(circle, rgba(141,154,170,.18), transparent 70%); }
+                 background: radial-gradient(circle, color-mix(in srgb, var(--clay) 18%, transparent), transparent 70%); }
   .greet { font-size: 14px; color: var(--ink-soft); }
   .greet b { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 22px; color: var(--ink); margin-left: 4px; letter-spacing: .08em; }
   .store { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--ink-soft);
@@ -130,7 +131,7 @@
   .photo .thumb svg { width: 26px; height: 26px; }
   .photo .t1 { font-size: 15px; font-weight: 500; }
   .photo .t2 { font-size: 12px; color: var(--ink-soft); margin-top: 3px; line-height: 1.5; }
-  .photo.has { border-style: solid; border-color: var(--sage); background: #EEF2F4; }
+  .photo.has { border-style: solid; border-color: var(--sage); background: var(--hair); }
   .photo.has .thumb svg { display: none; }
   .photo .check { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%;
                   background: var(--sage); color: #fff; display: none; place-items: center; }
@@ -183,7 +184,7 @@
 
   .hidden { display: none !important; }
   .overlay { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;
-             gap: 14px; background: rgba(217,223,228,.82); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+             gap: 14px; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
              color: var(--ink-soft); font-size: 15px; letter-spacing: .1em; }
   .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--hair); border-top-color: var(--clay);
              animation: spin .9s linear infinite; }
@@ -303,7 +304,7 @@
 
   /* 啟動畫面 */
   .splash { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--bg);
-            background-image: radial-gradient(120% 60% at 100% 0%, #E5EAEE 0%, transparent 60%), radial-gradient(90% 50% at 0% 100%, #D0D7DD 0%, transparent 60%);
+            background-image: radial-gradient(120% 60% at 100% 0%, var(--bg-hi, #E5EAEE) 0%, transparent 60%), radial-gradient(90% 50% at 0% 100%, var(--bg-deep) 0%, transparent 60%);
             transition: opacity .45s ease, visibility .45s; }
   .splash.out { opacity: 0; visibility: hidden; }
   .sp-in { text-align: center; padding: 24px; }
@@ -319,7 +320,7 @@
 
   /* 打卡成功 */
   .okview { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px;
-          background: rgba(245,247,248,.96); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade .25s ease; cursor: pointer; }
+          background: rgba(245,247,248,.96); background: color-mix(in srgb, var(--paper) 96%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade .25s ease; cursor: pointer; }
   @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
   .done-in { text-align: center; max-width: 320px; }
   .done-mascot svg { width: 92px; height: 92px; animation: pop .6s cubic-bezier(.2,1.6,.4,1) both; }
@@ -338,6 +339,65 @@
   .done-note { margin-top: 14px; font-size: 13px; color: #8E6B63; background: var(--rose-tint); padding: 8px 14px; border-radius: 99px; display: inline-block; }
   .done-tap { margin-top: 30px; font-size: 12px; color: var(--ink-faint); letter-spacing: .15em; }
   footer { text-align: center; font-size: 11px; color: var(--ink-faint); letter-spacing: .15em; margin-top: 18px; }
+
+  /* ── 字級調整：小字放大（最小 13px），並一律不斷行 ── */
+  .done-in { max-width: 360px; }
+  .done-mascot svg { width: 110px; height: 110px; }
+  .done-check { width: 56px; height: 56px; }
+  .done-title { font-size: 28px; margin-top: 16px; white-space: nowrap; }
+  .done-time { font-size: 58px; margin-top: 12px; }
+  .done-store { font-size: 18px; margin-top: 14px; }
+  .done-word { font-size: 22px; margin-top: 20px; }
+  .done-note { font-size: 15px; padding: 9px 16px; }
+  .done-tap { font-size: 14px; }
+
+  .demo { font-size: 13px; }
+  .status-pill { font-size: 14px; white-space: nowrap; }
+  .q-btn { font-size: 15px; white-space: nowrap; }
+  .greet { font-size: 16px; }
+  .store { font-size: 15px; }
+  .store.pick { font-size: 16px; }
+  .store-hint { font-size: 14px; }
+  .date { font-size: 15px; }
+  .date .num { font-size: 14px; }
+  .msg small { font-size: 14px; }
+  .photo .t2 { font-size: 14px; }
+  button .sub { font-size: 12px; }
+  .today-card h2 { font-size: 16px; }
+  ul.today .where { font-size: 13px; }
+  .tag { font-size: 13px; white-space: nowrap; }
+  .empty { font-size: 15px; }
+  .install { font-size: 14px; } .install b { font-size: 16px; } .install .go { font-size: 14px; white-space: nowrap; }
+  .ask-msg small { font-size: 14px; }
+  .slow { font-size: 14px; }
+  .work-row { font-size: 15px; }
+  .work-row > * { white-space: nowrap; }
+  .work-since .num { font-size: 13px; }
+  .work-scale { font-size: 12px; }
+  .badge { font-size: 15px; }
+  .step-title { font-size: 15px; white-space: nowrap; }
+  .photo .retake { font-size: 14px; }
+  .btns button.primary .sub { font-size: 11px; }
+  .btns button.secondary, .btns button.secondary .lbl { font-size: 15px; white-space: nowrap; }
+  .sp-sub { font-size: 14px; }
+  .sp-text { font-size: 15px; }
+  footer { font-size: 13px; }
+
+  /* 不斷行保護 */
+  .brand, .status-pill, .q-btn, .btns button .lbl, .btns button .sub, .photo .t1, .photo .t2 { white-space: nowrap; }
+  .photo .t1, .photo .t2 { overflow: hidden; text-overflow: ellipsis; }
+  .photo .photo-txt { min-width: 0; overflow: hidden; }
+  ul.today .where { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 400px) {
+    .brand { letter-spacing: .12em; }
+    .head-r { gap: 6px; }
+    .q-btn { padding: 6px 11px 6px 9px; }
+    .photo .t2 { font-size: 13px; }
+  }
+  @media (max-width: 370px) {
+    .status-pill { display: none !important; }
+    .btns button.primary .sub { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -795,7 +855,7 @@ function setPhoto(dataUrl, source) {
   $('photoThumb').style.backgroundImage = 'url(' + photoData + ')';
   $('photoBox').classList.add('has');
   $('photoT1').textContent = '照片已拍好';
-  $('photoT2').textContent = '會連同打卡時間一起存檔';
+  $('photoT2').textContent = '已加上時間浮水印';
   updateButtons();
 }
 
@@ -1022,7 +1082,7 @@ async function locateStores() {
       fillStores(near, pick);
       const mall = branchOf(near[0].name);
       setHint(near.length === 1 ? '已依定位自動選擇櫃點'
-                                : '您在「' + esc(mall) + '」，請選擇今天的品牌櫃', '');
+                                : '您在 ' + esc(mall) + '，請選品牌櫃', '');
     } else {
       fillStores(allStores, defaultStore);
       setHint('您目前不在任何櫃點附近，打卡會被標記「不在櫃點」　<a data-relocate="1">重新定位</a>', 'warn');

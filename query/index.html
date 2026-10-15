@@ -27,6 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
+<script src="../theme.js"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪・紫芋（與打卡 App 的灰藍區分） ── */
@@ -61,6 +62,7 @@
           background: var(--paper); color: var(--ink-soft); text-decoration: none; box-shadow: var(--shadow); letter-spacing: .08em; }
   .back svg { width: 16px; height: 16px; }
   header .brand { margin-right: auto; margin-left: 12px; }
+  header .thm { margin-left: 8px; }
   .pill { font-size: 14px; padding: 5px 12px; border-radius: 999px; background: var(--paper); color: var(--ink-soft); }
   .pill.admin { background: var(--rose-tint); color: var(--rose-deep); }
 
@@ -96,7 +98,7 @@
   /* ════════ 改版 ════════ */
   .fadein { animation: fin .35s ease both; }
   @keyframes fin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-  .sk { display: inline-block; border-radius: 6px; background: linear-gradient(90deg, var(--bg-2) 0%, #F4EFF6 50%, var(--bg-2) 100%);
+  .sk { display: inline-block; border-radius: 6px; background: linear-gradient(90deg, var(--bg-2) 0%, var(--paper) 50%, var(--bg-2) 100%);
         background-size: 200% 100%; animation: shim 1.2s linear infinite; vertical-align: middle; }
   @keyframes shim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
   .sk.av { width: 34px; height: 34px; border-radius: 50%; margin-right: 10px; }
@@ -132,24 +134,24 @@
   .person .st { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .person .tm { white-space: nowrap; }
   .ratio { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: var(--hair); margin: 2px 2px 8px; gap: 2px; }
-  .ratio span { flex: 0; transition: flex .6s ease; } .ratio .w { background: var(--sage); } .ratio .o { background: var(--mist); } .ratio .n { background: #D6CEDB; }
+  .ratio span { flex: 0; transition: flex .6s ease; } .ratio .w { background: var(--sage); } .ratio .o { background: var(--mist); } .ratio .n { background: var(--bg-3); }
   .ratio-lg { display: flex; gap: 14px; font-size: 12px; color: var(--ink-soft); margin: 0 4px 16px; align-items: center; }
   .ratio-lg i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
-  .ratio-lg i.w { background: var(--sage); } .ratio-lg i.o { background: var(--mist); } .ratio-lg i.n { background: #D6CEDB; }
+  .ratio-lg i.w { background: var(--sage); } .ratio-lg i.o { background: var(--mist); } .ratio-lg i.n { background: var(--bg-3); }
   .ratio-lg .r { margin-left: auto; font-weight: 600; color: var(--ink); }
   .chart { padding: 18px 18px 10px; }
   .chart-h { font-size: 14px; color: var(--ink-soft); letter-spacing: .15em; margin-bottom: 8px; }
   .hbar { display: grid; grid-template-columns: auto 64px 1fr 44px; align-items: center; gap: 6px; padding: 7px 0; }
   .hb-n { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hb-t { height: 10px; border-radius: 99px; background: var(--bg-2); overflow: hidden; }
-  .hb-t span { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #B7A9C2, var(--rose-deep)); }
+  .hb-t span { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--rose), var(--rose-deep)); }
   .hb-v { font-size: 13px; text-align: right; }
   .hp-top .nm { display: flex; align-items: center; }
   .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 6px 0 8px; }
   .cal .cw { font-size: 11px; color: var(--ink-faint); text-align: center; padding-bottom: 2px; }
   .cal .cd { aspect-ratio: 1; border-radius: 10px; display: grid; place-items: center; font-size: 12px; font-family: "Michroma", sans-serif;
              background: var(--bg-2); color: var(--ink-faint); position: relative; }
-  .cal .cd.fut { background: transparent; color: #CFC6D4; }
+  .cal .cd.fut { background: transparent; color: var(--ink-faint); opacity: .6; }
   .cal .cd.now { box-shadow: inset 0 0 0 2px var(--rose); }
   .cal .cd.miss { box-shadow: inset 0 0 0 2px var(--bad); background: var(--bad-tint); color: var(--bad); }
   .cal .cd.live { background: var(--sage-tint); color: var(--sage-deep); }
@@ -261,7 +263,7 @@
 
   /* 底部分頁 */
   nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; padding: 8px 16px calc(10px + env(safe-area-inset-bottom));
-        background: linear-gradient(transparent, rgba(220,211,224,.95) 30%); }
+        background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 95%, transparent) 30%); }
   nav .tabs { max-width: 420px; margin: 0 auto; display: flex; background: var(--paper); border-radius: 999px; box-shadow: var(--shadow); padding: 6px; }
   nav button { flex: 1; border: 0; background: none; font-family: inherit; font-size: 15px; color: var(--ink-faint); padding: 8px 0 6px;
                border-radius: 999px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; letter-spacing: .1em; }
@@ -281,6 +283,44 @@
   .install b { color: var(--ink); font-weight: 500; font-size: 17px; }
   .install .go { margin-left: auto; flex: none; padding: 8px 14px; border-radius: 999px; font-size: 15px; border: 0; background: var(--rose); color: #fff; font-family: inherit; }
   .install .x { flex: none; border: 0; background: none; color: var(--ink-faint); padding: 4px; font-size: 20px; cursor: pointer; }
+
+  /* ── 字級調整：小字放大，並一律不斷行 ── */
+  .av.sm { width: 28px; height: 28px; font-size: 13px; }
+  .person .st { font-size: 14px; }
+  .ratio-lg { font-size: 14px; } .ratio-lg > * { white-space: nowrap; }
+  .hb-n { font-size: 15px; white-space: nowrap; }
+  .hb-v { font-size: 14px; }
+  .cal .cw { font-size: 13px; }
+  .cal .cd { font-size: 13px; }
+  .cal-lg { font-size: 13px; } .cal-lg > * { white-space: nowrap; }
+  .state { font-size: 14px; white-space: nowrap; }
+  .field span { font-size: 14px; }
+  .tag { font-size: 14px; }
+  .kpi .k { font-size: 14px; white-space: nowrap; }
+  .drow .s { font-size: 14px; }
+  @media (max-width: 400px) {
+    .person .state { font-size: 13px; }
+    .person .tm { font-size: 14px; }
+  }
+
+  /* 不斷行保護 */
+  .back, .brand, .pill, .rec .who, .drow .io, .drow .d, .tag, .state { white-space: nowrap; }
+  .drow .s { white-space: nowrap; overflow: hidden; min-width: 0; }
+  .drow .s > span:not(.tag) { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .drow .s .tag { flex: none; }
+  @media (max-width: 400px) {
+    .brand { font-size: 16px; letter-spacing: .12em; }
+    header .brand { margin-left: 8px; }
+    .pill { padding: 5px 10px; }
+    .person .ab { font-size: 13px; padding: 6px 9px; letter-spacing: 0; }
+  }
+  @media (max-width: 370px) {
+    .person .st { grid-row: 3; grid-column: 2 / -1; flex-direction: row; align-items: center; gap: 6px;
+                  white-space: nowrap; overflow: hidden; margin-top: 2px; }
+    .person .st .sto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .drow { grid-template-columns: auto 1fr auto auto; gap: 2px 8px; font-size: 15px; }
+    .drow .io { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
@@ -347,7 +387,7 @@
   <!-- 工時 -->
   <section id="tab-hours" class="hidden">
     <h1 id="hrTitle">工時統計</h1>
-    <div class="sub">每天以第一筆上班到最後一筆下班計算</div>
+    <div class="sub">以第一筆上班到最後一筆下班計算</div>
     <div class="card month">
       <button class="arrow" id="mPrev" aria-label="上個月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
       <div class="m" id="mLabel"></div>
@@ -576,7 +616,7 @@ function dayRow(d) {
     '<div class="io">' + (d.in || '--:--') + '<i>→</i>' + (d.out || '--:--') + '</div>' +
     '<div class="h">' + (d.hours !== null ? d.hours + 'h' : '') + '</div>' +
     (ME.admin ? photoBtn(curHoursName + '・' + d.date.slice(5).replace('-', '/'), [{ label: '上班', time: d.in, id: d.inPhoto }, { label: '下班', time: d.out, id: d.outPhoto }]) : '') +
-    '<div class="s">' + esc(d.store || '') + ' ' + flag + (d.abnormal ? '<span class="tag warn">有異常</span>' : '') + '</div></div>';
+    '<div class="s"><span>' + esc(d.store || '') + '</span>' + flag + (d.abnormal ? '<span class="tag warn">有異常</span>' : '') + '</div></div>';
 }
 
 /* ---------- 打卡照片（主管） ---------- */
