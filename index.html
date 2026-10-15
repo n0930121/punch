@@ -12,6 +12,7 @@
     var z = 1;
     if (touch && sw < 600 && iw > sw * 1.25) z = iw / sw;
     document.documentElement.style.zoom = z === 1 ? '' : String(z);
+    document.documentElement.style.setProperty('--z', String(z));
   }
   apply();
   window.addEventListener('resize', function () { document.documentElement.style.zoom = ''; apply(); });
@@ -58,8 +59,9 @@
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; }
+  html, body { overscroll-behavior-y: none; }
   body {
-    min-height: 100vh; color: var(--ink); background: var(--bg);
+    min-height: calc(100vh / var(--z, 1)); color: var(--ink); background: var(--bg);
     background-image:
       radial-gradient(120% 60% at 100% 0%, var(--bg-hi, #E5EAEE) 0%, transparent 60%),
       radial-gradient(90% 50% at 0% 100%, var(--bg-deep) 0%, transparent 60%);
