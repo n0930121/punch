@@ -527,7 +527,7 @@ async function loadHours() {
   const r = await api({ action: 'q_hours', month: month, name: $('hName').value });
   if (!r.ok) return $('hrList').innerHTML = emptyBox(r.message);
   lastHours = r.people || [];
-  $('hrCount').textContent = lastHours.length ? lastHours.length + ' 位' : '';
+  $('hrCount').textContent = ME.admin && lastHours.length ? lastHours.length + ' 位' : '';
   if (!lastHours.length) return $('hrList').innerHTML = '<div class="card">' + emptyBox('這個月還沒有打卡紀錄') + '</div>';
   const single = lastHours.length === 1;
   const maxH = Math.max.apply(null, lastHours.map(p => p.totalHours).concat([1]));
