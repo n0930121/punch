@@ -210,7 +210,7 @@
   .shutter { width: 74px; height: 74px; padding: 0; border-radius: 50%; background: #F5F7F8; box-shadow: 0 0 0 5px rgba(255,255,255,.35); }
   .shutter:active { transform: scale(.92); }
   .msg .force { display: block; margin-top: 10px; border: 0; font-family: inherit; font-size: 14px; padding: 9px 16px; border-radius: 999px;
-                background: #fff; color: #8E6B63; box-shadow: none; flex-direction: row; letter-spacing: .05em; }
+                background: #fff; color: #8E6B63; box-shadow: none; flex-direction: row; justify-content: center; letter-spacing: .05em; }
   .ask { position: fixed; inset: 0; z-index: 25; background: rgba(40,46,52,.45); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
          display: flex; align-items: center; justify-content: center; padding: 24px; }
   .ask-card { width: 100%; max-width: 340px; background: var(--paper); border-radius: 24px; padding: 26px 22px 18px; text-align: center;
@@ -220,7 +220,8 @@
   .ask-msg { font-size: 16px; line-height: 1.65; color: var(--ink); }
   .ask-msg small { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
   .ask-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-  .ask-btns button { padding: 13px 0; border-radius: 14px; font-size: 15px; letter-spacing: .1em; box-shadow: none; flex-direction: row; }
+  .ask-btns button { padding: 13px 0; border-radius: 14px; font-size: 15px; letter-spacing: .1em; box-shadow: none;
+                     flex-direction: row; justify-content: center; align-items: center; text-align: center; text-indent: .1em; }
   .ask-no { background: var(--bg) !important; color: var(--ink-soft) !important; }
   .ask-ok { background: linear-gradient(160deg, var(--mist), var(--mist-deep)) !important; }
   .retry { margin-top: 14px; border: 0; font-family: inherit; font-size: 15px; padding: 10px 22px; border-radius: 999px;
