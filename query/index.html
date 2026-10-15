@@ -437,6 +437,62 @@
   .fxchips button { border: 0; font: inherit; font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--rose-tint); color: var(--rose-deep); cursor: pointer; white-space: nowrap; }
   @media (max-width: 370px) { .fx-h { font-size: 15px; gap: 5px; } .fx-h > span:not(.fx-t):not(.fx-s) { display: none; } .fx-h .fx-t { font-size: 15px; } }
   .cf-in { display: block; width: 100%; margin-top: 12px; box-sizing: border-box; }
+
+  /* ── 進場動畫 ── */
+  .hb-t span { width: 0; transition: width .9s cubic-bezier(.2,.8,.2,1); }
+  .cal .cd { animation: cdIn .45s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 14ms); }
+  @keyframes cdIn { from { opacity: 0; transform: translateY(6px) scale(.92); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .cal .cd { animation: none; } .hb-t span { transition: none; } }
+
+  /* ── 分頁切換：選中底色滑動、內容左右滑入 ── */
+  nav .tabs { position: relative; }
+  nav .tabs.has-ind::before { content: ""; position: absolute; top: 6px; bottom: 6px; left: 0; width: var(--iw); transform: translateX(var(--ix));
+                              border-radius: 999px; background: var(--rose-tint); transition: transform .38s cubic-bezier(.3,1.3,.5,1), width .38s; }
+  nav .tabs.has-ind button.on { background: none; }
+  nav button { z-index: 1; transition: color .25s; }
+  section.slide-l { animation: slideL .32s cubic-bezier(.2,.8,.2,1); }
+  section.slide-r { animation: slideR .32s cubic-bezier(.2,.8,.2,1); }
+  @keyframes slideL { from { opacity: 0; transform: translateX(22px); } to { opacity: 1; transform: none; } }
+  @keyframes slideR { from { opacity: 0; transform: translateX(-22px); } to { opacity: 1; transform: none; } }
+
+  .empty .mascot { display: block; width: 104px; height: 97px; margin: 0 auto 8px; animation: mBob 3.2s ease-in-out infinite; }
+  @keyframes mBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  @media (prefers-reduced-motion: reduce) { .empty .mascot { animation: none; } }
+
+  /* ── 日期詳細 ── */
+  .dd { align-items: end; padding: 0; }
+  .dd-card { max-width: 480px; width: 100%; border-radius: 26px 26px 0 0; padding: 18px 20px calc(22px + env(safe-area-inset-bottom)); text-align: left;
+             animation: ddUp .3s cubic-bezier(.2,.8,.2,1); }
+  @media (min-width: 560px) { .dd { align-items: center; padding: 24px; } .dd-card { border-radius: 26px; } }
+  @keyframes ddUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .dd-h { display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 600; margin-bottom: 14px; white-space: nowrap; }
+  .dd-h > span { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; }
+  .dd-x { position: static; flex: none; }
+  .dd-io { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .dd-io > div { background: var(--bg-2); border-radius: 16px; padding: 12px 14px; font-size: 15px; color: var(--ink-soft); display: flex; flex-direction: column; gap: 4px; }
+  .dd-io .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+  .dd-io b { font-size: 24px; color: var(--ink); font-weight: 400; }
+  .dd-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 2px; border-top: 1px solid var(--hair); font-size: 16px; white-space: nowrap; }
+  .dd-row span { color: var(--ink-soft); } .dd-row b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
+  .dd-tags { display: flex; gap: 6px; margin-top: 8px; }
+  .dd-empty { text-align: center; color: var(--ink-soft); font-size: 16px; padding: 4px 0 8px; }
+  .dd-empty .mascot { display: block; width: 84px; height: 78px; margin: 0 auto 6px; }
+  .dd-b { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+  /* ── 平板／橫向：兩欄排版 ── */
+  @media (min-width: 900px) {
+    main { max-width: 1040px; padding-left: 28px; padding-right: 28px; }
+    header, h1, .sub { max-width: none; }
+    #peopleList { display: grid; grid-template-columns: 1fr 1fr; column-gap: 32px; }
+    #peopleList .person:nth-child(2) { border-top: 0; }
+    #recList:has(.card + .card) { columns: 2; column-gap: 18px; }
+    #recList .card { break-inside: avoid; display: inline-block; width: 100%; }
+    #hrList { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; }
+    #hrList .chart { grid-column: 1 / -1; }
+    #hrList > .card:only-child, #hrList .hp.open:only-of-type { grid-column: 1 / -1; }
+    #tab-staff #staffList, #tab-staff #fixAdmin { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; }
+    .filters .row { max-width: 720px; }
+  }
 </style>
 </head>
 <body>
@@ -554,6 +610,7 @@ const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, '0');
 const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 const WEEK = '日一二三四五六';
+const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 let ME = null, curTab = '', range = 'today', abnOnly = false, month = '', lastRecs = [], lastHours = [];
 
 /* ---------- 啟動 ---------- */
@@ -598,11 +655,25 @@ function fillSelect(sel, list, allLabel) {
   sel.innerHTML = '<option value="">' + allLabel + '</option>' + (list || []).map(n => '<option>' + esc(n) + '</option>').join('');
 }
 
+const TAB_ORDER = ['today', 'records', 'hours', 'staff'];
+function moveIndicator() {
+  const on = document.querySelector('nav button.on'), tabs = document.querySelector('nav .tabs');
+  if (!on || !tabs) return;
+  tabs.style.setProperty('--ix', on.offsetLeft + 'px'); tabs.style.setProperty('--iw', on.offsetWidth + 'px');
+  tabs.classList.add('has-ind');
+}
 function showTab(tab) {
+  const prev = curTab;
   curTab = tab;
   try { sessionStorage.setItem('qTab', tab); } catch (e) {}
   ['today', 'records', 'hours', 'staff'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== tab));
   document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  moveIndicator();
+  const sec = $('tab-' + tab);
+  if (prev && prev !== tab && !REDUCED) {
+    sec.classList.remove('slide-l', 'slide-r'); void sec.offsetWidth;
+    sec.classList.add(TAB_ORDER.indexOf(tab) > TAB_ORDER.indexOf(prev) ? 'slide-l' : 'slide-r');
+  }
   window.scrollTo(0, 0);
   if (tab === 'today') loadToday();
   if (tab === 'records') loadRecords();
@@ -625,7 +696,10 @@ function avatar(name, cls) {
   for (const ch of n) h = (h * 31 + ch.codePointAt(0)) >>> 0;
   const c = AV_COLORS[h % AV_COLORS.length];
   const ch = /^[A-Za-z]/.test(n) ? n[0].toUpperCase() : Array.from(n)[0];
-  return '<span class="av ' + (cls || '') + '" style="background:' + c[0] + ';color:' + c[1] + '">' + esc(ch) + '</span>';
+  const dark = document.documentElement.getAttribute('data-mode') === 'dark';
+  const bg = dark ? 'color-mix(in srgb,' + c[1] + ' 34%,var(--paper))' : c[0];
+  const fg = dark ? 'color-mix(in srgb,' + c[1] + ' 45%,#fff)' : c[1];
+  return '<span class="av ' + (cls || '') + '" style="background:' + bg + ';color:' + fg + '">' + esc(ch) + '</span>';
 }
 
 /* ---------- 今日 ---------- */
@@ -635,8 +709,8 @@ async function loadToday() {
   if (!r.ok) return $('peopleList').innerHTML = emptyBox(r.message);
   const d = new Date(r.date + 'T00:00:00');
   $('todayDate').textContent = r.date.replace(/-/g, '.') + '　週' + WEEK[d.getDay()];
-  $('cWorking').textContent = r.counts.working; $('cOff').textContent = r.counts.off;
-  $('cNone').textContent = r.counts.none; $('cAbn').textContent = r.counts.abnormal;
+  countUp($('cWorking'), r.counts.working); countUp($('cOff'), r.counts.off);
+  countUp($('cNone'), r.counts.none); countUp($('cAbn'), r.counts.abnormal);
   $('statAbn').classList.toggle('has', r.counts.abnormal > 0);
   const tot = r.counts.working + r.counts.off + r.counts.none || 1, bar = $('ratioBar').children;
   $('leaveTxt').textContent = r.counts.leave ? '休假 ' + r.counts.leave : '';
@@ -658,6 +732,20 @@ function abLine(t) {
   const i = String(t).indexOf('：');
   if (i < 0) return '<div class="abl"><span>' + esc(t) + '</span></div>';
   return '<div class="abl"><b>' + esc(t.slice(0, i)) + '</b><span>' + esc(t.slice(i + 1)) + '</span></div>';
+}
+
+/* 數字跳動：0 → 目標值（小數保留一位） */
+function countUp(el, to, ms) {
+  to = Number(to) || 0;
+  const dec = String(to).indexOf('.') >= 0 ? 1 : 0;
+  if (REDUCED || !to) { el.textContent = to.toFixed(dec); return; }
+  const t0 = performance.now(), dur = ms || 700;
+  const step = t => {
+    const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = (to * e).toFixed(dec);
+    if (k < 1) requestAnimationFrame(step); else el.textContent = to.toFixed(dec);
+  };
+  requestAnimationFrame(step);
 }
 
 /* ---------- 紀錄 ---------- */
@@ -682,7 +770,7 @@ async function loadRecords() {
   if (!r.ok) return $('recList').innerHTML = emptyBox(r.message);
   lastRecs = r.records || [];
   $('recCount').textContent = r.message ? r.message : '共 ' + lastRecs.length + ' 筆' + (r.truncated ? '（只顯示最近 1500 筆）' : '');
-  if (!lastRecs.length) return $('recList').innerHTML = '<div class="card">' + emptyBox(abnOnly ? '這段期間沒有異常紀錄 🎉' : '這段期間沒有打卡紀錄') + '</div>';
+  if (!lastRecs.length) return $('recList').innerHTML = '<div class="card">' + (abnOnly ? emptyBox('這段期間沒有異常紀錄', 'happy') : emptyBox('這段期間沒有打卡紀錄')) + '</div>';
   const groups = {};
   lastRecs.forEach(x => (groups[x.date] = groups[x.date] || []).push(x));
   $('recList').innerHTML = Object.keys(groups).map(date => {
@@ -711,25 +799,64 @@ async function loadHours() {
   if (!r.ok) return $('hrList').innerHTML = emptyBox(r.message);
   lastHours = r.people || [];
   $('hrCount').textContent = ME.admin && lastHours.length ? lastHours.length + ' 位' : '';
-  if (!lastHours.length) return $('hrList').innerHTML = '<div class="card">' + emptyBox('這個月還沒有打卡紀錄') + '</div>';
+  if (!lastHours.length) return $('hrList').innerHTML = '<div class="card">' + emptyBox('這個月還沒有打卡紀錄', 'calm') + '</div>';
   const single = lastHours.length === 1;
   const maxH = Math.max.apply(null, lastHours.map(p => p.totalHours).concat([1]));
   const overview = single ? '' : '<div class="card chart fadein"><div class="chart-h">本月總工時</div>' +
     lastHours.slice().sort((a, b) => b.totalHours - a.totalHours).map(p =>
       '<div class="hbar">' + avatar(p.name, 'sm') + '<span class="hb-n">' + esc(p.name) + '</span>' +
-      '<span class="hb-t"><span style="width:' + (p.totalHours / maxH * 100) + '%"></span></span>' +
-      '<span class="hb-v num">' + p.totalHours + '</span></div>').join('') + '</div>';
+      '<span class="hb-t"><span data-w="' + (p.totalHours / maxH * 100) + '"></span></span>' +
+      '<span class="hb-v num" data-cnt="' + p.totalHours + '">0</span></div>').join('') + '</div>';
   $('hrList').innerHTML = overview + lastHours.map(p =>
     '<div class="card hp fadein' + (single ? ' open' : '') + '"><div class="hp-top"><span class="nm">' + avatar(p.name) + esc(p.name) + '</span>' +
     ((p.leaves || []).length ? '<span class="lvn">休 ' + p.leaves.length + ' 天</span>' : '') +
     '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>' +
-    '<div class="kpis"><div class="kpi"><div class="v">' + p.workDays + '</div><div class="k">出勤天數</div></div>' +
-    '<div class="kpi"><div class="v">' + p.totalHours + '</div><div class="k">總工時</div></div>' +
-    '<div class="kpi' + (p.missing ? ' miss' : '') + '"><div class="v">' + p.missing + '</div><div class="k">缺卡</div></div></div>' +
+    '<div class="kpis"><div class="kpi"><div class="v" data-cnt="' + p.workDays + '">0</div><div class="k">出勤天數</div></div>' +
+    '<div class="kpi"><div class="v" data-cnt="' + p.totalHours + '">0</div><div class="k">總工時</div></div>' +
+    '<div class="kpi' + (p.missing ? ' miss' : '') + '"><div class="v" data-cnt="' + p.missing + '">0</div><div class="k">缺卡</div></div></div>' +
     '<div class="dlist">' + calendar(p) + p.days.map(d => (curHoursName = p.name, dayRow(d))).join('') + '</div></div>'
   ).join('');
   document.querySelectorAll('.hp-top').forEach(el => el.onclick = () => el.parentElement.classList.toggle('open'));
-  if (ME.admin) document.querySelectorAll('.cal .cd[data-d]').forEach(el => el.onclick = () => askLeave(el.dataset.n, el.dataset.d, el.classList.contains('lv')));
+  // 進場動畫：數字由 0 跳到實際值、長條由左往右長出來
+  $('hrList').querySelectorAll('[data-cnt]').forEach(el => countUp(el, Number(el.dataset.cnt)));
+  requestAnimationFrame(() => requestAnimationFrame(() =>
+    $('hrList').querySelectorAll('.hb-t span[data-w]').forEach((el, i) => { el.style.transitionDelay = (i * 60) + 'ms'; el.style.width = el.dataset.w + '%'; })));
+  document.querySelectorAll('.cal .cd[data-d]').forEach(el => el.onclick = () => dayDetail(el.dataset.n, el.dataset.d));
+}
+
+/* 點日曆上的日期：顯示那天的上下班、工時、櫃點；主管可看照片、標記／取消休假 */
+function dayDetail(name, date) {
+  const p = lastHours.find(x => x.name === name); if (!p) return;
+  const x = p.days.find(d => d.date === date), isLeave = (p.leaves || []).indexOf(date) >= 0;
+  const dt = new Date(date + 'T00:00:00');
+  const title = date.slice(5).replace('-', '/') + '（週' + WEEK[dt.getDay()] + '）';
+  let body = '';
+  if (x) {
+    body = '<div class="dd-io"><div><span class="lb"><span class="dot in"></span>上班</span><b class="num">' + esc(x.in || '--:--') + '</b></div>' +
+      '<div><span class="lb"><span class="dot out"></span>下班</span><b class="num">' + esc(x.out || '--:--') + '</b></div></div>' +
+      '<div class="dd-row"><span>工時</span><b>' + (x.hours !== null ? x.hours + ' 小時' : '—') + '</b></div>' +
+      '<div class="dd-row"><span>櫃點</span><b>' + esc(x.store || '—') + '</b></div>' +
+      (x.flag || x.abnormal ? '<div class="dd-tags">' + (x.flag ? '<span class="tag ' + (x.flag === '上班中' ? '' : 'bad') + '">' + esc(x.flag) + '</span>' : '') +
+        (x.abnormal ? '<span class="tag warn">有異常</span>' : '') + '</div>' : '');
+  } else if (isLeave) body = '<div class="dd-empty">' + window.UC_MASCOT('sleep') + '這天是休假</div>';
+  else body = '<div class="dd-empty">' + window.UC_MASCOT('calm') + '這天沒有打卡紀錄</div>';
+  const acts = [];
+  if (ME.admin && x && (x.inPhoto || x.outPhoto)) acts.push('<button class="sbtn" data-dd="photo">查看照片</button>');
+  if (ME.admin && !x) acts.push('<button class="sbtn go" data-dd="leave">' + (isLeave ? '取消休假' : '標記休假') + '</button>');
+  if (!ME.admin && x && x.flag && x.flag !== '上班中') acts.push('<button class="sbtn go" data-dd="fix">申請補卡</button>');
+  const w = document.createElement('div'); w.className = 'cf dd';
+  w.innerHTML = '<div class="cf-card dd-card"><div class="dd-h"><span>' + (ME.admin ? avatar(name, 'sm') + esc(name) + '・' : '') + title + '</span>' +
+    '<button class="pm-x dd-x" aria-label="關閉">×</button></div>' + body +
+    (acts.length ? '<div class="dd-b">' + acts.join('') + '</div>' : '') + '</div>';
+  document.body.appendChild(w);
+  const close = () => w.remove();
+  w.onclick = e => { if (e.target === w || e.target.classList.contains('dd-x')) close(); };
+  w.querySelectorAll('[data-dd]').forEach(b => b.onclick = () => {
+    close();
+    if (b.dataset.dd === 'photo') openPhotos({ title: name + '・' + date.slice(5).replace('-', '/'), items: [{ label: '上班', time: x.in, id: x.inPhoto }, { label: '下班', time: x.out, id: x.outPhoto }] });
+    if (b.dataset.dd === 'leave') askLeave(name, date, isLeave);
+    if (b.dataset.dd === 'fix') { showTab('records'); setTimeout(() => { openFixForm(); $('fxDate').value = date; if (x.flag === '缺下班卡') document.querySelector('#fxType [data-v="下班"]').click(); }, 350); }
+  });
 }
 
 /* 主管點日曆空白日：標記／取消休假 */
@@ -762,12 +889,14 @@ function calendar(p) {
     } else if (lv[d]) cls += ' lv';
     else if (isCur && d > today.getDate()) cls += ' fut';
     if (isCur && d === today.getDate()) cls += ' now';
-    const key = !x && ME.admin ? ' data-n="' + esc(p.name) + '" data-d="' + month + '-' + pad(d) + '"' : '';
+    const fut = isCur && d > today.getDate();
+    const canTap = x || lv[d] || (ME.admin && !fut);
+    const key = canTap ? ' data-n="' + esc(p.name) + '" data-d="' + month + '-' + pad(d) + '"' : '';
     if (key) cls += ' tap';
-    cells += '<span class="' + cls + '" style="' + style + '"' + key + '>' + d + '</span>';
+    cells += '<span class="' + cls + '" style="' + style + ';--i:' + (first + d) + '"' + key + '>' + d + '</span>';
   }
   return '<div class="cal">' + cells + '</div><div class="cal-lg"><span><i class="l1"></i>工時短</span><span><i class="l2"></i>工時長</span><span><i class="lm"></i>缺卡</span>' + (ME.admin ? '<span><i class="la"></i>有異常</span>' : '') + '<span><i class="lv"></i>休假</span></div>' +
-    (ME.admin ? '<div class="cal-tip">點沒有打卡的日期，可以標記或取消休假</div>' : '');
+    '<div class="cal-tip">' + (ME.admin ? '點日期看詳細，沒有打卡的日期可以標記休假' : '點日期可以看那天的上下班時間') + '</div>';
 }
 
 function dayRow(d) {
@@ -1015,6 +1144,8 @@ function bindUI() {
   $('fixOpen').onclick = openFixForm;
   $('hrExport').onclick = exportHours;
   document.addEventListener('visibilitychange', () => { if (!document.hidden && curTab === 'today') loadToday(); });
+  window.addEventListener('resize', moveIndicator);
+  document.addEventListener('uc-theme', () => { if (ME && curTab) showTab(curTab); });   // 切換深淺色時重畫（頭像配色）
 }
 function shiftMonth(n) {
   const [y, m] = month.split('-').map(Number);
@@ -1022,7 +1153,11 @@ function shiftMonth(n) {
   month = d.getFullYear() + '-' + pad(d.getMonth() + 1);
   loadHours();
 }
-function emptyBox(msg) {
+function emptyBox(msg, kind) {
+  if (!kind) kind = /錯誤|失敗|逾時|無法|不能|只有/.test(msg || '') ? 'oops' : 'sleep';
+  return '<div class="empty">' + window.UC_MASCOT(kind) + '<div>' + esc(msg || '') + '</div></div>';
+}
+function emptyBoxOld(msg) {
   return '<div class="empty"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></div>' + esc(msg || '') + '</div>';
 }
 function showState(html) {

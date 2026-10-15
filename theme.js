@@ -1,4 +1,4 @@
-// UC 打卡系統 — 12 種莫蘭迪色系（右上角色票，點開選擇）
+// UC 打卡系統 — 12 種莫蘭迪色系＋深色模式（右上角色票，點開選擇）
 // 打卡頁與查詢頁各自記住自己的色系；預設：打卡＝灰藍、查詢＝芋泥紫。
 (function () {
   // [名稱, bg, bg-hi, bg-deep, paper, ink, ink-soft, ink-faint, hair, accent, accent-deep, accent-tint]
@@ -26,15 +26,81 @@
     olive:   ['#9A9590', '#78736E', '#EBE8E4']
   };
   var ORDER = ['blue', 'taro', 'sage', 'celadon', 'denim', 'smoke', 'milk', 'apricot', 'clay', 'rose', 'blush', 'olive'];
+  // 語意色（上班綠、下班藍、提醒、異常、警示）的淺色基準值
+  var SEM = { sage: '#8E9C8A', mist: '#8D9AAA', rose: '#B8968F', bad: '#A3706A', amber: '#B9895A' };
   var isQuery = /\/query\/?/.test(location.pathname);
   var KEY = isQuery ? 'uc-theme-query' : 'uc-theme-punch';
   var DEF = isQuery ? 'taro' : 'blue';
 
+  var MKEY = 'uc-mode';   // auto（晚上 7 點到早上 7 點自動深色）／light／dark，兩頁共用
   function saved() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
   function remember(k) { try { localStorage.setItem(KEY, k); } catch (e) {} }
+  function savedMode() { try { return localStorage.getItem(MKEY) || 'auto'; } catch (e) { return 'auto'; } }
+  function rememberMode(m) { try { localStorage.setItem(MKEY, m); } catch (e) {} }
+  function isDark(mode) {
+    if (mode === 'dark') return true;
+    if (mode === 'light') return false;
+    var h = new Date().getHours();
+    return h >= 19 || h < 7;
+  }
 
+  /* ── 顏色換算（深色版用） ── */
+  function hex2hsl(hex) {
+    var r = parseInt(hex.substr(1, 2), 16) / 255, g = parseInt(hex.substr(3, 2), 16) / 255, b = parseInt(hex.substr(5, 2), 16) / 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, h = 0, s = 0;
+    if (mx !== mn) {
+      var d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+      h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60;
+    }
+    return [h, s, l];
+  }
+  function hsl(h, s, l) {
+    s = Math.max(0, Math.min(1, s)); l = Math.max(0, Math.min(1, l));
+    var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2, r, g, b;
+    if (h < 60) { r = c; g = x; b = 0; } else if (h < 120) { r = x; g = c; b = 0; } else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; } else if (h < 300) { r = x; g = 0; b = c; } else { r = c; g = 0; b = x; }
+    var t = function (v) { return ('0' + Math.round((v + m) * 255).toString(16)).slice(-2); };
+    return '#' + t(r) + t(g) + t(b);
+  }
+  // solid：按鈕／色塊；text：深色底上的彩色字；tint：淡色底（深色版改成暗色底）
+  function tone(hex, role) {
+    var c = hex2hsl(hex), h = c[0], s = c[1];
+    if (role === 'solid') return hsl(h, s * 1.05, .56);
+    if (role === 'text') return hsl(h, s * 1.1, .76);
+    return hsl(h, s * .55, .25);
+  }
+  function darkVars(t, mi) {
+    var b = hex2hsl(t[1]), h = b[0], sat = Math.min(b[1], .35);
+    var v = {
+      '--bg': hsl(h, sat * .55, .115), '--bg-hi': hsl(h, sat * .6, .15), '--bg-2': hsl(h, sat * .55, .2), '--bg-deep': hsl(h, sat * .5, .085), '--bg-3': hsl(h, sat * .5, .26),
+      '--paper': hsl(h, sat * .5, .165), '--ink': hsl(h, .12, .9), '--ink-soft': hsl(h, .1, .72), '--ink-faint': hsl(h, .08, .56), '--hair': hsl(h, sat * .45, .235),
+      '--acc': tone(t[9], 'solid'), '--acc-deep': tone(t[9], 'text'), '--acc-tint': tone(t[9], 'tint'),
+      '--sage': tone(SEM.sage, 'solid'), '--sage-deep': tone(SEM.sage, 'text'), '--sage-tint': tone(SEM.sage, 'tint'),
+      '--mist': tone(mi ? mi[0] : SEM.mist, 'solid'), '--mist-deep': tone(mi ? mi[0] : SEM.mist, 'text'), '--mist-tint': tone(mi ? mi[0] : SEM.mist, 'tint'),
+      '--bad': hsl(hex2hsl(SEM.bad)[0], .45, .68), '--bad-tint': tone(SEM.bad, 'tint'),
+      '--amber': hsl(hex2hsl(SEM.amber)[0], .5, .66), '--amber-tint': tone(SEM.amber, 'tint'),
+      '--shadow': '0 1px 1px rgba(0,0,0,.25), 0 10px 26px -12px rgba(0,0,0,.6)',
+      '--shadow-lg': '0 2px 4px rgba(0,0,0,.3), 0 18px 40px -18px rgba(0,0,0,.7)'
+    };
+    if (isQuery) { v['--rose'] = tone(t[9], 'solid'); v['--rose-deep'] = tone(t[9], 'text'); v['--rose-tint'] = tone(t[9], 'tint'); }
+    else { v['--clay'] = tone(t[9], 'solid'); v['--rose'] = hsl(hex2hsl(SEM.rose)[0], .4, .72); v['--rose-tint'] = tone(SEM.rose, 'tint'); }
+    return v;
+  }
+  var DARK_KEYS = ['--sage', '--sage-deep', '--sage-tint', '--bad', '--bad-tint', '--amber', '--amber-tint', '--shadow', '--shadow-lg', '--rose', '--rose-tint'];
+
+  var mode = savedMode();
   function apply(k) {
-    var t = T[k] || T[DEF], s = document.documentElement.style;
+    var t = T[k] || T[DEF], s = document.documentElement.style, dark = isDark(mode);
+    DARK_KEYS.forEach(function (n) { s.removeProperty(n); });
+    document.documentElement.setAttribute('data-mode', dark ? 'dark' : 'light');
+    if (dark) {
+      var dv = darkVars(t, MIST[k]);
+      for (var dn in dv) s.setProperty(dn, dv[dn]);
+      document.documentElement.setAttribute('data-theme', k);
+      var dm = document.querySelector('meta[name=theme-color]'); if (dm) dm.setAttribute('content', dv['--bg']);
+      document.dispatchEvent(new CustomEvent('uc-theme'));
+      return;
+    }
     var v = { '--bg': t[1], '--bg-hi': t[2], '--bg-2': t[2], '--bg-deep': t[3], '--bg-3': t[3], '--paper': t[4],
               '--ink': t[5], '--ink-soft': t[6], '--ink-faint': t[7], '--hair': t[8],
               '--acc': t[9], '--acc-deep': t[10], '--acc-tint': t[11] };
@@ -45,10 +111,16 @@
     ['--mist', '--mist-deep', '--mist-tint'].forEach(function (n, i) { if (mi) s.setProperty(n, mi[i]); else s.removeProperty(n); });
     document.documentElement.setAttribute('data-theme', k);
     var m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', t[1]);
+    document.dispatchEvent(new CustomEvent('uc-theme'));
   }
   var cur = T[saved()] ? saved() : DEF;
   apply(cur);
-  window.UC_THEMES = { list: ORDER, apply: function (k) { cur = k; apply(k); remember(k); mark(); } };
+  window.UC_THEMES = { list: ORDER, apply: function (k) { cur = k; apply(k); remember(k); mark(); },
+                       setMode: function (m) { mode = m; rememberMode(m); apply(cur); mark(); },
+                       isDark: function () { return document.documentElement.getAttribute('data-mode') === 'dark'; } };
+  // 自動模式：每分鐘檢查一次是否該切換
+  var lastDark = isDark(mode);
+  setInterval(function () { var d = isDark(mode); if (d !== lastDark) { lastDark = d; apply(cur); } }, 60000);
 
   var css =
     '.thm{position:relative;flex:none}' +
@@ -64,10 +136,33 @@
     '.thm-o span{width:36px;height:36px;border-radius:50%;position:relative;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}' +
     '.thm-o span::after{content:"";position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:50%;background:var(--sw-a);box-shadow:0 0 0 2px var(--paper)}' +
     '.thm-o.on{color:var(--ink);font-weight:600}' +
-    '.thm-o.on span{box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--ink-soft)}';
+    '.thm-o.on span{box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--ink-soft)}' +
+    '.thm-m{display:flex;background:var(--bg-2,var(--hair));border-radius:12px;padding:3px;margin:0 2px 14px}' +
+    '.thm-m button{flex:1;border:0;background:none;font:inherit;font-size:14px;padding:7px 0;border-radius:9px;color:var(--ink-soft);cursor:pointer;white-space:nowrap;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;flex-direction:row;letter-spacing:.04em}' +
+    '.thm-m button svg{width:14px;height:14px}' +
+    '.thm-m button.on{background:var(--paper);color:var(--ink);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.12)}' +
+    '.thm-tip{font-size:12px;color:var(--ink-faint);margin:-8px 4px 12px;white-space:nowrap}' +
+    // ── 深色模式：實心按鈕改用較深的同色，白字才看得清楚；固定的咖啡色字改用提醒色 ──
+    'html[data-mode=dark] button.in:not(.secondary){background:linear-gradient(160deg,var(--sage),color-mix(in srgb,var(--sage) 70%,#000))}' +
+    'html[data-mode=dark] button.out:not(.secondary),html[data-mode=dark] .ask-ok{background:linear-gradient(160deg,var(--mist),color-mix(in srgb,var(--mist) 70%,#000))!important}' +
+    'html[data-mode=dark] #workBox .bar span{background:linear-gradient(90deg,color-mix(in srgb,var(--sage) 60%,#000),var(--sage))}' +
+    'html[data-mode=dark] .sbtn.go,html[data-mode=dark] .cf-ok,html[data-mode=dark] .bar .fixbtn{background:color-mix(in srgb,var(--rose) 78%,#000)}' +
+    'html[data-mode=dark] .cf-ok.danger,html[data-mode=dark] .nbadge{background:color-mix(in srgb,var(--bad) 70%,#000)}' +
+    'html[data-mode=dark] .chip.on{background:color-mix(in srgb,var(--rose) 80%,#000)}' +
+    'html[data-mode=dark] .store.pick.empty,html[data-mode=dark] .store-hint.warn,html[data-mode=dark] .msg.warn,html[data-mode=dark] .tag.bad,' +
+      'html[data-mode=dark] .done-note,html[data-mode=dark] .ask-ico{color:var(--rose)}' +
+    'html[data-mode=dark] .msg.err{color:#E8ABA2}' +
+    'html[data-mode=dark] .photo.has{background:var(--bg-2,var(--hair))}' +
+    'html[data-mode=dark] .toast{background:var(--ink);color:var(--bg)}' +
+    'html[data-mode=dark] .sw{background:var(--hair)}' +
+    'html[data-mode=dark] img.sp-logo,html[data-mode=dark] .hd img{filter:brightness(.92)}' +
+    'html[data-mode=dark] .demo{border-color:var(--hair)}' +
+    'html[data-mode=dark] body{color-scheme:dark}' +
+    'html[data-mode=dark] input,html[data-mode=dark] select{color-scheme:dark}';
 
   function mark() {
     document.querySelectorAll('.thm-o').forEach(function (b) { b.classList.toggle('on', b.dataset.k === cur); });
+    document.querySelectorAll('.thm-m button').forEach(function (b) { b.classList.toggle('on', b.dataset.m === mode); });
   }
   function build() {
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
@@ -75,7 +170,13 @@
     if (!host) return;
     var w = document.createElement('div'); w.className = 'thm';
     w.innerHTML = '<button class="thm-b" type="button" aria-label="選擇色系"><i></i></button>' +
-      '<div class="thm-p" role="menu"><div class="thm-h">選擇色系</div><div class="thm-g">' +
+      '<div class="thm-p" role="menu"><div class="thm-h">顯示模式</div>' +
+      '<div class="thm-m">' +
+        '<button type="button" data-m="auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>自動</button>' +
+        '<button type="button" data-m="light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>淺色</button>' +
+        '<button type="button" data-m="dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/></svg>深色</button>' +
+      '</div><div class="thm-tip">自動：晚上 7 點到早上 7 點顯示深色</div>' +
+      '<div class="thm-h">選擇色系</div><div class="thm-g">' +
       ORDER.map(function (k) {
         var t = T[k];
         return '<button class="thm-o" type="button" data-k="' + k + '" style="--sw-a:' + t[10] + '">' +
@@ -83,11 +184,43 @@
       }).join('') + '</div></div>';
     host.appendChild(w);
     w.querySelector('.thm-b').addEventListener('click', function (e) { e.stopPropagation(); w.classList.toggle('open'); });
+    w.querySelectorAll('.thm-m button').forEach(function (b) {
+      b.addEventListener('click', function (e) { e.stopPropagation(); window.UC_THEMES.setMode(b.dataset.m); });
+    });
     w.querySelectorAll('.thm-o').forEach(function (b) {
       b.addEventListener('click', function (e) { e.stopPropagation(); window.UC_THEMES.apply(b.dataset.k); setTimeout(function () { w.classList.remove('open'); }, 160); });
     });
     document.addEventListener('click', function (e) { if (!w.contains(e.target)) w.classList.remove('open'); });
     mark();
   }
+  /* ── 鬧鐘寶寶小插圖（空白狀態用）：sleep 睡覺／happy 開心／oops 疑惑／calm 平常 ── */
+  window.UC_MASCOT = function (kind) {
+    var eye = '#5E574F', face;
+    if (kind === 'happy') face =
+      '<path d="M44 58q4-5 8 0M68 58q4-5 8 0" fill="none" stroke="' + eye + '" stroke-width="2.6" stroke-linecap="round"/>' +
+      '<path d="M50 68q10 10 20 0" fill="#E99A8C" stroke="' + eye + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="M100 18l2.2 5 5 2.2-5 2.2-2.2 5-2.2-5-5-2.2 5-2.2z" fill="#F6D98E"/><path d="M16 40l1.6 3.6 3.6 1.6-3.6 1.6-1.6 3.6-1.6-3.6-3.6-1.6 3.6-1.6z" fill="#F6D98E"/>';
+    else if (kind === 'oops') face =
+      '<circle cx="48" cy="58" r="3" fill="' + eye + '"/><circle cx="72" cy="58" r="3" fill="' + eye + '"/>' +
+      '<path d="M53 71q7-4 14 0" fill="none" stroke="' + eye + '" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<path d="M86 40q4 6 0 9q-4-3 0-9z" fill="#AFC8DE"/>';
+    else if (kind === 'calm') face =
+      '<circle cx="48" cy="58" r="3" fill="' + eye + '"/><circle cx="72" cy="58" r="3" fill="' + eye + '"/>' +
+      '<path d="M54 68q6 5 12 0" fill="none" stroke="' + eye + '" stroke-width="2.4" stroke-linecap="round"/>';
+    else face =
+      '<path d="M43 58q5 4 10 0M67 58q5 4 10 0" fill="none" stroke="' + eye + '" stroke-width="2.6" stroke-linecap="round"/>' +
+      '<ellipse cx="60" cy="70" rx="3.2" ry="2.6" fill="' + eye + '" opacity=".75"/>' +
+      '<g fill="none" stroke="var(--ink-faint,#A3AEB7)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M96 12h8l-8 9h8"/><path d="M108 26h5l-5 6h5"/></g>';
+    return '<svg class="mascot" viewBox="0 0 120 112" aria-hidden="true">' +
+      '<ellipse cx="60" cy="106" rx="30" ry="4" fill="var(--hair,#E3E8EC)"/>' +
+      '<path d="M40 96l-6 8M80 96l6 8" stroke="#D9A595" stroke-width="5" stroke-linecap="round"/>' +
+      '<path d="M48 20q12-8 24 0" fill="none" stroke="#D9A595" stroke-width="4" stroke-linecap="round"/>' +
+      '<circle cx="31" cy="26" r="13" fill="#EBB9AA"/><circle cx="89" cy="26" r="13" fill="#EBB9AA"/>' +
+      '<circle cx="60" cy="61" r="40" fill="#F4D4C8"/><circle cx="60" cy="61" r="32" fill="#FFF8F2"/>' +
+      '<ellipse cx="41" cy="67" rx="5" ry="3.2" fill="#F2B8AE" opacity=".8"/><ellipse cx="79" cy="67" rx="5" ry="3.2" fill="#F2B8AE" opacity=".8"/>' +
+      face + '</svg>';
+  };
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
 })();

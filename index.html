@@ -450,6 +450,45 @@
   .gv-x { width: 38px; height: 38px; padding: 0; border-radius: 50%; background: rgba(255,255,255,.2); color: #fff; font-size: 24px; line-height: 1; box-shadow: none; display: grid; place-items: center; }
   .gv-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 12px calc(16px + env(safe-area-inset-bottom)); overscroll-behavior: contain; }
   .gv-body img { display: block; width: 100%; max-width: 560px; margin: 0 auto; border-radius: 18px; }
+
+  /* ── 數字固定寬度 ── */
+  .dg { display: inline-block; width: 1em; text-align: center; }
+  .dc { display: inline-block; width: .32em; text-align: center; }
+  .clock .hm .dg { width: .98em; }
+  body { font-variant-numeric: tabular-nums; }
+
+  /* ── 打卡按鈕：按壓回彈、送出中 ── */
+  .btns button.primary { transition: transform .18s cubic-bezier(.3,1.6,.5,1), box-shadow .2s, filter .2s; will-change: transform; }
+  .btns button.primary:active:not(:disabled) { transform: scale(.955); box-shadow: 0 4px 14px -8px rgba(0,0,0,.35); }
+  .btns button .bz { display: none; }
+  .btns button.sending { filter: none !important; opacity: 1 !important; transform: none; pointer-events: none; }
+  .btns button.sending .cute, .btns button.sending .lbl, .btns button.sending .sub { display: none; }
+  .btns button.sending .bz { display: inline-flex; align-items: center; gap: 12px; font-size: 18px; letter-spacing: .2em; }
+  .btns button.sending .bz::before { content: ""; width: 24px; height: 24px; border-radius: 50%; border: 3px solid rgba(255,255,255,.3);
+                                     border-top-color: #fff; animation: bzspin .8s linear infinite; }
+  .btns button.sending::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+                                background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.18) 50%, transparent 70%);
+                                background-size: 220% 100%; animation: bzsheen 1.4s linear infinite; }
+  .btns button { position: relative; overflow: hidden; }
+  .btns button.secondary.sending .bz { font-size: 15px; letter-spacing: .1em; color: var(--ink-soft); }
+  .btns button.secondary.sending .bz::before { width: 16px; height: 16px; border-width: 2px; border-color: var(--hair); border-top-color: var(--ink-soft); }
+  .btns button.secondary.sending::after { display: none; }
+  @keyframes bzspin { to { transform: rotate(360deg); } }
+  @keyframes bzsheen { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+
+  /* ── 打卡成功星點 ── */
+  .done-in { position: relative; }
+  .sparks { position: absolute; left: 50%; top: 55px; width: 0; height: 0; pointer-events: none; }
+  .sparks i { position: absolute; left: 0; top: 0; width: var(--s); height: var(--s); margin: calc(var(--s) / -2); background: var(--c);
+              border-radius: 50%; opacity: 0; animation: spark 1.3s cubic-bezier(.15,.7,.3,1) forwards; box-shadow: 0 0 6px var(--c); }
+  .sparks i.star { border-radius: 2px; transform: rotate(45deg); width: calc(var(--s) * .9); height: calc(var(--s) * .9);
+                   clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); border-radius: 0; box-shadow: none;
+                   width: calc(var(--s) * 2); height: calc(var(--s) * 2); margin: calc(var(--s) * -1); }
+  @keyframes spark { 0% { opacity: 0; transform: translate(0, 0) scale(.3); } 18% { opacity: 1; }
+                     100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1); } }
+
+  ul.today li.empty { flex-direction: column; gap: 4px; padding: 10px 0 6px; }
+  ul.today li.empty .em svg { width: 74px; height: 69px; display: block; }
 </style>
 </head>
 <body>
@@ -595,7 +634,7 @@
 <!-- 打卡成功 -->
 <div id="done" class="okview hidden" role="dialog" aria-live="polite">
   <div class="done-in">
-    <div class="done-mascot" id="doneMascot"></div>
+    <div class="done-mascot" id="doneMascot"></div><div class="sparks" id="sparks"></div>
     <svg class="done-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="23"/><path d="M15.5 27l7 7 14-15"/></svg>
     <div class="done-title" id="doneTitle">上班打卡成功</div>
     <div class="done-time num" id="doneTime">--:--</div>
@@ -739,6 +778,17 @@ async function loadStatus() {
 }
 
 /* ---------- 打卡 ---------- */
+/* 送出中：按鈕本身顯示轉圈＋狀態文字，不再蓋全螢幕 */
+function btnBusy(type, text) {
+  document.querySelectorAll('.btns button').forEach(b => b.classList.remove('sending'));
+  if (!type) return;
+  const b = type === '上班' ? $('btnIn') : $('btnOut');
+  let t = b.querySelector('.bz');
+  if (!t) { t = document.createElement('span'); t.className = 'bz'; b.appendChild(t); }
+  t.textContent = text;
+  b.classList.add('sending');
+}
+
 async function doPunch(type, force) {
   if (busy) return;
   if (requirePhoto && !photoData) return showMsg('err', '請先拍攝櫃位照片');
@@ -753,7 +803,7 @@ async function doPunch(type, force) {
   }
   busy = true; updateButtons();
   try {
-    overlay('定位中');
+    btnBusy(type, '定位中');
     const loc = await getLocation();
     let pos = loc.pos || null;
     if (!pos && lastPos && Date.now() - lastPos.t < LOC_REUSE_MS) pos = lastPos;   // 剛剛抓到的位置還可以用
@@ -770,7 +820,7 @@ async function doPunch(type, force) {
       }
       return showMsg('err', '抓不到位置，請移到靠門口或窗邊，再按一次<small>室內收訊較差時常發生</small>');
     }
-    overlay('送出中');
+    btnBusy(type, '送出中');
     const r = await api({
       action: 'punch', type, store: storeMode === 'pick' ? currentStore() : '',
       lat: pos ? pos.lat : '', lng: pos ? pos.lng : '', accuracy: pos ? pos.acc : '',
@@ -796,7 +846,7 @@ async function doPunch(type, force) {
       ? '連線逾時，請再按一次<small>不用擔心重複，3 分鐘內同一種卡只會記一次</small>'
       : '網路錯誤，請確認連線後再試一次<small>' + esc(e.message || e) + '</small>');
   } finally {
-    overlay(null);
+    btnBusy(null);
     busy = false; updateButtons();
   }
 }
@@ -1171,7 +1221,7 @@ function hint2(main, sub, relocate) {
 function openGuide() {
   const w = document.createElement('div'); w.className = 'gv';
   w.innerHTML = '<div class="gv-top"><span>使用教學</span><button class="gv-x" aria-label="關閉">×</button></div>' +
-    '<div class="gv-body"><img src="guide/staff.jpg?v=3" alt="櫃姐使用教學"></div>';
+    '<div class="gv-body"><img src="guide/staff.jpg?v=4" alt="櫃姐使用教學"></div>';
   document.body.appendChild(w);
   document.documentElement.style.overflow = 'hidden';
   const close = () => { w.remove(); document.documentElement.style.overflow = ''; };
@@ -1198,12 +1248,28 @@ function showStore() {
 }
 
 /* ---------- 打卡成功畫面 ---------- */
+/* 打卡成功：從吉祥物身邊飄散的小星點（上班暖色、下班冷色） */
+function sparkle(isIn) {
+  const box = $('sparks'); box.innerHTML = '';
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cols = isIn ? ['#F6D98E', '#F3B9A0', '#FBE7B5', '#E9C2A6', '#FFFFFF'] : ['#C9C3E6', '#AFC1DA', '#E4DDF3', '#BFD3D9', '#FFFFFF'];
+  for (let i = 0; i < 22; i++) {
+    const a = (i / 22) * Math.PI * 2 + Math.random() * .4, r = 70 + Math.random() * 70;
+    const el = document.createElement('i');
+    el.className = i % 3 ? 'dot' : 'star';
+    el.style.cssText = '--dx:' + Math.cos(a) * r + 'px;--dy:' + (Math.sin(a) * r - 10) + 'px;--c:' + cols[i % cols.length] +
+      ';--s:' + (4 + Math.random() * 5).toFixed(1) + 'px;animation-delay:' + (120 + Math.random() * 220).toFixed(0) + 'ms';
+    box.appendChild(el);
+  }
+}
+
 function showDone(type, time, store, verdict) {
   const d = $('done'), isIn = type === '上班';
+  sparkle(isIn);
   d.classList.toggle('out-type', !isIn);
   $('doneMascot').innerHTML = (isIn ? $('btnIn') : $('btnOut')).querySelector('.cute').outerHTML;
   $('doneTitle').textContent = type + '打卡成功';
-  $('doneTime').textContent = time || '';
+  $('doneTime').innerHTML = monoHTML(time || '');
   $('doneStore').textContent = store && store !== 'fixed' ? store : $('staffStore').textContent;
   const h = new Date().getHours();
   $('doneWord').textContent = isIn ? (h < 12 ? '早安，今天也加油！' : '今天也辛苦了，加油！') : '辛苦了，回家路上小心～';
@@ -1279,7 +1345,7 @@ function renderToday(list) {
     if (t) { const d = new Date(); d.setHours(Number(t[1]), Number(t[2]), 0, 0); workStart = d.getTime(); $('workSince').textContent = t[0]; }
   }
   updateWork();
-  if (!list || !list.length) { ul.innerHTML = '<li class="empty">今天還沒有打卡紀錄</li>'; updateButtons(); return; }
+  if (!list || !list.length) { ul.innerHTML = '<li class="empty"><span class="em">' + (window.UC_MASCOT ? UC_MASCOT('sleep') : '') + '</span>今天還沒有打卡紀錄</li>'; updateButtons(); return; }
   ul.innerHTML = list.map(x =>
     '<li><span class="bullet ' + (x.type === '上班' ? 'in' : 'out') + '"></span>' +
     '<span class="type">' + esc(x.type) + (x.store ? '<span class="where">' + esc(x.store) + '</span>' : '') + '</span>' +
@@ -1289,13 +1355,19 @@ function renderToday(list) {
   updateButtons();
 }
 
+/* 數字固定寬度：每個數字放在等寬的格子裡，秒數跳動時整排不會左右晃 */
+function monoHTML(str) {
+  return String(str).replace(/[0-9]/g, c => '<span class="dg">' + c + '</span>').replace(/:/g, '<span class="dc">:</span>');
+}
+function setMono(el, str) { if (el.dataset.v !== str) { el.dataset.v = str; el.innerHTML = monoHTML(str); } }
+
 function startClock() {
   const days = '日一二三四五六';
   const p = n => String(n).padStart(2, '0');
   const tick = () => {
     const d = new Date(), h = d.getHours();
-    $('clockHM').textContent = p(h) + ':' + p(d.getMinutes());
-    $('clockS').textContent = p(d.getSeconds());
+    setMono($('clockHM'), p(h) + ':' + p(d.getMinutes()));
+    setMono($('clockS'), p(d.getSeconds()));
     $('clockDate').innerHTML = '<span class="num">' + d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + '</span>　星期' + days[d.getDay()];
     $('greetWord').textContent = h < 11 ? '早安' : h < 18 ? '午安' : '晚安';
     if (d.getSeconds() === 0) updateWork();
