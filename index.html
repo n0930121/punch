@@ -28,6 +28,19 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32-v4.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon-v4.png">
+<!-- iPhone 從桌面開啟時的啟動畫面（各機型尺寸） -->
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1320x2868.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1206x2622.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="icons/splash/splash-828x1792.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1242x2208.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="icons/splash/splash-750x1334.png">
+<link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="icons/splash/splash-640x1136.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="UC 打卡系統">
@@ -35,7 +48,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
-<script src="theme.js?v=5"></script>
+<script src="theme.js?v=6"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪色票 ── */
@@ -481,6 +494,47 @@
 
   ul.today li.empty { flex-direction: column; gap: 4px; padding: 10px 0 6px; }
   ul.today li.empty .em svg { width: 74px; height: 69px; display: block; }
+
+  /* ── 上班時間圓環 ── */
+  .work { display: flex; align-items: center; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--hair); }
+  .ring { position: relative; width: 68px; height: 68px; flex: none; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 6; }
+  .ring .rt { stroke: var(--hair); }
+  .ring .rp { stroke: url(#rg); stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); }
+  .ring.over .rp { stroke: var(--amber, #B9895A); }
+  .ring .rc { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+  .ring .rc b { font-size: 17px; font-weight: 400; color: var(--ink); }
+  .ring .rc span { font-size: 11px; color: var(--ink-faint); letter-spacing: .1em; }
+  .wtxt { min-width: 0; }
+  .wtxt .work-lbl { font-size: 16px; color: var(--ink-soft); white-space: nowrap; }
+  .wtxt .work-lbl b { color: var(--ink); font-weight: 600; }
+  .wtxt .work-since { font-size: 14px; color: var(--ink-faint); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wtxt .work-since .num { font-size: 13px; color: var(--ink-soft); }
+  .wtxt .work-left { font-size: 13px; color: var(--ink-faint); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ring.over ~ .wtxt .work-left { color: var(--amber, #B9895A); }
+  html.mq-max370 .ring { width: 60px; height: 60px; } html.mq-max370 .wtxt .work-since { font-size: 13px; }
+
+  /* ── 問候語 ── */
+  .greet-wrap { min-width: 0; }
+  .greet .gi { display: inline-block; width: 20px; height: 20px; margin-right: 6px; vertical-align: -4px; }
+  .greet .gi svg { width: 100%; height: 100%; display: block; animation: giIn .6s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes giIn { from { transform: scale(.4) rotate(-30deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  .greet-note { font-size: 13px; color: var(--ink-faint); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .04em; }
+  .greet-row { align-items: flex-start; }
+
+  /* ── 開場轉場 ── */
+  .splash { transition: opacity .55s ease .12s, visibility 0s linear .7s; }
+  .splash .sp-logo { transition: transform .6s cubic-bezier(.6,0,.2,1); }
+  .splash.out .sp-name, .splash.out .sp-sub, .splash.out .sp-dots, .splash.out .sp-text { opacity: 0; transform: translateY(8px); transition: opacity .25s, transform .25s; }
+  .splash.out .sp-logo { animation: none; }
+  body:has(#splash:not(.out)) main .rise { animation-play-state: paused; }
+
+  /* ── 頂端毛玻璃 ── */
+  header { position: sticky; top: 0; z-index: 20; margin-left: -16px; margin-right: -16px; padding: calc(8px + env(safe-area-inset-top)) 20px 8px;
+           transition: background .25s, box-shadow .25s; }
+  body.scrolled header { background: color-mix(in srgb, var(--bg) 72%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+                         box-shadow: 0 1px 0 color-mix(in srgb, var(--ink-faint) 22%, transparent); }
 </style>
 </head>
 <body>
@@ -510,18 +564,21 @@
   <!-- 打卡主畫面 -->
   <div id="punchView" class="hidden">
     <section class="card hero rise">
-      <div class="greet-row"><div class="greet"><span id="greetWord">您好</span>，<b id="staffName"></b></div>
+      <div class="greet-row"><div class="greet-wrap"><div class="greet"><span class="gi" id="greetIcon"></span><span id="greetWord">您好</span>，<b id="staffName"></b></div><div class="greet-note hidden" id="greetNote"></div></div>
         <button class="guide-link" id="guideOpen" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>使用教學</button></div>
       <div class="clock"><span class="hm" id="clockHM">--:--</span><span class="s" id="clockS">--</span></div>
       <div class="date" id="clockDate"></div>
       <!-- 上班中：計時＋進度 -->
       <div class="work hidden" id="workBox">
-        <div class="work-row">
-          <span class="work-lbl"><i class="live"></i>已上班 <b id="workDur">0 分</b></span>
-          <span class="work-since">自 <span class="num" id="workSince">--:--</span></span>
+        <div class="ring" id="workRing">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--sage)"/><stop offset="1" style="stop-color:var(--sage-deep)"/></linearGradient></defs>
+            <circle class="rt" cx="32" cy="32" r="27"/><circle class="rp" id="ringP" cx="32" cy="32" r="27"/></svg>
+          <div class="rc"><b class="num" id="ringH">0</b><span>小時</span></div>
         </div>
-        <div class="bar"><span id="workBar"></span></div>
-        <div class="work-scale"><span>0</span><span>4h</span><span>9h</span></div>
+        <div class="wtxt">
+          <div class="work-lbl"><i class="live"></i>已上班 <b id="workDur">0 分</b></div>
+          <div class="work-since">自 <span class="num" id="workSince">--:--</span> 上班</div><div class="work-left" id="workLeft"></div>
+        </div>
       </div>
     </section>
 
@@ -673,6 +730,11 @@ let requirePhoto = true;
 let photoData = null;
 let busy = false;
 let doneTimer = null, workStart = null, lastType = null;
+var GI = {
+  sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.6" fill="#F3C969"/><g stroke="#F3C969" stroke-width="2" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg>',
+  dusk: '<svg viewBox="0 0 24 24"><path d="M5 16a7 7 0 0 1 14 0z" fill="#EFA78C"/><path d="M2.5 18.5h19" stroke="#D9937B" stroke-width="2" stroke-linecap="round"/><g stroke="#EFA78C" stroke-width="2" stroke-linecap="round"><path d="M12 4.5v2M5.6 7.6l1.4 1.4M18.4 7.6L17 9"/></g></svg>',
+  moon: '<svg viewBox="0 0 24 24"><path d="M19.5 14.6A8 8 0 1 1 9.4 4.5a6.3 6.3 0 0 0 10.1 10.1z" fill="#C9C3E6"/><circle cx="18.5" cy="5.5" r="1.1" fill="#C9C3E6"/><circle cx="21" cy="9" r=".7" fill="#C9C3E6"/></svg>'
+};
 const SHIFT_HOURS = 9;
 
 /* ---------- 手機 App（PWA） ---------- */
@@ -716,10 +778,20 @@ function setLoading(text) {
   clearTimeout(slowTimer);
   slowTimer = setTimeout(() => $('slowHint').classList.remove('hidden'), 8000);
 }
+window.addEventListener('scroll', () => document.body.classList.toggle('scrolled', scrollY > 8), { passive: true });
+
 function hideSplash() {
   clearTimeout(slowTimer);
   const sp = $('splash'); if (!sp || sp.classList.contains('out')) return;
-  sp.classList.add('out'); setTimeout(() => sp.remove(), 500);
+  // 轉場：圖示縮小飛向左上角品牌位置，主畫面卡片依序浮上來
+  const logo = sp.querySelector('.sp-logo'), brand = document.querySelector('header .brand');
+  if (logo && brand && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    const a = logo.getBoundingClientRect(), b = brand.getBoundingClientRect();
+    const dx = (b.left + 10) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+    logo.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(.12)';
+  }
+  document.body.classList.add('entered');
+  sp.classList.add('out'); setTimeout(() => sp.remove(), 700);
 }
 
 /* ---------- 啟動 ---------- */
@@ -795,6 +867,7 @@ async function doPunch(type, force) {
   }
   busy = true; updateButtons();
   try {
+    try { navigator.vibrate && navigator.vibrate(10); } catch (e) {}
     btnBusy(type, '定位中');
     const loc = await getLocation();
     let pos = loc.pos || null;
@@ -1220,7 +1293,7 @@ function openGuide() {
   w.querySelector('.gv-x').onclick = close;
   w.onclick = e => { if (e.target === w) close(); };
 }
-document.getElementById('guideOpen').onclick = openGuide;
+document.getElementById('guideOpen').onclick = () => { try { navigator.vibrate && navigator.vibrate(6); } catch (e) {} openGuide(); };
 
 function setHint(html, kind) {
   const h = $('storeHint');
@@ -1281,7 +1354,12 @@ function updateWork() {
   if (!workStart) { box.classList.add('hidden'); return; }
   const mins = Math.max(0, Math.floor((Date.now() - workStart) / 60000));
   $('workDur').textContent = (mins >= 60 ? Math.floor(mins / 60) + ' 小時 ' : '') + (mins % 60) + ' 分';
-  $('workBar').style.width = Math.min(100, mins / (SHIFT_HOURS * 60) * 100) + '%';
+  const k = Math.min(1, mins / (SHIFT_HOURS * 60)), C = 2 * Math.PI * 27;
+  $('ringP').style.strokeDasharray = C; $('ringP').style.strokeDashoffset = C * (1 - k);
+  $('ringH').textContent = (Math.floor(mins / 6) / 10).toFixed(1).replace(/\.0$/, '');
+  const left = SHIFT_HOURS * 60 - mins;
+  $('workLeft').textContent = left > 0 ? '再 ' + (left >= 60 ? Math.floor(left / 60) + ' 小時 ' : '') + (left % 60) + ' 分滿 ' + SHIFT_HOURS + ' 小時' : '已滿 ' + SHIFT_HOURS + ' 小時，記得打下班卡';
+  $('workRing').classList.toggle('over', left <= 0);
   box.classList.remove('hidden');
 }
 
@@ -1347,6 +1425,21 @@ function renderToday(list) {
   updateButtons();
 }
 
+/* 問候語：早上小太陽、傍晚夕陽、晚上小月亮；特別的日子加一句話 */
+
+function updateGreet(d) {
+  const h = d.getHours(), wd = d.getDay();
+  const k = h >= 5 && h < 16 ? 'sun' : h >= 16 && h < 18 ? 'dusk' : 'moon';
+  if ($('greetIcon').dataset.k !== k) { $('greetIcon').innerHTML = GI[k]; $('greetIcon').dataset.k = k; }
+  $('greetIcon').dataset.h = h;
+  let note = '';
+  if (h >= 22 || h < 5) note = '這麼晚了，辛苦了，早點休息';
+  else if (wd === 5) note = '週五了，再撐一下！';
+  else if (wd === 1 && h < 14) note = '新的一週，加油！';
+  else if (wd === 6 || wd === 0) note = '週末辛苦了，假日人多加油！';
+  $('greetNote').textContent = note; $('greetNote').classList.toggle('hidden', !note);
+}
+
 /* 數字固定寬度：每個數字放在等寬的格子裡，秒數跳動時整排不會左右晃 */
 function monoHTML(str) {
   return String(str).replace(/[0-9]/g, c => '<span class="dg">' + c + '</span>').replace(/:/g, '<span class="dc">:</span>');
@@ -1362,6 +1455,7 @@ function startClock() {
     setMono($('clockS'), p(d.getSeconds()));
     $('clockDate').innerHTML = '<span class="num">' + d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + '</span>　星期' + days[d.getDay()];
     $('greetWord').textContent = h < 11 ? '早安' : h < 18 ? '午安' : '晚安';
+    if (d.getSeconds() === 0 || !$('greetIcon').dataset.h) updateGreet(d);
     if (d.getSeconds() === 0) updateWork();
   };
   tick(); setInterval(tick, 1000);

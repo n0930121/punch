@@ -32,7 +32,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
-<script src="../theme.js?v=5"></script>
+<script src="../theme.js?v=6"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪・紫芋（與打卡 App 的灰藍區分） ── */
@@ -450,6 +450,55 @@
 
   /* ── 平板／橫向：兩欄排版 ── */
   /* mq-min900 */ html.mq-min900 main { max-width: 1040px; padding-left: 28px; padding-right: 28px; } html.mq-min900 header,html.mq-min900 h1,html.mq-min900 .sub { max-width: none; } html.mq-min900 #peopleList { display: grid; grid-template-columns: 1fr 1fr; column-gap: 32px; } html.mq-min900 #peopleList .person:nth-child(2) { border-top: 0; } html.mq-min900 #recList:has(.card + .card) { columns: 2; column-gap: 18px; } html.mq-min900 #recList .card { break-inside: avoid; display: inline-block; width: 100%; } html.mq-min900 #hrList { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; } html.mq-min900 #hrList .chart { grid-column: 1 / -1; } html.mq-min900 #hrList > .card:only-child,html.mq-min900 #hrList .hp.open:only-of-type { grid-column: 1 / -1; } html.mq-min900 #tab-staff #staffList,html.mq-min900 #tab-staff #fixAdmin { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; } html.mq-min900 .filters .row { max-width: 720px; }
+
+  /* ── 今日時間軸 ── */
+  .people { padding-top: 6px; }
+  .tl-head { display: grid; grid-template-columns: 40px 1fr; column-gap: 10px; align-items: end; padding: 10px 0 2px; font-size: 12px; color: var(--ink-faint); }
+  .tl-head > span { grid-column: 1 / -1; display: none; }
+  .tl-scale { grid-column: 2; position: relative; height: 16px; font-family: "Michroma", sans-serif; font-size: 10px; }
+  .tl-scale span { position: absolute; transform: translateX(-50%); }
+  .person .tl { grid-column: 2 / -1; margin-top: 8px; }
+  .tl-tr { position: relative; height: 8px; border-radius: 99px; background: var(--hair); }
+  .tl-tr i { position: absolute; top: 1px; bottom: 1px; width: 1px; background: color-mix(in srgb, var(--ink-faint) 35%, transparent); }
+  .tl-seg { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: var(--mist); }
+  .tl-seg.working { background: linear-gradient(90deg, color-mix(in srgb, var(--sage) 70%, var(--paper)), var(--sage)); }
+  .tl-now { position: absolute; top: -3px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--sage); box-shadow: 0 0 0 3px var(--paper); animation: tlp 2s infinite; }
+  @keyframes tlp { 0%,100% { box-shadow: 0 0 0 3px var(--paper), 0 0 0 3px color-mix(in srgb, var(--sage) 50%, transparent); } 50% { box-shadow: 0 0 0 3px var(--paper), 0 0 0 8px transparent; } }
+  html.mq-max400 .tl-head { grid-template-columns: 34px 1fr; column-gap: 8px; }
+  html.mq-min900 .tl-head { display: none; }
+
+  .kpi .dl { font-size: 12px; margin-top: 4px; white-space: nowrap; letter-spacing: 0; }
+  .kpi .dl.up { color: var(--sage-deep); } .kpi .dl.down { color: var(--bad); } .kpi .dl.eq { color: var(--ink-faint); }
+  .kpi .dl::before { display: inline-block; margin-right: 2px; font-size: 10px; }
+  .kpi .dl.up::before { content: "▲"; } .kpi .dl.down::before { content: "▼"; }
+
+  /* ── 頂端毛玻璃＋大標題收合 ── */
+  header { position: sticky; top: 0; z-index: 20; margin: 0 -16px 16px; padding: calc(8px + env(safe-area-inset-top)) 20px 8px;
+           transition: background .25s, box-shadow .25s, backdrop-filter .25s; }
+  body.scrolled header { background: color-mix(in srgb, var(--bg) 72%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+                         box-shadow: 0 1px 0 color-mix(in srgb, var(--ink-faint) 22%, transparent); }
+  header .brand { position: relative; overflow: hidden; height: 1.5em; }
+  header .brand .b-main, header .brand .b-sub { display: block; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .3s; white-space: nowrap; }
+  header .brand .b-sub { position: absolute; left: 16px; top: 0; transform: translateY(110%); opacity: 0; color: var(--ink); letter-spacing: .12em; }
+  body.title-in header .brand .b-main { transform: translateY(-110%); opacity: 0; }
+  body.title-in header .brand .b-sub { transform: none; opacity: 1; }
+  html.mq-min900 header { margin-left: -28px; margin-right: -28px; padding-left: 32px; padding-right: 32px; }
+  section h1 { transition: opacity .25s; }
+  body.title-in section:not(.hidden) h1 { opacity: .0; }
+  header .brand { display: flex; align-items: center; min-width: 0; }
+  header .brand::before { flex: none; }
+  html.mq-max370 body.title-in header .brand { display: flex; }
+  html.mq-max370 body.title-in header .pill { display: none; }
+
+  /* ── 下拉更新 ── */
+  .ptr { position: fixed; left: 50%; top: calc(8px + env(safe-area-inset-top)); z-index: 30; transform: translate(-50%, -70px); opacity: 0;
+         display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: var(--paper); box-shadow: var(--shadow);
+         font-size: 14px; color: var(--ink-soft); transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s; pointer-events: none; white-space: nowrap; }
+  .ptr.show { opacity: 1; transition: opacity .2s; }
+  .ptr-m svg { width: 34px; height: 32px; display: block; }
+  .ptr.ready .ptr-m { animation: ptrShake .5s ease-in-out infinite; }
+  .ptr.loading .ptr-m { animation: ptrShake .35s ease-in-out infinite; }
+  @keyframes ptrShake { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
 </style>
 </head>
 <body>
@@ -459,7 +508,7 @@
   <header>
     <a class="back" href="../" aria-label="回打卡">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>打卡</a>
-    <div class="brand">打卡查詢</div>
+    <div class="brand"><span class="b-main">打卡查詢</span><span class="b-sub" id="hdTitle"></span></div>
     <div class="pill hidden" id="rolePill"></div>
   </header>
 
@@ -480,7 +529,7 @@
     </div>
     <div class="ratio" id="ratioBar"><span class="w"></span><span class="o"></span><span class="n"></span></div>
     <div class="ratio-lg"><span><i class="w"></i>上班中</span><span><i class="o"></i>已下班</span><span><i class="n"></i>未打卡</span><span class="lvc hidden" id="leaveTxt"></span><span class="r" id="ratioTxt"></span></div>
-    <div class="card people" id="peopleList"></div>
+    <div class="card people"><div class="tl-head"><span>今日時間軸</span><div class="tl-scale" id="tlScale"></div></div><div id="peopleList"></div></div>
     <div class="note">回到 App 或切換分頁時會自動更新</div>
   </section>
 
@@ -675,11 +724,27 @@ async function loadToday() {
   bar[0].style.flex = r.counts.working; bar[1].style.flex = r.counts.off; bar[2].style.flex = r.counts.none;
   $('ratioTxt').textContent = '到班率 ' + Math.round((r.counts.working + r.counts.off) / tot * 100) + '%';
   const label = { working: '上班中', off: '已下班', none: '未打卡', leave: '休假' };
+  // 時間軸範圍：預設 10:00–22:00，有人更早到或更晚走就自動放寬
+  const toM = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : null; };
+  const now = new Date(), nowM = now.getHours() * 60 + now.getMinutes();
+  let t0 = 600, t1 = 1320;
+  r.people.forEach(p => { const a = toM(p.inTime), b = toM(p.outTime); if (a !== null) t0 = Math.min(t0, Math.floor(a / 60) * 60); if (b !== null) t1 = Math.max(t1, Math.ceil(b / 60) * 60); });
+  if (r.people.some(p => p.state === 'working')) t1 = Math.max(t1, Math.ceil(nowM / 60) * 60);
+  const pct = m => Math.max(0, Math.min(100, (m - t0) / (t1 - t0) * 100));
+  const ticks = []; for (let h = Math.ceil(t0 / 60) + 1; h * 60 < t1; h++) if (h % 2 === 0) ticks.push(h);
+  const tl = p => {
+    const a = toM(p.inTime); if (a === null) return '';
+    const b = p.state === 'working' ? nowM : toM(p.outTime); if (b === null) return '';
+    return '<div class="tl"><div class="tl-tr">' + ticks.map(h => '<i style="left:' + pct(h * 60) + '%"></i>').join('') +
+      '<span class="tl-seg ' + p.state + '" style="left:' + pct(a) + '%;width:' + Math.max(1.5, pct(b) - pct(a)) + '%"></span>' +
+      (p.state === 'working' ? '<span class="tl-now" style="left:' + pct(nowM) + '%"></span>' : '') + '</div></div>';
+  };
+  $('tlScale').innerHTML = ticks.map(h => '<span style="left:' + pct(h * 60) + '%">' + h + '</span>').join('');
   $('peopleList').innerHTML = r.people.length ? r.people.map(p =>
     '<div class="person fadein">' + avatar(p.name, 'pav') + '<div class="nm"><span class="nmx">' + esc(p.name) + '</span><span class="state s1 ' + p.state + '">' + label[p.state] + '</span></div>' +
     '<div class="st"><span class="state s2 ' + p.state + '">' + label[p.state] + '</span><span class="sto">' + (p.store ? esc(p.store) : p.state === 'leave' ? '今日休假' : '尚未選櫃點') + '</span></div>' +
     '<div class="tm">上 <b class="num">' + (p.inTime || '--:--') + '</b><br>下 <b class="num">' + (p.outTime || '--:--') + '</b></div>' +
-    photoBtn(p.name + '・今天', [{ label: '上班', time: p.inTime, id: p.inPhoto }, { label: '下班', time: p.outTime, id: p.outPhoto }]) +
+    photoBtn(p.name + '・今天', [{ label: '上班', time: p.inTime, id: p.inPhoto }, { label: '下班', time: p.outTime, id: p.outPhoto }]) + tl(p) +
     (p.abnormal.length ? '<div class="ab">' + p.abnormal.map(abLine).join('') + '</div>' : '') + '</div>'
   ).join('') : emptyBox('還沒有已開通的人員');
 }
@@ -689,6 +754,42 @@ function abLine(t) {
   const i = String(t).indexOf('：');
   if (i < 0) return '<div class="abl"><span>' + esc(t) + '</span></div>';
   return '<div class="abl"><b>' + esc(t.slice(0, i)) + '</b><span>' + esc(t.slice(i + 1)) + '</span></div>';
+}
+
+/* 觸感回饋（Android 有感；iPhone 網頁不支援震動，會自動略過） */
+function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 8); } catch (e) {} }
+
+/* 今日頁下拉更新：往下拉，鬧鐘寶寶搖一搖，放開就重新整理 */
+function initPull() {
+  const ind = document.createElement('div'); ind.className = 'ptr';
+  ind.innerHTML = '<div class="ptr-m">' + window.UC_MASCOT('calm') + '</div><span>下拉更新</span>';
+  document.body.appendChild(ind);
+  let y0 = null, dy = 0, busy = false;
+  const TH = 70;
+  document.addEventListener('touchstart', e => {
+    if (busy || curTab !== 'today' || scrollY > 0 || document.querySelector('.cf, .pm, .thm.open')) { y0 = null; return; }
+    y0 = e.touches[0].clientY; dy = 0;
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (y0 === null) return;
+    dy = e.touches[0].clientY - y0;
+    if (dy <= 0) { ind.style.transform = ''; ind.classList.remove('show'); return; }
+    const d = Math.min(110, dy * .5);
+    ind.classList.add('show'); ind.classList.toggle('ready', dy > TH * 1.6);
+    ind.style.transform = 'translate(-50%,' + (d - 70) + 'px)';
+    ind.querySelector('span').textContent = dy > TH * 1.6 ? '放開更新' : '下拉更新';
+  }, { passive: true });
+  document.addEventListener('touchend', async () => {
+    if (y0 === null) return;
+    const go = dy > TH * 1.6; y0 = null;
+    if (!go) { ind.style.transform = ''; ind.classList.remove('show', 'ready'); return; }
+    busy = true; buzz(10);
+    ind.classList.add('loading'); ind.querySelector('span').textContent = '更新中…';
+    ind.style.transform = 'translate(-50%, 0px)';
+    await loadToday();
+    ind.querySelector('span').textContent = '已更新';
+    setTimeout(() => { ind.style.transform = ''; ind.classList.remove('show', 'ready', 'loading'); busy = false; }, 500);
+  });
 }
 
 /* 數字跳動：0 → 目標值（小數保留一位） */
@@ -769,7 +870,7 @@ async function loadHours() {
     ((p.leaves || []).length ? '<span class="lvn">休 ' + p.leaves.length + ' 天</span>' : '') +
     '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>' +
     '<div class="kpis"><div class="kpi"><div class="v" data-cnt="' + p.workDays + '">0</div><div class="k">出勤天數</div></div>' +
-    '<div class="kpi"><div class="v" data-cnt="' + p.totalHours + '">0</div><div class="k">總工時</div></div>' +
+    '<div class="kpi"><div class="v" data-cnt="' + p.totalHours + '">0</div><div class="k">總工時</div>' + deltaTag(p) + '</div>' +
     '<div class="kpi' + (p.missing ? ' miss' : '') + '"><div class="v" data-cnt="' + p.missing + '">0</div><div class="k">缺卡</div></div></div>' +
     '<div class="dlist">' + calendar(p) + p.days.map(d => (curHoursName = p.name, dayRow(d))).join('') + '</div></div>'
   ).join('');
@@ -778,7 +879,16 @@ async function loadHours() {
   $('hrList').querySelectorAll('[data-cnt]').forEach(el => countUp(el, Number(el.dataset.cnt)));
   requestAnimationFrame(() => requestAnimationFrame(() =>
     $('hrList').querySelectorAll('.hb-t span[data-w]').forEach((el, i) => { el.style.transitionDelay = (i * 60) + 'ms'; el.style.width = el.dataset.w + '%'; })));
-  document.querySelectorAll('.cal .cd[data-d]').forEach(el => el.onclick = () => dayDetail(el.dataset.n, el.dataset.d));
+  document.querySelectorAll('.cal .cd[data-d]').forEach(el => el.onclick = () => { buzz(6); dayDetail(el.dataset.n, el.dataset.d); });
+}
+
+/* 和上個月比較：比上月 +3.2h／-1.5h／持平 */
+function deltaTag(p) {
+  if (p.prevHours === null || p.prevHours === undefined) return '';
+  const d = Math.round((p.totalHours - p.prevHours) * 10) / 10;
+  if (!p.prevHours && !p.totalHours) return '';
+  const cls = d > 0 ? 'up' : d < 0 ? 'down' : 'eq';
+  return '<div class="dl ' + cls + '">' + (d === 0 ? '與上月持平' : '比上月 ' + (d > 0 ? '+' : '−') + Math.abs(d) + 'h') + '</div>';
 }
 
 /* 點日曆上的日期：顯示那天的上下班、工時、櫃點；主管可看照片、標記／取消休假 */
@@ -1003,7 +1113,7 @@ function confirmBox(title, msg, okText, onOk, danger) {
     '<div class="cf-b"><button class="cf-no">取消</button><button class="cf-ok' + (danger ? ' danger' : '') + '">' + okText + '</button></div></div>';
   document.body.appendChild(w);
   w.onclick = e => { if (e.target === w || e.target.classList.contains('cf-no')) w.remove(); };
-  w.querySelector('.cf-ok').onclick = async e => { e.target.disabled = true; e.target.textContent = '處理中…'; await onOk(); w.remove(); };
+  w.querySelector('.cf-ok').onclick = async e => { buzz(12); e.target.disabled = true; e.target.textContent = '處理中…'; await onOk(); w.remove(); };
 }
 function toast(msg) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
@@ -1081,9 +1191,9 @@ function exportHours() {
 
 /* ---------- UI ---------- */
 function bindUI() {
-  document.querySelectorAll('nav button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+  document.querySelectorAll('nav button').forEach(b => b.onclick = () => { if (b.dataset.tab !== curTab) buzz(8); showTab(b.dataset.tab); });
   document.querySelectorAll('#rangeChips .chip').forEach(c => c.onclick = () => {
-    range = c.dataset.r;
+    range = c.dataset.r; buzz(6);
     document.querySelectorAll('#rangeChips .chip').forEach(x => x.classList.toggle('on', x === c));
     $('customRange').classList.toggle('hidden', range !== 'custom');
     loadRecords();
@@ -1093,7 +1203,7 @@ function bindUI() {
   const fadeChk = () => ch.classList.toggle('fade-r', ch.scrollLeft + ch.clientWidth < ch.scrollWidth - 4);
   ch.addEventListener('scroll', fadeChk, { passive: true }); window.addEventListener('resize', fadeChk);
   setTimeout(fadeChk, 0); new MutationObserver(fadeChk).observe($('tab-records'), { attributes: true });
-  $('fAbn').onclick = () => { abnOnly = !abnOnly; $('fAbn').classList.toggle('on', abnOnly); loadRecords(); };
+  $('fAbn').onclick = () => { buzz(8); abnOnly = !abnOnly; $('fAbn').classList.toggle('on', abnOnly); loadRecords(); };
   $('hName').onchange = loadHours;
   $('mPrev').onclick = () => shiftMonth(-1);
   $('mNext').onclick = () => shiftMonth(1);
@@ -1102,6 +1212,16 @@ function bindUI() {
   $('hrExport').onclick = exportHours;
   document.addEventListener('visibilitychange', () => { if (!document.hidden && curTab === 'today') loadToday(); });
   window.addEventListener('resize', moveIndicator);
+  // 捲動：頂端變毛玻璃，大標題捲出去後縮進頂端
+  const onScroll = () => {
+    document.body.classList.toggle('scrolled', scrollY > 8);
+    const h1 = document.querySelector('section:not(.hidden) h1');
+    const past = h1 && h1.getBoundingClientRect().bottom < 56;
+    if (past && h1) $('hdTitle').textContent = h1.textContent;
+    document.body.classList.toggle('title-in', !!past);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  initPull();
   document.addEventListener('uc-theme', () => { if (ME && curTab) showTab(curTab); });   // 切換深淺色時重畫（頭像配色）
 }
 function shiftMonth(n) {
@@ -1222,7 +1342,7 @@ function demoApi(p) {
                       inPhoto: asStaff ? '' : 'demoIn01234', outPhoto: asStaff || flag ? '' : 'demoOut01234' });
         }
         const leaves = [p.month + '-03', p.month + '-10'].concat(Object.keys(DEMO_LEAVE).filter(k => k.indexOf(name) === 0).map(k => k.slice(name.length)));
-        return { name, days: days.reverse(), leaves, workDays: days.length, totalHours: Math.round(total * 10) / 10, missing: miss };
+        return { name, days: days.reverse(), leaves, prevHours: Math.round((total - 3.4 + base * 2.1) * 10) / 10, workDays: days.length, totalHours: Math.round(total * 10) / 10, missing: miss };
       };
       return res({ ok: true, me, month: p.month, people: asStaff || p.name ? [mk(p.name || '王小美', 3)] : people.slice(0, 4).map((n, i) => mk(n, i)) });
     }

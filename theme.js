@@ -160,6 +160,7 @@
     'html[data-mode=dark] body{color-scheme:dark}' +
     'html[data-mode=dark] input,html[data-mode=dark] select{color-scheme:dark}';
 
+  function hz() { try { if (navigator.vibrate) navigator.vibrate(6); } catch (e) {} }
   function mark() {
     document.querySelectorAll('.thm-o').forEach(function (b) { b.classList.toggle('on', b.dataset.k === cur); });
     document.querySelectorAll('.thm-m button').forEach(function (b) { b.classList.toggle('on', b.dataset.m === mode); });
@@ -183,12 +184,12 @@
           '<span style="background:linear-gradient(135deg,' + t[2] + ',' + t[3] + ')"></span>' + t[0] + '</button>';
       }).join('') + '</div></div>';
     host.appendChild(w);
-    w.querySelector('.thm-b').addEventListener('click', function (e) { e.stopPropagation(); w.classList.toggle('open'); });
+    w.querySelector('.thm-b').addEventListener('click', function (e) { e.stopPropagation(); hz(); w.classList.toggle('open'); });
     w.querySelectorAll('.thm-m button').forEach(function (b) {
-      b.addEventListener('click', function (e) { e.stopPropagation(); window.UC_THEMES.setMode(b.dataset.m); });
+      b.addEventListener('click', function (e) { e.stopPropagation(); hz(); window.UC_THEMES.setMode(b.dataset.m); });
     });
     w.querySelectorAll('.thm-o').forEach(function (b) {
-      b.addEventListener('click', function (e) { e.stopPropagation(); window.UC_THEMES.apply(b.dataset.k); setTimeout(function () { w.classList.remove('open'); }, 160); });
+      b.addEventListener('click', function (e) { e.stopPropagation(); hz(); window.UC_THEMES.apply(b.dataset.k); setTimeout(function () { w.classList.remove('open'); }, 160); });
     });
     document.addEventListener('click', function (e) { if (!w.contains(e.target)) w.classList.remove('open'); });
     mark();
