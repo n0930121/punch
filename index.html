@@ -209,6 +209,9 @@
   .flip svg { width: 26px; height: 26px; }
   .shutter { width: 74px; height: 74px; padding: 0; border-radius: 50%; background: #F5F7F8; box-shadow: 0 0 0 5px rgba(255,255,255,.35); }
   .shutter:active { transform: scale(.92); }
+  .retry { margin-top: 14px; border: 0; font-family: inherit; font-size: 15px; padding: 10px 22px; border-radius: 999px;
+           background: var(--mist); color: #fff; box-shadow: none; display: inline-block; letter-spacing: .1em; }
+  .slow { margin-top: 12px; font-size: 13px; color: var(--ink-faint); line-height: 1.7; }
   footer { text-align: center; font-size: 11px; color: var(--ink-faint); letter-spacing: .15em; margin-top: 18px; }
 </style>
 </head>
@@ -392,6 +395,16 @@ function setupInstallBar() {
   };
 }
 
+const RETRY_BTN = '<br><button class="retry" onclick="location.reload()">重新載入</button>';
+let slowTimer = null;
+function setLoading(text) {
+  if ($('stateView').classList.contains('hidden')) return;
+  $('stateView').innerHTML = '<div class="ico"><div class="spinner" style="width:26px;height:26px"></div></div><div>' + text +
+    '</div><div class="slow hidden" id="slowHint">網路較慢，請再稍候一下…<br>商場 Wi-Fi 若需要先登入，請先完成登入或改用行動網路</div>';
+  clearTimeout(slowTimer);
+  slowTimer = setTimeout(() => { const h = $('slowHint'); if (h) h.classList.remove('hidden'); }, 8000);
+}
+
 /* ---------- 啟動 ---------- */
 (async function start() {
   startClock();
@@ -400,19 +413,26 @@ function setupInstallBar() {
     if (DEMO) {
       $('demoBar').classList.remove('hidden');
     } else {
+      setLoading('連線 LINE 中…');
       await liff.init({ liffId: LIFF_ID });
       if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
     }
     setupInstallBar();
+    setLoading('讀取資料中…');
     await loadStatus();
   } catch (e) {
-    showState('warn', '無法啟動：' + esc(e.message || e) + '<br><small>請關閉後重新開啟</small>');
+    const slow = e && e.name === 'AbortError';
+    const offline = e && /fetch|network/i.test(String(e.message));
+    showState('warn', (slow ? '連線逾時，網路可能不穩' : offline ? '連不上伺服器，請確認網路<br><small>商場 Wi-Fi 若需要先登入，請先完成登入或改用行動網路</small>'
+                       : '無法啟動：' + esc(e.message || e)) + RETRY_BTN);
   }
 })();
 
+
+
 async function loadStatus() {
   const r = await api({ action: 'status' });
-  if (!r.ok) return showState('warn', esc(r.message || '讀取失敗'));
+  if (!r.ok) return showState('warn', esc(r.message || '讀取失敗') + (r.code === 'CONFIG' ? '' : RETRY_BTN));
   requirePhoto = r.requirePhoto !== false;
 
   if (r.state === 'pending') {
@@ -461,7 +481,9 @@ async function doPunch(type) {
       clearPhoto();
     }
   } catch (e) {
-    showMsg('err', '網路錯誤，請確認連線後再試一次<small>' + esc(e.message || e) + '</small>');
+    showMsg('err', e && e.name === 'AbortError'
+      ? '連線逾時，請再按一次<small>不用擔心重複，3 分鐘內同一種卡只會記一次</small>'
+      : '網路錯誤，請確認連線後再試一次<small>' + esc(e.message || e) + '</small>');
   } finally {
     overlay(null);
     busy = false; updateButtons();
@@ -603,10 +625,17 @@ async function api(payload) {
   } catch (e) {}
   payload.idToken = liff.getIDToken();
   // 不設 Content-Type（預設 text/plain），避免跨網域預檢，Apps Script 才收得到
-  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-  const r = await res.json();
-  if (r.code === 'AUTH') return relogin();
-  return r;
+  // 30 秒沒回應就放棄，避免畫面一直轉圈
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 30000);
+  try {
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload), signal: ctrl.signal });
+    const r = await res.json();
+    if (r.code === 'AUTH') return relogin();
+    return r;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // 重新登入，但 2 分鐘內只自動做一次，避免無限循環

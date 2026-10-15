@@ -498,13 +498,15 @@ async function api(payload) {
   } catch (e) {}
   payload.idToken = liff.getIDToken();
   try {
-    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 30000);
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload), signal: ctrl.signal });
     const r = await res.json();
     if (r.code === 'AUTH') return relogin();
     if (r.message && /尚未開通/.test(r.message)) showState(esc(r.message) + '<br><small>請先在打卡 App 完成登記並由主管開通</small>');
     return r;
   } catch (e) {
-    return { ok: false, message: '網路錯誤，請稍後再試' };
+    return { ok: false, message: e && e.name === 'AbortError' ? '連線逾時，網路可能不穩，請稍後再試' : '網路錯誤，請稍後再試' };
   }
 }
 function relogin() {
