@@ -31,8 +31,11 @@
 <meta name="apple-mobile-web-app-title" content="UC 打卡系統">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
-<script src="../theme.js?v=6"></script>
+<link rel="preload" href="../fonts/michroma.woff2" as="font" type="font/woff2" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&display=optional" rel="stylesheet">
+<style>@font-face{font-family:"Michroma";src:url("../fonts/michroma.woff2") format("woff2");font-display:block}html{background:var(--bg,#D9DFE4)}@view-transition{navigation:auto}::view-transition-old(root){animation:vtOut .22s ease both}::view-transition-new(root){animation:vtIn .32s cubic-bezier(.2,.8,.2,1) both}@keyframes vtOut{to{opacity:0}}@keyframes vtIn{from{opacity:0;transform:translateY(10px)}}@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}</style>
+<link rel="prefetch" href="../">
+<script src="../theme.js?v=8"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪・紫芋（與打卡 App 的灰藍區分） ── */
@@ -499,6 +502,20 @@
   .ptr.ready .ptr-m { animation: ptrShake .5s ease-in-out infinite; }
   .ptr.loading .ptr-m { animation: ptrShake .35s ease-in-out infinite; }
   @keyframes ptrShake { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+
+  /* ── 開啟時的骨架（取代「載入中」） ── */
+  .boot .sk { display: block; border-radius: 10px; }
+  .boot-h { margin: 6px 4px 18px; }
+  .boot-st { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+  .boot-st .sk { height: 78px; border-radius: 18px; }
+  .boot-c { padding: 20px 18px; display: flex; flex-direction: column; gap: 16px; }
+  .boot-c .sk { height: 14px; }
+
+  /* ── 觸控範圍：外觀不變，可點範圍往外擴到手指好按的大小 ── */
+  .back, .thm-b, .drow .pbtn, .pm-x, .pbtn { position: relative; }
+  .back::after, .thm-b::after, .drow .pbtn::after, .pm-x::after, .pbtn::after { content: ""; position: absolute; inset: -8px; }
+  :focus-visible { outline: 2px solid var(--acc-deep, #64718A); outline-offset: 2px; border-radius: 10px; }
+  .cal .cd.tap:focus-visible { outline-offset: 1px; }
 </style>
 </head>
 <body>
@@ -512,9 +529,10 @@
     <div class="pill hidden" id="rolePill"></div>
   </header>
 
-  <div id="stateView" class="card state-view">
-    <div class="ico"><div class="spinner"></div></div>
-    <div>載入中</div>
+  <div id="stateView" class="boot">
+    <div class="boot-h"><i class="sk" style="width:46%;height:30px"></i><i class="sk" style="width:34%;height:16px;margin-top:10px"></i></div>
+    <div class="boot-st"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div>
+    <div class="card boot-c"><i class="sk" style="width:60%"></i><i class="sk" style="width:85%"></i><i class="sk" style="width:72%"></i><i class="sk" style="width:80%"></i><i class="sk" style="width:65%"></i></div>
   </div>
 
   <!-- 今日（主管） -->
@@ -636,7 +654,7 @@ let ME = null, curTab = '', range = 'today', abnOnly = false, month = '', lastRe
     $('rolePill').textContent = ME.admin ? '主管・' + ME.name : ME.name;
     $('rolePill').classList.toggle('admin', ME.admin);
     $('rolePill').classList.remove('hidden');
-    if (!ME.admin) { $('recTitle').textContent = '我的打卡紀錄'; $('recSub').textContent = '只顯示您自己的紀錄'; $('hrTitle').textContent = '我的工時'; }
+    if (!ME.admin) { $('recTitle').textContent = '我的打卡紀錄'; $('recSub').textContent = '只顯示你自己的紀錄'; $('hrTitle').textContent = '我的工時'; }
     fillSelect($('fName'), r.staff, '全部人員');
     fillSelect($('hName'), r.staff, '全部人員');
     fillSelect($('fStore'), r.stores, '全部櫃點');
@@ -748,7 +766,7 @@ async function loadToday() {
   $('tlScale').innerHTML = ticks.map(h => '<span style="left:' + pct(h * 60) + '%">' + h + '</span>').join('');
   $('peopleList').innerHTML = r.people.length ? r.people.map(p =>
     '<div class="person fadein">' + avatar(p.name, 'pav') + '<div class="nm"><span class="nmx">' + esc(p.name) + '</span><span class="state s1 ' + p.state + '">' + label[p.state] + '</span></div>' +
-    '<div class="st"><span class="state s2 ' + p.state + '">' + label[p.state] + '</span><span class="sto">' + (p.store ? esc(p.store) : p.state === 'leave' ? '今日休假' : '尚未選櫃點') + '</span></div>' +
+    '<div class="st"><span class="state s2 ' + p.state + '">' + label[p.state] + '</span><span class="sto">' + (p.store ? esc(p.store) : p.state === 'leave' ? '今日休假' : '尚未選擇櫃點') + '</span></div>' +
     '<div class="tm">上 <b class="num">' + (p.inTime || '--:--') + '</b><br>下 <b class="num">' + (p.outTime || '--:--') + '</b></div>' +
     photoBtn(p.name + '・今天', [{ label: '上班', time: p.inTime, id: p.inPhoto }, { label: '下班', time: p.outTime, id: p.outPhoto }]) + tl(p) +
     (p.abnormal.length ? '<div class="ab">' + p.abnormal.map(abLine).join('') + '</div>' : '') + '</div>'
@@ -964,7 +982,7 @@ function calendar(p) {
     if (isCur && d === today.getDate()) cls += ' now';
     const fut = isCur && d > today.getDate();
     const canTap = x || lv[d] || (ME.admin && !fut);
-    const key = canTap ? ' data-n="' + esc(p.name) + '" data-d="' + month + '-' + pad(d) + '"' : '';
+    const key = canTap ? ' data-n="' + esc(p.name) + '" data-d="' + month + '-' + pad(d) + '" role="button" tabindex="0" aria-label="' + m + '月' + d + '日"' : '';
     if (key) cls += ' tap';
     cells += '<span class="' + cls + '" style="' + style + ';--i:' + (first + d) + '"' + key + '>' + d + '</span>';
   }
@@ -1220,6 +1238,8 @@ function bindUI() {
   $('hrExport').onclick = exportHours;
   document.addEventListener('visibilitychange', () => { if (!document.hidden && curTab === 'today') loadToday(); });
   window.addEventListener('resize', moveIndicator);
+  // 鍵盤操作：可點的格子按 Enter／空白鍵也能點
+  document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][tabindex]')) { e.preventDefault(); e.target.click(); } });
   // 捲動：頂端變毛玻璃，大標題捲出去後縮進頂端
   const onScroll = () => {
     document.body.classList.toggle('scrolled', scrollY > 8);
@@ -1246,7 +1266,7 @@ function emptyBoxOld(msg) {
   return '<div class="empty"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></div>' + esc(msg || '') + '</div>';
 }
 function showState(html) {
-  $('stateView').classList.remove('hidden');
+  $('stateView').classList.remove('hidden', 'boot'); $('stateView').classList.add('card', 'state-view');
   $('stateView').innerHTML = '<div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg></div><div>' + html + '</div>';
 }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
