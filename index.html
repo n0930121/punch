@@ -537,14 +537,40 @@ function getLocation() {
 /* ---------- 頁面內相機（不能從相簿選照片） ---------- */
 let camStream = null, camFacing = 'environment', photoSource = '';
 
+/* 相機規則：
+   ・相機權限被拒 → 不能拍照打卡，教她怎麼開
+   ・相機被其他 App 占用 → 請她關掉再試
+   ・這支手機/瀏覽器真的不支援頁面相機 → 才改用系統相機（只收 3 分鐘內剛拍的，紀錄標記「非頁面相機拍攝」） */
+const CAM_GUIDE = '<b>請先允許使用相機才能打卡</b><small>' +
+  'Android：設定 → 應用程式 → Chrome（或 LINE）→ 權限 → 相機 →「使用時允許」；<br>' +
+  '或在打卡頁網址列左邊的鎖頭 → 權限 → 相機 → 允許<br>' +
+  'iPhone：設定 → Safari（或 LINE）→ 相機 →「允許」<br>' +
+  '開好後回到這裡，再點一次拍照</small>';
+
 async function openCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return fallbackPicker();
   try {
     await startStream();
     $('cam').classList.remove('hidden');
+    hideMsg();
   } catch (e) {
-    // 使用者拒絕相機權限、或這個瀏覽器不支援 → 改用系統相機，但只收「剛拍的」照片
-    fallbackPicker();
+    const name = e && e.name;
+    if (name === 'NotAllowedError' || name === 'SecurityError' || name === 'PermissionDeniedError') {
+      return showMsg('err', CAM_GUIDE);
+    }
+    if (name === 'NotReadableError' || name === 'TrackStartError' || name === 'AbortError') {
+      return showMsg('err', '相機正被其他 App 使用中<small>請關閉其他用到相機的 App（例如視訊、拍照），再點一次拍照</small>');
+    }
+    // 找不到指定鏡頭：改用任何一顆鏡頭再試一次
+    if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+      try {
+        camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        const v = $('camVideo'); v.srcObject = camStream; v.style.transform = ''; await v.play().catch(() => {});
+        $('cam').classList.remove('hidden'); hideMsg();
+        return;
+      } catch (e2) {}
+    }
+    fallbackPicker();   // 真的不支援，才走備用方式
   }
 }
 
