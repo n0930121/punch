@@ -78,12 +78,41 @@
   .stat.abn.has { background: var(--amber-tint); }
 
   .people { padding: 6px 18px; }
-  .person { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 14px 0; border-top: 1px solid var(--hair); }
+  .person { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 10px; padding: 14px 0; border-top: 1px solid var(--hair); }
   .person:first-child { border-top: 0; }
   .person .nm { font-size: 19px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
   .person .st { font-size: 14px; color: var(--ink-soft); grid-column: 1; }
   .person .tm { grid-row: 1 / span 2; grid-column: 2; text-align: right; align-self: center; font-size: 17px; color: var(--ink-soft); line-height: 1.7; }
   .person .tm b { font-weight: 400; color: var(--ink); }
+  .pbtn { border: 0; padding: 0; width: 40px; height: 40px; border-radius: 12px; background: var(--rose-tint); color: var(--rose-deep);
+          display: grid; place-items: center; cursor: pointer; align-self: center; }
+  .pbtn svg { width: 19px; height: 19px; }
+  .pbtn.off { visibility: hidden; }
+  .person .pbtn { grid-row: 1 / span 2; grid-column: 3; }
+  .drow .pbtn { width: 34px; height: 34px; border-radius: 10px; grid-row: 1 / span 2; grid-column: 4; }
+  .drow .pbtn svg { width: 16px; height: 16px; }
+  .person .ab, .drow .s { grid-column: 1 / -1; }
+  .drow .s { grid-column: 2 / 4; }
+  /* 照片視窗 */
+  .pm { position: fixed; inset: 0; z-index: 30; background: rgba(40,34,46,.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+        display: flex; align-items: flex-end; justify-content: center; }
+  .pm-card { width: 100%; max-width: 520px; background: var(--paper); border-radius: 26px 26px 0 0; padding: 18px 18px calc(22px + env(safe-area-inset-bottom));
+             max-height: 92vh; overflow: auto; animation: up .25s ease; }
+  @keyframes up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .pm-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .pm-top b { font-family: "Noto Serif TC", serif; font-size: 19px; letter-spacing: .06em; }
+  .pm-top span { display: block; font-size: 14px; color: var(--ink-soft); margin-top: 2px; }
+  .pm-x { border: 0; background: var(--bg-2); width: 38px; height: 38px; border-radius: 50%; font-size: 22px; color: var(--ink-soft); cursor: pointer; flex: none; }
+  .pm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pm-grid.one { grid-template-columns: 1fr; }
+  .pm-item .lb { display: flex; align-items: center; gap: 6px; font-size: 15px; margin-bottom: 6px; }
+  .pm-item .lb .num { font-size: 15px; color: var(--ink-soft); margin-left: auto; }
+  .pm-img { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--bg-2); display: grid; place-items: center; overflow: hidden;
+            color: var(--ink-faint); font-size: 14px; text-align: center; }
+  .pm-grid.one .pm-img { aspect-ratio: 4 / 3; }
+  .pm-img img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: zoom-in; }
+  .pm-full { position: fixed; inset: 0; z-index: 40; background: #111; display: grid; place-items: center; }
+  .pm-full img { max-width: 100%; max-height: 100%; }
   .person .ab { grid-column: 1 / -1; font-size: 14px; color: var(--amber); background: var(--amber-tint); border-radius: 10px; padding: 6px 10px; line-height: 1.6; }
   .state { font-size: 13px; padding: 2px 9px; border-radius: 999px; font-weight: 400; letter-spacing: .05em; }
   .state.working { background: var(--sage-tint); color: var(--sage-deep); }
@@ -151,7 +180,7 @@
   .kpi.miss .v { color: var(--bad); }
   .dlist { display: none; padding-bottom: 6px; }
   .hp.open .dlist { display: block; }
-  .drow { display: grid; grid-template-columns: 88px 1fr auto; gap: 2px 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--hair); font-size: 17px; }
+  .drow { display: grid; grid-template-columns: 88px 1fr auto auto; gap: 2px 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--hair); font-size: 17px; }
   .drow .d { color: var(--ink-soft); font-size: 15px; }
   .drow .io { font-family: "Michroma", sans-serif; font-size: 15px; }
   .drow .io i { font-style: normal; color: var(--ink-faint); margin: 0 4px; }
@@ -354,6 +383,7 @@ async function loadToday() {
     '<div class="person"><div class="nm">' + esc(p.name) + '<span class="state ' + p.state + '">' + label[p.state] + '</span></div>' +
     '<div class="st">' + (p.store ? esc(p.store) : '—') + '</div>' +
     '<div class="tm">上 <b class="num">' + (p.inTime || '--:--') + '</b><br>下 <b class="num">' + (p.outTime || '--:--') + '</b></div>' +
+    photoBtn(p.name + '・今天', [{ label: '上班', time: p.inTime, id: p.inPhoto }, { label: '下班', time: p.outTime, id: p.outPhoto }]) +
     (p.abnormal.length ? '<div class="ab">' + p.abnormal.map(esc).join('<br>') + '</div>' : '') + '</div>'
   ).join('') : emptyBox('還沒有已開通的人員');
 }
@@ -393,8 +423,7 @@ function recRow(x) {
   const bad = x.verdict && x.verdict !== '正常';
   const tags = '<span class="tag' + (bad ? ' bad' : '') + '">' + esc(x.verdict || '—') + '</span>' +
     (x.warn ? x.warn.split('、').map(w => '<span class="tag warn">' + esc(w) + '</span>').join('') : '');
-  const ph = x.photo ? '<a class="ph" href="' + esc(x.photo) + '" target="_blank" rel="noopener" aria-label="查看照片">' +
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 16l-5-5-8 8"/></svg></a>' : '<span></span>';
+  const ph = x.photoId ? photoBtn(x.name + '・' + x.date.slice(5).replace('-', '/'), [{ label: x.type, time: x.time, id: x.photoId }]).replace('class="pbtn"', 'class="pbtn ph"') : '<span></span>';
   return '<div class="rec"><div class="t">' + esc(x.time) + '</div>' +
     '<div class="who"><span class="dot ' + (x.type === '上班' ? 'in' : 'out') + '"></span>' + esc(x.type) + (ME.admin ? '・' + esc(x.name) : '') + '</div>' +
     ph + '<div class="where">' + esc(x.store) + '</div><div class="tags">' + tags + '</div></div>';
@@ -417,7 +446,7 @@ async function loadHours() {
     '<div class="kpis"><div class="kpi"><div class="v">' + p.workDays + '</div><div class="k">出勤天數</div></div>' +
     '<div class="kpi"><div class="v">' + p.totalHours + '</div><div class="k">總工時</div></div>' +
     '<div class="kpi' + (p.missing ? ' miss' : '') + '"><div class="v">' + p.missing + '</div><div class="k">缺卡</div></div></div>' +
-    '<div class="dlist">' + p.days.map(dayRow).join('') + '</div></div>'
+    '<div class="dlist">' + p.days.map(d => (curHoursName = p.name, dayRow(d))).join('') + '</div></div>'
   ).join('');
   document.querySelectorAll('.hp-top').forEach(el => el.onclick = () => el.parentElement.classList.toggle('open'));
 }
@@ -428,7 +457,52 @@ function dayRow(d) {
   return '<div class="drow"><div class="d">' + d.date.slice(5).replace('-', '/') + ' 週' + WEEK[dt.getDay()] + '</div>' +
     '<div class="io">' + (d.in || '--:--') + '<i>→</i>' + (d.out || '--:--') + '</div>' +
     '<div class="h">' + (d.hours !== null ? d.hours + 'h' : '') + '</div>' +
+    (ME.admin ? photoBtn(curHoursName + '・' + d.date.slice(5).replace('-', '/'), [{ label: '上班', time: d.in, id: d.inPhoto }, { label: '下班', time: d.out, id: d.outPhoto }]) : '') +
     '<div class="s">' + esc(d.store || '') + ' ' + flag + (d.abnormal ? '<span class="tag warn">有異常</span>' : '') + '</div></div>';
+}
+
+/* ---------- 打卡照片（主管） ---------- */
+let curHoursName = '';
+const CAM_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 16l-5-5-8 8"/></svg>';
+function photoBtn(title, items) {
+  const has = items.some(i => i.id);
+  if (!ME || !ME.admin) return '';
+  return '<button class="pbtn' + (has ? '' : ' off') + '" aria-label="查看打卡照片" data-p="' +
+    encodeURIComponent(JSON.stringify({ title: title, items: items })) + '">' + CAM_ICON + '</button>';
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.pbtn');
+  if (b && b.dataset.p) openPhotos(JSON.parse(decodeURIComponent(b.dataset.p)));
+});
+async function openPhotos(info) {
+  const items = info.items;
+  const wrap = document.createElement('div');
+  wrap.className = 'pm';
+  wrap.innerHTML = '<div class="pm-card"><div class="pm-top"><div><b>' + esc(info.title) + '</b><span>打卡照片</span></div>' +
+    '<button class="pm-x" aria-label="關閉">×</button></div><div class="pm-grid' + (items.length === 1 ? ' one' : '') + '">' +
+    items.map((it, i) => '<div class="pm-item"><div class="lb"><span class="dot ' + (it.label === '上班' ? 'in' : 'out') + '"></span>' + esc(it.label) +
+      '<span class="num">' + esc(it.time || '--:--') + '</span></div><div class="pm-img" id="pmi' + i + '">' +
+      (it.id ? '<div class="spinner"></div>' : (it.time ? '沒有照片' : '尚未打卡')) + '</div></div>').join('') + '</div></div>';
+  document.body.appendChild(wrap);
+  const close = () => wrap.remove();
+  wrap.onclick = e => { if (e.target === wrap || e.target.classList.contains('pm-x')) close(); };
+  const ids = items.map(i => i.id).filter(x => x);
+  if (!ids.length) return;
+  const r = await api({ action: 'q_photo', ids: ids });
+  items.forEach((it, i) => {
+    if (!it.id) return;
+    const box = wrap.querySelector('#pmi' + i);
+    const ph = r.ok && (r.photos || []).find(p => p.id === it.id);
+    if (ph && ph.data) {
+      box.innerHTML = '<img alt="' + esc(it.label) + '照片">';
+      const img = box.querySelector('img'); img.src = ph.data;
+      img.onclick = () => {
+        const f = document.createElement('div'); f.className = 'pm-full';
+        f.innerHTML = '<img>'; f.querySelector('img').src = ph.data;
+        f.onclick = () => f.remove(); document.body.appendChild(f);
+      };
+    } else box.textContent = (ph && ph.error) || r.message || '照片讀取失敗';
+  });
 }
 
 /* ---------- 匯出 CSV（Excel 可直接開） ---------- */
@@ -525,6 +599,14 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().the
 })).catch(() => {});
 
 /* ---------- 預覽模式假資料（網址加 ?demo=1，或 ?demo=staff 看櫃姐畫面） ---------- */
+function demoPhoto(out) {
+  const c = document.createElement('canvas'); c.width = 480; c.height = 640; const g = c.getContext('2d');
+  g.fillStyle = out ? '#C9CED6' : '#D8CBB8'; g.fillRect(0, 0, 480, 640);
+  g.fillStyle = '#7a6a5a'; g.fillRect(60, 300, 360, 260); g.fillStyle = '#efe6d8'; g.fillRect(110, 120, 260, 110);
+  g.fillStyle = '#4b3f3d'; g.font = 'bold 44px sans-serif'; g.textAlign = 'center'; g.fillText('UCHINO', 240, 192);
+  g.font = '28px sans-serif'; g.fillText(out ? '下班照片（示範）' : '上班照片（示範）', 240, 610);
+  return c.toDataURL('image/jpeg', .8);
+}
 function demoApi(p) {
   const asStaff = new URLSearchParams(location.search).get('demo') === 'staff';
   const today = ymd(new Date());
@@ -534,15 +616,16 @@ function demoApi(p) {
     if (p.action === 'q_me') return res({ ok: true, me, staff: asStaff ? ['王小美'] : people,
       stores: ['UCHINO - SOGO復興', 'UCHINO - 信義A8', 'Berkemann - SOGO復興', 'HASSIA - 新光南西', 'IKEUCHI - 板橋大遠百'] });
     if (p.action === 'q_today') return res({ ok: true, me, date: today, counts: { working: 3, off: 1, none: 2, abnormal: 2 }, people: [
-      { name: '王小美', state: 'working', inTime: '10:52', outTime: '', store: 'UCHINO - SOGO復興', abnormal: [] },
+      { name: '王小美', state: 'working', inTime: '10:52', outTime: '', store: 'UCHINO - SOGO復興', abnormal: [], inPhoto: 'demoIn01234' },
       { name: '林佳慧', state: 'working', inTime: '10:55', outTime: '', store: 'Berkemann - SOGO復興', abnormal: [] },
       { name: '陳怡君', state: 'working', inTime: '11:08', outTime: '', store: 'HASSIA - 新光南西', abnormal: ['11:08 上班：櫃點不符：UCHINO - 新光南西'] },
-      { name: '張雅婷', state: 'off', inTime: '09:58', outTime: '14:02', store: 'UCHINO - 信義A8', abnormal: ['14:02 下班：定位可疑（誤差3m）'] },
+      { name: '張雅婷', state: 'off', inTime: '09:58', outTime: '14:02', store: 'UCHINO - 信義A8', abnormal: ['14:02 下班：定位可疑（誤差3m）'], inPhoto: 'demoIn01234', outPhoto: 'demoOut01234' },
       { name: '李珮瑜', state: 'none', inTime: '', outTime: '', store: '', abnormal: [] },
       { name: '黃詩涵', state: 'none', inTime: '', outTime: '', store: '', abnormal: [] }] });
+    if (p.action === 'q_photo') return res({ ok: true, photos: p.ids.map(id => ({ id, data: demoPhoto(id.indexOf('Out') > 0) })) });
     if (p.action === 'q_records') {
       let recs = [
-        { date: today, time: '14:02', name: '張雅婷', store: 'UCHINO - 信義A8', type: '下班', verdict: '正常', distance: 42, accuracy: 3, warn: '定位可疑（誤差3m）', photo: '#' },
+        { date: today, time: '14:02', name: '張雅婷', store: 'UCHINO - 信義A8', type: '下班', verdict: '正常', distance: 42, accuracy: 3, warn: '定位可疑（誤差3m）', photo: '#', photoId: 'demoOut01234' },
         { date: today, time: '11:08', name: '陳怡君', store: 'HASSIA - 新光南西', type: '上班', verdict: '櫃點不符：UCHINO - 新光南西', distance: 12, accuracy: 35, warn: '', photo: '#' },
         { date: today, time: '10:55', name: '林佳慧', store: 'Berkemann - SOGO復興', type: '上班', verdict: '正常', distance: 60, accuracy: 28, warn: '', photo: '#' },
         { date: today, time: '10:52', name: '王小美', store: 'UCHINO - SOGO復興', type: '上班', verdict: '正常', distance: 38, accuracy: 41, warn: '', photo: '#' },
@@ -560,7 +643,8 @@ function demoApi(p) {
           const d = p.month + '-' + pad(i); const flag = i === 6 && base ? '缺下班卡' : '';
           const h = flag ? null : Math.round((9 + ((i * base) % 5) / 10) * 10) / 10;
           if (h) total += h; if (flag) miss++;
-          days.push({ date: d, in: '10:5' + (i % 9), out: flag ? '' : '21:' + pad(30 + (i % 20)), hours: h, flag, store: 'UCHINO - SOGO復興', abnormal: !asStaff && i === 9 });
+          days.push({ date: d, in: '10:5' + (i % 9), out: flag ? '' : '21:' + pad(30 + (i % 20)), hours: h, flag, store: 'UCHINO - SOGO復興', abnormal: !asStaff && i === 9,
+                      inPhoto: asStaff ? '' : 'demoIn01234', outPhoto: asStaff || flag ? '' : 'demoOut01234' });
         }
         return { name, days: days.reverse(), workDays: days.length, totalHours: Math.round(total * 10) / 10, missing: miss };
       };
