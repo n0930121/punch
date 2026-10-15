@@ -648,9 +648,9 @@ let ME = null, curTab = '', range = 'today', abnOnly = false, month = '', lastRe
     try { tab = sessionStorage.getItem('qTab') || tab; } catch (e) {}
     if ((tab === 'today' || tab === 'staff') && !ME.admin) tab = 'records';
     STORES = r.stores || [];
-    $('fixOpen').classList.toggle('hidden', ME.admin);
+    $('fixOpen').classList.remove('hidden');
     if (ME.admin) { badgeN.staff = r.pending || 0; badgeN.fix = r.fixPending || 0; setPendBadge(); }
-    if (new URLSearchParams(location.search).has('fix') && !ME.admin) { tab = 'records'; setTimeout(openFixForm, 300); }
+    if (new URLSearchParams(location.search).has('fix')) { tab = 'records'; setTimeout(openFixForm, 300); }
     showTab(tab);
   } catch (e) {
     showState('無法啟動：' + esc(e.message || e));
@@ -1102,7 +1102,9 @@ function openFixForm() {
     const r = await api(body);
     btn.disabled = false; btn.textContent = '送出申請';
     if (!r.ok) return toast(r.message || '送出失敗');
-    w.remove(); toast('已送出，等主管審核'); renderFixMine(r.list || []);
+    w.remove();
+    if (ME.admin) { toast('已送出，到「人員」頁審核'); badgeN.fix += 1; setPendBadge(); }
+    else { toast('已送出，等主管審核'); renderFixMine(r.list || []); }
   };
 }
 
