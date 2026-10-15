@@ -211,6 +211,18 @@
   .shutter:active { transform: scale(.92); }
   .msg .force { display: block; margin-top: 10px; border: 0; font-family: inherit; font-size: 14px; padding: 9px 16px; border-radius: 999px;
                 background: #fff; color: #8E6B63; box-shadow: none; flex-direction: row; letter-spacing: .05em; }
+  .ask { position: fixed; inset: 0; z-index: 25; background: rgba(40,46,52,.45); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+         display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .ask-card { width: 100%; max-width: 340px; background: var(--paper); border-radius: 24px; padding: 26px 22px 18px; text-align: center;
+              box-shadow: 0 20px 50px -20px rgba(0,0,0,.4); animation: rise .25s ease; }
+  .ask-ico { width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: var(--rose-tint); color: #8E6B63;
+             display: grid; place-items: center; font-size: 24px; font-weight: 700; }
+  .ask-msg { font-size: 16px; line-height: 1.65; color: var(--ink); }
+  .ask-msg small { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
+  .ask-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+  .ask-btns button { padding: 13px 0; border-radius: 14px; font-size: 15px; letter-spacing: .1em; box-shadow: none; flex-direction: row; }
+  .ask-no { background: var(--bg) !important; color: var(--ink-soft) !important; }
+  .ask-ok { background: linear-gradient(160deg, var(--mist), var(--mist-deep)) !important; }
   .retry { margin-top: 14px; border: 0; font-family: inherit; font-size: 15px; padding: 10px 22px; border-radius: 999px;
            background: var(--mist); color: #fff; box-shadow: none; display: inline-block; letter-spacing: .1em; }
   .slow { margin-top: 12px; font-size: 13px; color: var(--ink-faint); line-height: 1.7; }
@@ -458,6 +470,14 @@ async function doPunch(type, force) {
   if (busy) return;
   if (requirePhoto && !photoData) return showMsg('err', '請先拍攝櫃位照片');
   if (!currentStore()) return showMsg('err', '請先選擇今天的櫃點');
+  // 防按錯：上班中又按上班、還沒上班就按下班
+  if (!force) {
+    let warn = '';
+    if (type === '上班' && lastType === '上班') warn = '你目前是<b>上班中</b>，確定要再打一次「上班」嗎？<small>如果是要下班，請按「取消」再按「下班」</small>';
+    if (type === '下班' && lastType === null) warn = '今天還沒有<b>上班</b>紀錄，確定要打「下班」嗎？<small>如果是剛到櫃上，請按「取消」再按「上班」</small>';
+    if (type === '下班' && lastType === '下班') warn = '你今天已經打過<b>下班</b>了，確定要再打一次嗎？';
+    if (warn && !(await askConfirm(warn, '確定' + type))) return;
+  }
   busy = true; updateButtons();
   try {
     overlay('定位中');
@@ -481,7 +501,7 @@ async function doPunch(type, force) {
     const r = await api({
       action: 'punch', type, store: storeMode === 'pick' ? currentStore() : '',
       lat: pos ? pos.lat : '', lng: pos ? pos.lng : '', accuracy: pos ? pos.acc : '',
-      photo: photoData, photoSource: photoSource, deviceId: deviceId(), ua: navigator.userAgent,
+      photo: photoData ? await watermark(photoData, type) : photoData, photoSource: photoSource, deviceId: deviceId(), ua: navigator.userAgent,
     });
     if (!r.ok) {
       showMsg('err', esc(r.message || '打卡失敗，請再試一次'));
@@ -535,7 +555,7 @@ function getLocation() {
 }
 
 /* ---------- 頁面內相機（不能從相簿選照片） ---------- */
-let camStream = null, camFacing = 'environment', photoSource = '';
+let camStream = null, camFacing = 'environment', photoSource = '', photoAt = null;
 
 /* 相機規則：
    ・相機權限被拒 → 不能拍照打卡，教她怎麼開
@@ -610,12 +630,57 @@ function fallbackPicker() {
 }
 
 function setPhoto(dataUrl, source) {
-  photoData = dataUrl; photoSource = source;
+  photoData = dataUrl; photoSource = source; photoAt = new Date();
   $('photoThumb').style.backgroundImage = 'url(' + photoData + ')';
   $('photoBox').classList.add('has');
   $('photoT1').textContent = '照片已備妥';
   $('photoT2').textContent = '點此可重拍';
   updateButtons();
+}
+
+/* 照片浮水印：打卡類別、拍攝時間、櫃點、姓名，印在照片下方 */
+function watermark(dataUrl, type) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+        const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+        const u = Math.max(c.width, c.height) / 1280;          // 依照片大小縮放字級
+        const band = Math.round(118 * u);
+        const grad = g.createLinearGradient(0, c.height - band * 1.5, 0, c.height);
+        grad.addColorStop(0, 'rgba(30,34,38,0)'); grad.addColorStop(.35, 'rgba(30,34,38,.55)'); grad.addColorStop(1, 'rgba(30,34,38,.78)');
+        g.fillStyle = grad; g.fillRect(0, c.height - band * 1.5, c.width, band * 1.5);
+        const d = photoAt || new Date(), p = n => String(n).padStart(2, '0');
+        const when = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+        const x = Math.round(28 * u);
+        g.textBaseline = 'alphabetic'; g.fillStyle = '#fff';
+        g.font = '600 ' + Math.round(38 * u) + 'px "Noto Sans TC", sans-serif';
+        g.fillText(type + '打卡　' + when, x, c.height - Math.round(66 * u));
+        g.font = Math.round(30 * u) + 'px "Noto Sans TC", sans-serif'; g.fillStyle = 'rgba(255,255,255,.88)';
+        g.fillText((currentStore() !== 'fixed' ? currentStore() : $('staffStore').textContent) + '　' + $('staffName').textContent, x, c.height - Math.round(26 * u));
+        g.textAlign = 'right'; g.font = '600 ' + Math.round(24 * u) + 'px "Noto Sans TC", sans-serif'; g.fillStyle = 'rgba(255,255,255,.7)';
+        g.fillText('UC 打卡系統', c.width - x, c.height - Math.round(26 * u));
+        resolve(c.toDataURL('image/jpeg', 0.72));
+      } catch (e) { resolve(dataUrl); }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+/* 確認視窗（取代瀏覽器的 confirm，避免卡住 LINE） */
+function askConfirm(html, okText) {
+  return new Promise(resolve => {
+    const w = document.createElement('div'); w.className = 'ask';
+    w.innerHTML = '<div class="ask-card"><div class="ask-ico">!</div><div class="ask-msg">' + html + '</div>' +
+      '<div class="ask-btns"><button class="ask-no">取消</button><button class="ask-ok">' + esc(okText || '確定') + '</button></div></div>';
+    document.body.appendChild(w);
+    const done = v => { w.remove(); resolve(v); };
+    w.querySelector('.ask-no').onclick = () => done(false);
+    w.querySelector('.ask-ok').onclick = () => done(true);
+    w.onclick = e => { if (e.target === w) done(false); };
+  });
 }
 
 /* 每支手機一組固定的裝置代碼（存在這支手機上） */
