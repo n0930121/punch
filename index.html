@@ -13,6 +13,10 @@
     if (touch && sw < 600 && iw > sw * 1.25) z = iw / sw;
     document.documentElement.style.zoom = z === 1 ? '' : String(z);
     document.documentElement.style.setProperty('--z', String(z));
+    // 版面寬度判斷一律用「放大後的實際寬度」：電腦版網站模式下，瀏覽器回報 980px，但畫面其實是手機寬
+    var ew = iw / z, c = document.documentElement.classList;
+    c.toggle('mq-max400', ew <= 400); c.toggle('mq-max370', ew <= 370);
+    c.toggle('mq-min560', ew >= 560); c.toggle('mq-min900', ew >= 900);
   }
   apply();
   window.addEventListener('resize', function () { document.documentElement.style.zoom = ''; apply(); });
@@ -31,7 +35,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
-<script src="theme.js"></script>
+<script src="theme.js?v=5"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪色票 ── */
@@ -390,16 +394,8 @@
   .photo .t1, .photo .t2 { overflow: hidden; text-overflow: ellipsis; }
   .photo .photo-txt { min-width: 0; overflow: hidden; }
   ul.today .where { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  @media (max-width: 400px) {
-    .brand { letter-spacing: .12em; }
-    .head-r { gap: 6px; }
-    .q-btn { padding: 6px 11px 6px 9px; }
-    .photo .t2 { font-size: 13px; }
-  }
-  @media (max-width: 370px) {
-    .status-pill { display: none !important; }
-    .btns button.primary .sub { display: none; }
-  }
+  /* mq-max400 */ html.mq-max400 .brand { letter-spacing: .12em; } html.mq-max400 .head-r { gap: 6px; } html.mq-max400 .q-btn { padding: 6px 11px 6px 9px; } html.mq-max400 .photo .t2 { font-size: 13px; }
+  /* mq-max370 */ html.mq-max370 .status-pill { display: none !important; } html.mq-max370 .btns button.primary .sub { display: none; }
 
   /* ── 字級第二輪：開場畫面、確認櫃點、今日紀錄 ── */
   .sp-logo { width: 116px; height: 116px; }
@@ -428,11 +424,7 @@
   .photo { max-width: 100%; }
   #staffStore { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .store.pick svg { flex: none; }
-  @media (max-width: 370px) {
-    .store.pick { font-size: 16px; }
-    .store-hint .h1 { font-size: 15px; } .store-hint .h2 { font-size: 14px; }
-    .sp-name { letter-spacing: .2em; text-indent: .2em; }
-  }
+  /* mq-max370 */ html.mq-max370 .store.pick { font-size: 16px; } html.mq-max370 .store-hint .h1 { font-size: 15px; } html.mq-max370 .store-hint .h2 { font-size: 14px; } html.mq-max370 .sp-name { letter-spacing: .2em; text-indent: .2em; }
 
   /* ── 使用教學、申請補卡連結 ── */
   .greet-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -444,7 +436,7 @@
   .today-card h2 { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
   .fix-link { font-family: "Noto Sans TC", sans-serif; font-weight: 400; font-size: 14px; letter-spacing: .02em; color: var(--ink-soft);
               text-decoration: none; white-space: nowrap; }
-  @media (max-width: 370px) { .fix-link { font-size: 13px; } }
+  /* mq-max370 */ html.mq-max370 .fix-link { font-size: 13px; }
   .gv { position: fixed; inset: 0; z-index: 40; background: rgba(30,34,38,.55); display: flex; flex-direction: column; animation: fade .2s ease; }
   .gv-top { display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top)) 16px 10px; color: #fff; font-size: 16px; letter-spacing: .1em; }
   .gv-x { width: 38px; height: 38px; padding: 0; border-radius: 50%; background: rgba(255,255,255,.2); color: #fff; font-size: 24px; line-height: 1; box-shadow: none; display: grid; place-items: center; }

@@ -13,6 +13,10 @@
     if (touch && sw < 600 && iw > sw * 1.25) z = iw / sw;
     document.documentElement.style.zoom = z === 1 ? '' : String(z);
     document.documentElement.style.setProperty('--z', String(z));
+    // 版面寬度判斷一律用「放大後的實際寬度」：電腦版網站模式下，瀏覽器回報 980px，但畫面其實是手機寬
+    var ew = iw / z, c = document.documentElement.classList;
+    c.toggle('mq-max400', ew <= 400); c.toggle('mq-max370', ew <= 370);
+    c.toggle('mq-min560', ew >= 560); c.toggle('mq-min900', ew >= 900);
   }
   apply();
   window.addEventListener('resize', function () { document.documentElement.style.zoom = ''; apply(); });
@@ -28,7 +32,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&family=Michroma&display=swap" rel="stylesheet">
-<script src="../theme.js"></script>
+<script src="../theme.js?v=5"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
 <style>
   /* ── 莫蘭迪・紫芋（與打卡 App 的灰藍區分） ── */
@@ -116,22 +120,10 @@
   .person .pbtn { grid-column: 4; }
   .person .nmx { white-space: nowrap; word-break: keep-all; flex: none; }
   .person .nm { white-space: nowrap; }
-  @media (max-width: 400px) {
-    .person { grid-template-columns: 34px minmax(0, 1fr) auto auto; column-gap: 8px; }
-    .person .pav { width: 34px; height: 34px; font-size: 14px; }
-    .person .nm { font-size: 17px; gap: 6px; }
-    .person .state { font-size: 12px; padding: 2px 7px; }
-    .person .tm { font-size: 13px; }
-    .person .pbtn { width: 40px; height: 40px; }
-  }
+  /* mq-max400 */ html.mq-max400 .person { grid-template-columns: 34px minmax(0, 1fr) auto auto; column-gap: 8px; } html.mq-max400 .person .pav { width: 34px; height: 34px; font-size: 14px; } html.mq-max400 .person .nm { font-size: 17px; gap: 6px; } html.mq-max400 .person .state { font-size: 12px; padding: 2px 7px; } html.mq-max400 .person .tm { font-size: 13px; } html.mq-max400 .person .pbtn { width: 40px; height: 40px; }
   .person .nm { overflow: hidden; }
   .person .state.s2 { display: none; }
-  @media (max-width: 370px) {
-    .person .state.s1 { display: none; }
-    .person .state.s2 { display: inline-block; margin: 0; }
-    .person .st { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; overflow: visible; white-space: normal; }
-    .person .st .sto { white-space: normal; word-break: keep-all; overflow-wrap: anywhere; line-height: 1.4; }
-  }
+  /* mq-max370 */ html.mq-max370 .person .state.s1 { display: none; } html.mq-max370 .person .state.s2 { display: inline-block; margin: 0; } html.mq-max370 .person .st { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; overflow: visible; white-space: normal; } html.mq-max370 .person .st .sto { white-space: normal; word-break: keep-all; overflow-wrap: anywhere; line-height: 1.4; }
   .person .state { white-space: nowrap; flex: none; }
   .person .st { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .person .tm { white-space: nowrap; }
@@ -300,10 +292,7 @@
   .tag { font-size: 14px; }
   .kpi .k { font-size: 14px; white-space: nowrap; }
   .drow .s { font-size: 14px; }
-  @media (max-width: 400px) {
-    .person .state { font-size: 13px; }
-    .person .tm { font-size: 14px; }
-  }
+  /* mq-max400 */ html.mq-max400 .person .state { font-size: 13px; } html.mq-max400 .person .tm { font-size: 14px; }
 
   /* 不斷行保護 */
   .back, .brand, .pill, .rec .who, .drow .io, .drow .d, .tag, .state { white-space: nowrap; }
@@ -320,25 +309,10 @@
   .kpi .k { font-size: 15px; }
   .rec .tag { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
   .rec > div { min-width: 0; }
-  @media (max-width: 370px) { header .brand { display: none; } header .pill { margin-left: auto; } }
-  @media (max-width: 400px) {
-    .brand { font-size: 16px; letter-spacing: .12em; }
-    header .brand { margin-left: 8px; }
-    .pill { padding: 5px 10px; }
-    .person .ab { font-size: 13px; padding: 6px 9px; letter-spacing: 0; }
-  }
-  @media (max-width: 370px) {
-    .person .st { grid-row: 3; grid-column: 2 / -1; flex-direction: row; align-items: center; gap: 6px;
-                  white-space: nowrap; overflow: hidden; margin-top: 2px; }
-    .person .st .sto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-    .drow { grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 2px 7px; font-size: 14px; }
-    .drow .io { font-size: 13px; } .drow .io i { margin: 0 1px; } .drow .h { font-size: 13px; }
-    .drow .pbtn { width: 32px; height: 32px; }
-    .drow .io { grid-column: 2 / 4; } .drow .h { grid-row: 2; grid-column: 3; } .drow .s { grid-row: 3; grid-column: 1 / 4; }
-    .drow .io { font-size: 14px; } .drow .h { font-size: 14px; }
-    .person .st, .rec .where { font-size: 14px; } .sub { font-size: 15px; }
-    .rec { column-gap: 9px; } .rec .who { font-size: 16px; } .rec .t { font-size: 15px; }
-  }
+  /* mq-max370 */ html.mq-max370 header .brand { display: none; } html.mq-max370 header .pill { margin-left: auto; }
+  /* mq-max400 */ html.mq-max400 .brand { font-size: 16px; letter-spacing: .12em; } html.mq-max400 header .brand { margin-left: 8px; } html.mq-max400 .pill { padding: 5px 10px; } html.mq-max400 .person .ab { font-size: 13px; padding: 6px 9px; letter-spacing: 0; }
+  /* mq-max370 */ html.mq-max370 .person .st { grid-row: 3; grid-column: 2 / -1; flex-direction: row; align-items: center; gap: 6px;
+                  white-space: nowrap; overflow: hidden; margin-top: 2px; } html.mq-max370 .person .st .sto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; } html.mq-max370 .drow { grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 2px 7px; font-size: 14px; } html.mq-max370 .drow .io { font-size: 13px; } html.mq-max370 .drow .io i { margin: 0 1px; } html.mq-max370 .drow .h { font-size: 13px; } html.mq-max370 .drow .pbtn { width: 32px; height: 32px; } html.mq-max370 .drow .io { grid-column: 2 / 4; } html.mq-max370 .drow .h { grid-row: 2; grid-column: 3; } html.mq-max370 .drow .s { grid-row: 3; grid-column: 1 / 4; } html.mq-max370 .drow .io { font-size: 14px; } html.mq-max370 .drow .h { font-size: 14px; } html.mq-max370 .person .st,html.mq-max370 .rec .where { font-size: 14px; } html.mq-max370 .sub { font-size: 15px; } html.mq-max370 .rec { column-gap: 9px; } html.mq-max370 .rec .who { font-size: 16px; } html.mq-max370 .rec .t { font-size: 15px; }
 
   /* ── 休假 ── */
   .state.leave { background: var(--rose-tint); color: var(--rose-deep); }
@@ -356,14 +330,9 @@
   .person .ab .abl b { font-weight: 600; flex: none; }
   .person .ab .abl b::after { content: "："; }
   .person .ab .abl span { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-  @media (max-width: 370px) {
-    .person .ab .abl { display: block; }
-    .person .ab .abl b, .person .ab .abl span { display: block; }
-    .person .ab .abl b::after { content: ""; }
-    .person .ab .abl + .abl { margin-top: 4px; }
-  }
+  /* mq-max370 */ html.mq-max370 .person .ab .abl { display: block; } html.mq-max370 .person .ab .abl b,html.mq-max370 .person .ab .abl span { display: block; } html.mq-max370 .person .ab .abl b::after { content: ""; } html.mq-max370 .person .ab .abl + .abl { margin-top: 4px; }
 
-  @media (max-width: 370px) { .ratio-lg { flex-wrap: wrap; gap: 4px 12px; } }
+  /* mq-max370 */ html.mq-max370 .ratio-lg { flex-wrap: wrap; gap: 4px 12px; }
   /* ── 日期按鈕右側淡出，提示可左右滑 ── */
   .chips.fade-r { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
                   mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
@@ -435,7 +404,7 @@
   .seg button.on { background: var(--paper); color: var(--ink); box-shadow: var(--shadow); font-weight: 500; }
   .fxchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .fxchips button { border: 0; font: inherit; font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--rose-tint); color: var(--rose-deep); cursor: pointer; white-space: nowrap; }
-  @media (max-width: 370px) { .fx-h { font-size: 15px; gap: 5px; } .fx-h > span:not(.fx-t):not(.fx-s) { display: none; } .fx-h .fx-t { font-size: 15px; } }
+  /* mq-max370 */ html.mq-max370 .fx-h { font-size: 15px; gap: 5px; } html.mq-max370 .fx-h > span:not(.fx-t):not(.fx-s) { display: none; } html.mq-max370 .fx-h .fx-t { font-size: 15px; }
   .cf-in { display: block; width: 100%; margin-top: 12px; box-sizing: border-box; }
 
   /* ── 進場動畫 ── */
@@ -463,7 +432,7 @@
   .dd { align-items: end; padding: 0; }
   .dd-card { max-width: 480px; width: 100%; border-radius: 26px 26px 0 0; padding: 18px 20px calc(22px + env(safe-area-inset-bottom)); text-align: left;
              animation: ddUp .3s cubic-bezier(.2,.8,.2,1); }
-  @media (min-width: 560px) { .dd { align-items: center; padding: 24px; } .dd-card { border-radius: 26px; } }
+  /* mq-min560 */ html.mq-min560 .dd { align-items: center; padding: 24px; } html.mq-min560 .dd-card { border-radius: 26px; }
   @keyframes ddUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
   .dd-h { display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 600; margin-bottom: 14px; white-space: nowrap; }
   .dd-h > span { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; }
@@ -480,19 +449,7 @@
   .dd-b { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
 
   /* ── 平板／橫向：兩欄排版 ── */
-  @media (min-width: 900px) {
-    main { max-width: 1040px; padding-left: 28px; padding-right: 28px; }
-    header, h1, .sub { max-width: none; }
-    #peopleList { display: grid; grid-template-columns: 1fr 1fr; column-gap: 32px; }
-    #peopleList .person:nth-child(2) { border-top: 0; }
-    #recList:has(.card + .card) { columns: 2; column-gap: 18px; }
-    #recList .card { break-inside: avoid; display: inline-block; width: 100%; }
-    #hrList { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; }
-    #hrList .chart { grid-column: 1 / -1; }
-    #hrList > .card:only-child, #hrList .hp.open:only-of-type { grid-column: 1 / -1; }
-    #tab-staff #staffList, #tab-staff #fixAdmin { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; }
-    .filters .row { max-width: 720px; }
-  }
+  /* mq-min900 */ html.mq-min900 main { max-width: 1040px; padding-left: 28px; padding-right: 28px; } html.mq-min900 header,html.mq-min900 h1,html.mq-min900 .sub { max-width: none; } html.mq-min900 #peopleList { display: grid; grid-template-columns: 1fr 1fr; column-gap: 32px; } html.mq-min900 #peopleList .person:nth-child(2) { border-top: 0; } html.mq-min900 #recList:has(.card + .card) { columns: 2; column-gap: 18px; } html.mq-min900 #recList .card { break-inside: avoid; display: inline-block; width: 100%; } html.mq-min900 #hrList { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; } html.mq-min900 #hrList .chart { grid-column: 1 / -1; } html.mq-min900 #hrList > .card:only-child,html.mq-min900 #hrList .hp.open:only-of-type { grid-column: 1 / -1; } html.mq-min900 #tab-staff #staffList,html.mq-min900 #tab-staff #fixAdmin { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; } html.mq-min900 .filters .row { max-width: 720px; }
 </style>
 </head>
 <body>
