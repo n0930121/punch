@@ -209,6 +209,8 @@
   .flip svg { width: 26px; height: 26px; }
   .shutter { width: 74px; height: 74px; padding: 0; border-radius: 50%; background: #F5F7F8; box-shadow: 0 0 0 5px rgba(255,255,255,.35); }
   .shutter:active { transform: scale(.92); }
+  .msg .force { display: block; margin-top: 10px; border: 0; font-family: inherit; font-size: 14px; padding: 9px 16px; border-radius: 999px;
+                background: #fff; color: #8E6B63; box-shadow: none; flex-direction: row; letter-spacing: .05em; }
   .retry { margin-top: 14px; border: 0; font-family: inherit; font-size: 15px; padding: 10px 22px; border-radius: 999px;
            background: var(--mist); color: #fff; box-shadow: none; display: inline-block; letter-spacing: .1em; }
   .slow { margin-top: 12px; font-size: 13px; color: var(--ink-faint); line-height: 1.7; }
@@ -452,14 +454,29 @@ async function loadStatus() {
 }
 
 /* ---------- 打卡 ---------- */
-async function doPunch(type) {
+async function doPunch(type, force) {
   if (busy) return;
   if (requirePhoto && !photoData) return showMsg('err', '請先拍攝櫃位照片');
   if (!currentStore()) return showMsg('err', '請先選擇今天的櫃點');
   busy = true; updateButtons();
   try {
     overlay('定位中');
-    const pos = await getLocation();
+    const loc = await getLocation();
+    let pos = loc.pos || null;
+    if (!pos && lastPos && Date.now() - lastPos.t < LOC_REUSE_MS) pos = lastPos;   // 剛剛抓到的位置還可以用
+    if (!pos && !force) {
+      if (loc.err === 1 || loc.err === 0) {
+        locDenied = true;
+        setHint('定位權限沒有開啟，無法打卡　<a data-relocate="1">重新定位</a>', 'warn');
+        return showMsg('err', LOC_GUIDE);
+      }
+      locFails++;
+      if (LOC_FALLBACK_AFTER && locFails >= LOC_FALLBACK_AFTER) {
+        return showMsg('warn', '還是抓不到位置<small>可以移到靠門口或窗邊再按一次；真的不行，可以按下面的按鈕，但紀錄會標記「無定位」</small>' +
+          '<button class="force" data-force="' + type + '">仍要' + type + '打卡</button>');
+      }
+      return showMsg('err', '抓不到位置，請移到靠門口或窗邊，再按一次<small>室內收訊較差時常發生</small>');
+    }
     overlay('送出中');
     const r = await api({
       action: 'punch', type, store: storeMode === 'pick' ? currentStore() : '',
@@ -490,12 +507,28 @@ async function doPunch(type) {
   }
 }
 
+/* ---------- 定位規則 ----------
+   ・定位權限被關閉 → 不能打卡，畫面教她怎麼開
+   ・權限有開但室內抓不到 → 先用 5 分鐘內抓到的位置；都沒有就請她換位置重試
+   ・連續失敗 LOC_FALLBACK_AFTER 次 → 才出現「仍要打卡」（紀錄標記「無定位」）；設 0 = 一律不准 */
+const LOC_FALLBACK_AFTER = 2;
+const LOC_REUSE_MS = 5 * 60 * 1000;
+let lastPos = null, locDenied = false, locFails = 0;
+const LOC_GUIDE = '<b>請先開啟定位才能打卡</b><small>' +
+  'Android：設定 → 應用程式 → Chrome（或 LINE）→ 權限 → 位置 →「使用時允許」<br>' +
+  'iPhone：設定 → 隱私權與安全性 → 定位服務（總開關要開）→ Safari 網站（或 LINE）→「使用 App 期間」<br>' +
+  '開好後回到這裡，點「重新定位」</small>';
+
 function getLocation() {
   return new Promise(resolve => {
-    if (!navigator.geolocation) return resolve(null);
+    if (!navigator.geolocation) return resolve({ err: 0 });
     navigator.geolocation.getCurrentPosition(
-      p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }),
-      () => resolve(null),  // 拒絕或失敗：照樣打卡，後端標記「無定位」
+      p => {
+        const pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, t: Date.now() };
+        lastPos = pos; locDenied = false; locFails = 0;
+        resolve({ pos: pos });
+      },
+      e => resolve({ err: e && e.code }),   // 1 = 權限被拒；2 = 抓不到；3 = 逾時
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
     );
   });
@@ -710,13 +743,21 @@ async function locateStores() {
   $('staffStore').textContent = '定位中…';
   setHint('正在確認您在哪一家百貨…', '');
   updateButtons();
-  const pos = await getLocation();
+  const loc = await getLocation();
+  const pos = loc.pos;
   locating = false;
 
   if (!pos) {
     fillStores(allStores, defaultStore);
-    setHint('無法定位，打卡會被標記「無定位」　<a data-relocate="1">重新定位</a>', 'warn');
+    if (loc.err === 1 || loc.err === 0) {
+      locDenied = true;
+      setHint('定位權限沒有開啟，<b>必須開啟才能打卡</b>　<a data-relocate="1">重新定位</a>', 'warn');
+      showMsg('err', LOC_GUIDE);
+    } else {
+      setHint('暫時抓不到位置，請移到靠門口或窗邊　<a data-relocate="1">重新定位</a>', 'warn');
+    }
   } else {
+    if (locDenied === false) hideMsg();
     const near = allStores
       .filter(s => s.lat !== null)
       .map(s => Object.assign({ d: distM(pos.lat, pos.lng, s.lat, s.lng) }, s))
@@ -785,12 +826,14 @@ function bindUI() {
     camFacing = camFacing === 'environment' ? 'user' : 'environment';
     try { await startStream(); } catch (e) {}
   });
+  $('msg').addEventListener('click', e => { const b = e.target.closest('[data-force]'); if (b) doPunch(b.dataset.force, true); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && locDenied && storeMode === 'pick') locateStores(); });
   $('btnIn').addEventListener('click', () => doPunch('上班'));
   $('btnOut').addEventListener('click', () => doPunch('下班'));
 }
 
 function updateButtons() {
-  const off = busy || locating || (requirePhoto && !photoData) || !currentStore();
+  const off = busy || locating || locDenied || (requirePhoto && !photoData) || !currentStore();
   $('btnIn').disabled = off;
   $('btnOut').disabled = off;
   // 提示下一步該按哪個
