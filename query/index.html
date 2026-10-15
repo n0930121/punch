@@ -339,6 +339,70 @@
     .person .st, .rec .where { font-size: 14px; } .sub { font-size: 15px; }
     .rec { column-gap: 9px; } .rec .who { font-size: 16px; } .rec .t { font-size: 15px; }
   }
+
+  /* ── 休假 ── */
+  .state.leave { background: var(--rose-tint); color: var(--rose-deep); }
+  .ratio-lg .lvc { color: var(--rose-deep); }
+  .cal .cd.lv { background: var(--rose-tint); color: var(--rose-deep); box-shadow: inset 0 0 0 1.5px var(--rose); }
+  .cal .cd.lv::after { content: "休"; position: absolute; font-family: "Noto Sans TC", sans-serif; font-size: 9px; bottom: 1px; right: 3px; }
+  .cal .cd { position: relative; }
+  .cal .cd.tap { cursor: pointer; }
+  .cal-lg .lv { background: var(--rose-tint); box-shadow: inset 0 0 0 1.5px var(--rose); }
+  .cal-tip { font-size: 13px; color: var(--ink-faint); margin: -2px 2px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hp-top .lvn { margin-left: auto; margin-right: 8px; font-size: 13px; color: var(--rose-deep); background: var(--rose-tint); padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+
+  /* ── 異常說明 ── */
+  .person .ab .abl { display: flex; gap: 0; white-space: nowrap; min-width: 0; }
+  .person .ab .abl b { font-weight: 600; flex: none; }
+  .person .ab .abl b::after { content: "："; }
+  .person .ab .abl span { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  @media (max-width: 370px) {
+    .person .ab .abl { display: block; }
+    .person .ab .abl b, .person .ab .abl span { display: block; }
+    .person .ab .abl b::after { content: ""; }
+    .person .ab .abl + .abl { margin-top: 4px; }
+  }
+
+  @media (max-width: 370px) { .ratio-lg { flex-wrap: wrap; gap: 4px 12px; } }
+  /* ── 日期按鈕右側淡出，提示可左右滑 ── */
+  .chips.fade-r { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
+                  mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+
+  /* ── 底部分頁：4 個時字小一點 ── */
+  nav button { position: relative; }
+  .nbadge { position: absolute; top: 3px; right: calc(50% - 22px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+            background: var(--bad); color: #fff; font-size: 11px; font-style: normal; line-height: 18px; letter-spacing: 0; }
+  body.is-admin nav button { letter-spacing: .04em; }
+
+  /* ── 人員管理 ── */
+  .sg { padding: 16px 18px 6px; }
+  .sg h3 { margin: 0 0 4px; display: flex; justify-content: space-between; font-size: 15px; font-weight: 500; color: var(--ink-soft); letter-spacing: .1em; }
+  .srow { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-top: 1px solid var(--hair); }
+  .sg h3 + .srow { border-top: 0; }
+  .srow.pend { flex-wrap: wrap; }
+  .srow.dim .sinfo { opacity: .6; }
+  .sinfo { display: flex; align-items: center; min-width: 0; flex: 1; }
+  .smeta { display: flex; flex-direction: column; min-width: 0; }
+  .smeta b { font-size: 17px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .smeta span { font-size: 13px; color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sact { display: flex; gap: 8px; width: 100%; padding-left: 44px; }
+  .sname { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--hair); background: var(--bg-2); color: var(--ink); }
+  .sbtn { flex: none; border: 0; font: inherit; font-size: 15px; padding: 9px 16px; border-radius: 999px; background: var(--bg-2); color: var(--ink-soft); cursor: pointer; white-space: nowrap; }
+  .sbtn.go { background: var(--rose-deep); color: #fff; }
+
+  .cf { position: fixed; inset: 0; z-index: 40; background: rgba(40,34,46,.45); display: grid; place-items: center; padding: 24px; animation: fadeIn .2s ease; }
+  .cf-card { width: 100%; max-width: 320px; background: var(--paper); border-radius: 22px; padding: 22px 20px 16px; text-align: center; box-shadow: 0 20px 50px -20px rgba(0,0,0,.4); }
+  .cf-t { font-size: 18px; font-weight: 600; }
+  .cf-m { font-size: 15px; color: var(--ink-soft); margin-top: 8px; line-height: 1.6; }
+  .cf-b { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+  .cf-b button { flex: 1; border: 0; font: inherit; font-size: 16px; padding: 11px 0; border-radius: 14px; cursor: pointer; white-space: nowrap; }
+  .cf-no { background: var(--bg-2); color: var(--ink-soft); }
+  .cf-ok { background: var(--rose-deep); color: #fff; }
+  .cf-ok.danger { background: var(--bad); }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 45; background: var(--ink); color: var(--paper);
+           font-size: 15px; padding: 10px 18px; border-radius: 999px; white-space: nowrap; transition: opacity .4s; }
+  .toast.out { opacity: 0; }
 </style>
 </head>
 <body>
@@ -368,7 +432,7 @@
       <div class="stat abn" id="statAbn"><div class="v" id="cAbn">0</div><div class="k">異常</div></div>
     </div>
     <div class="ratio" id="ratioBar"><span class="w"></span><span class="o"></span><span class="n"></span></div>
-    <div class="ratio-lg"><span><i class="w"></i>上班中</span><span><i class="o"></i>已下班</span><span><i class="n"></i>未打卡</span><span class="r" id="ratioTxt"></span></div>
+    <div class="ratio-lg"><span><i class="w"></i>上班中</span><span><i class="o"></i>已下班</span><span><i class="n"></i>未打卡</span><span class="lvc hidden" id="leaveTxt"></span><span class="r" id="ratioTxt"></span></div>
     <div class="card people" id="peopleList"></div>
     <div class="note">回到 App 或切換分頁時會自動更新</div>
   </section>
@@ -378,7 +442,7 @@
     <h1 id="recTitle">打卡紀錄</h1>
     <div class="sub" id="recSub">依日期、人員、櫃點查詢</div>
     <div class="card filters">
-      <div class="chips" id="rangeChips">
+      <div class="chips fade-r" id="rangeChips">
         <button class="chip on" data-r="today">今天</button>
         <button class="chip" data-r="yesterday">昨天</button>
         <button class="chip" data-r="7d">近 7 天</button>
@@ -421,6 +485,13 @@
     </div>
     <div id="hrList"></div>
   </section>
+  <!-- 人員管理（主管） -->
+  <section id="tab-staff" class="hidden">
+    <h1>人員管理</h1>
+    <div class="sub">開通新登記、停用離職人員</div>
+    <div id="staffList"></div>
+    <div class="note">停用後不能打卡，過去的紀錄會保留</div>
+  </section>
 </main>
 
 <nav class="hidden" id="nav">
@@ -431,6 +502,8 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>紀錄</button>
     <button data-tab="hours">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4M8.5 14h3M8.5 17h6"/></svg>工時</button>
+    <button data-tab="staff" class="admin-only">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9.5" r="2.6"/><path d="M16.5 14.6c2.6.1 4.4 1.7 5 4.4"/></svg>人員<i class="nbadge hidden" id="pendBadge"></i></button>
   </div>
 </nav>
 
@@ -473,7 +546,8 @@ let ME = null, curTab = '', range = 'today', abnOnly = false, month = '', lastRe
     $('nav').classList.remove('hidden');
     let tab = ME.admin ? 'today' : 'records';
     try { tab = sessionStorage.getItem('qTab') || tab; } catch (e) {}
-    if (tab === 'today' && !ME.admin) tab = 'records';
+    if ((tab === 'today' || tab === 'staff') && !ME.admin) tab = 'records';
+    if (ME.admin && r.pending) setPendBadge(r.pending);
     showTab(tab);
   } catch (e) {
     showState('無法啟動：' + esc(e.message || e));
@@ -487,12 +561,13 @@ function fillSelect(sel, list, allLabel) {
 function showTab(tab) {
   curTab = tab;
   try { sessionStorage.setItem('qTab', tab); } catch (e) {}
-  ['today', 'records', 'hours'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== tab));
+  ['today', 'records', 'hours', 'staff'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== tab));
   document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
   window.scrollTo(0, 0);
   if (tab === 'today') loadToday();
   if (tab === 'records') loadRecords();
   if (tab === 'hours') loadHours();
+  if (tab === 'staff') loadStaff();
 }
 
 /* ---------- 骨架畫面（讀取中） ---------- */
@@ -524,16 +599,25 @@ async function loadToday() {
   $('cNone').textContent = r.counts.none; $('cAbn').textContent = r.counts.abnormal;
   $('statAbn').classList.toggle('has', r.counts.abnormal > 0);
   const tot = r.counts.working + r.counts.off + r.counts.none || 1, bar = $('ratioBar').children;
+  $('leaveTxt').textContent = r.counts.leave ? '休假 ' + r.counts.leave : '';
+  $('leaveTxt').classList.toggle('hidden', !r.counts.leave);
   bar[0].style.flex = r.counts.working; bar[1].style.flex = r.counts.off; bar[2].style.flex = r.counts.none;
   $('ratioTxt').textContent = '到班率 ' + Math.round((r.counts.working + r.counts.off) / tot * 100) + '%';
-  const label = { working: '上班中', off: '已下班', none: '未打卡' };
+  const label = { working: '上班中', off: '已下班', none: '未打卡', leave: '休假' };
   $('peopleList').innerHTML = r.people.length ? r.people.map(p =>
     '<div class="person fadein">' + avatar(p.name, 'pav') + '<div class="nm"><span class="nmx">' + esc(p.name) + '</span><span class="state s1 ' + p.state + '">' + label[p.state] + '</span></div>' +
-    '<div class="st"><span class="state s2 ' + p.state + '">' + label[p.state] + '</span><span class="sto">' + (p.store ? esc(p.store) : '尚未選櫃點') + '</span></div>' +
+    '<div class="st"><span class="state s2 ' + p.state + '">' + label[p.state] + '</span><span class="sto">' + (p.store ? esc(p.store) : p.state === 'leave' ? '今日休假' : '尚未選櫃點') + '</span></div>' +
     '<div class="tm">上 <b class="num">' + (p.inTime || '--:--') + '</b><br>下 <b class="num">' + (p.outTime || '--:--') + '</b></div>' +
     photoBtn(p.name + '・今天', [{ label: '上班', time: p.inTime, id: p.inPhoto }, { label: '下班', time: p.outTime, id: p.outPhoto }]) +
-    (p.abnormal.length ? '<div class="ab">' + p.abnormal.map(esc).join('<br>') + '</div>' : '') + '</div>'
+    (p.abnormal.length ? '<div class="ab">' + p.abnormal.map(abLine).join('') + '</div>' : '') + '</div>'
   ).join('') : emptyBox('還沒有已開通的人員');
+}
+
+/* 異常說明：「11:08 上班」＋說明；小螢幕自動分兩行 */
+function abLine(t) {
+  const i = String(t).indexOf('：');
+  if (i < 0) return '<div class="abl"><span>' + esc(t) + '</span></div>';
+  return '<div class="abl"><b>' + esc(t.slice(0, i)) + '</b><span>' + esc(t.slice(i + 1)) + '</span></div>';
 }
 
 /* ---------- 紀錄 ---------- */
@@ -596,6 +680,7 @@ async function loadHours() {
       '<span class="hb-v num">' + p.totalHours + '</span></div>').join('') + '</div>';
   $('hrList').innerHTML = overview + lastHours.map(p =>
     '<div class="card hp fadein' + (single ? ' open' : '') + '"><div class="hp-top"><span class="nm">' + avatar(p.name) + esc(p.name) + '</span>' +
+    ((p.leaves || []).length ? '<span class="lvn">休 ' + p.leaves.length + ' 天</span>' : '') +
     '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>' +
     '<div class="kpis"><div class="kpi"><div class="v">' + p.workDays + '</div><div class="k">出勤天數</div></div>' +
     '<div class="kpi"><div class="v">' + p.totalHours + '</div><div class="k">總工時</div></div>' +
@@ -603,6 +688,18 @@ async function loadHours() {
     '<div class="dlist">' + calendar(p) + p.days.map(d => (curHoursName = p.name, dayRow(d))).join('') + '</div></div>'
   ).join('');
   document.querySelectorAll('.hp-top').forEach(el => el.onclick = () => el.parentElement.classList.toggle('open'));
+  if (ME.admin) document.querySelectorAll('.cal .cd[data-d]').forEach(el => el.onclick = () => askLeave(el.dataset.n, el.dataset.d, el.classList.contains('lv')));
+}
+
+/* 主管點日曆空白日：標記／取消休假 */
+function askLeave(name, date, isLeave) {
+  const d = new Date(date + 'T00:00:00');
+  const label = date.slice(5).replace('-', '/') + '（週' + WEEK[d.getDay()] + '）';
+  confirmBox(isLeave ? '取消休假？' : '標記為休假？', esc(name) + '・' + label,
+    isLeave ? '取消休假' : '標記休假', async () => {
+      const r = await api({ action: 'q_leave', name: name, date: date, on: !isLeave });
+      if (!r.ok) toast(r.message || '儲存失敗'); else { toast(isLeave ? '已取消休假' : '已標記休假'); loadHours(); }
+    });
 }
 
 /* 月曆：每天依工時深淺上色，缺卡紅框、有異常加橘點 */
@@ -610,6 +707,7 @@ function calendar(p) {
   const [y, m] = month.split('-').map(Number);
   const first = new Date(y, m - 1, 1).getDay(), days = new Date(y, m, 0).getDate();
   const map = {}; p.days.forEach(d => map[Number(d.date.slice(8))] = d);
+  const lv = {}; (p.leaves || []).forEach(x => lv[Number(x.slice(8))] = true);
   const today = new Date(), isCur = today.getFullYear() === y && today.getMonth() + 1 === m;
   let cells = '日一二三四五六'.split('').map(w => '<span class="cw">' + w + '</span>').join('');
   for (let i = 0; i < first; i++) cells += '<span></span>';
@@ -620,11 +718,15 @@ function calendar(p) {
       if (x.flag && x.flag !== '上班中') cls += ' miss';
       if (x.flag === '上班中') cls += ' live';
       if (x.abnormal) cls += ' abn';
-    } else if (isCur && d > today.getDate()) cls += ' fut';
+    } else if (lv[d]) cls += ' lv';
+    else if (isCur && d > today.getDate()) cls += ' fut';
     if (isCur && d === today.getDate()) cls += ' now';
-    cells += '<span class="' + cls + '" style="' + style + '">' + d + '</span>';
+    const key = !x && ME.admin ? ' data-n="' + esc(p.name) + '" data-d="' + month + '-' + pad(d) + '"' : '';
+    if (key) cls += ' tap';
+    cells += '<span class="' + cls + '" style="' + style + '"' + key + '>' + d + '</span>';
   }
-  return '<div class="cal">' + cells + '</div><div class="cal-lg"><span><i class="l1"></i>工時短</span><span><i class="l2"></i>工時長</span><span><i class="lm"></i>缺卡</span><span><i class="la"></i>有異常</span></div>';
+  return '<div class="cal">' + cells + '</div><div class="cal-lg"><span><i class="l1"></i>工時短</span><span><i class="l2"></i>工時長</span><span><i class="lm"></i>缺卡</span><span><i class="la"></i>有異常</span><span><i class="lv"></i>休假</span></div>' +
+    (ME.admin ? '<div class="cal-tip">點沒有打卡的日期，可以標記或取消休假</div>' : '');
 }
 
 function dayRow(d) {
@@ -635,6 +737,72 @@ function dayRow(d) {
     '<div class="h">' + (d.hours !== null ? d.hours + 'h' : '') + '</div>' +
     (ME.admin ? photoBtn(curHoursName + '・' + d.date.slice(5).replace('-', '/'), [{ label: '上班', time: d.in, id: d.inPhoto }, { label: '下班', time: d.out, id: d.outPhoto }]) : '') +
     '<div class="s"><span>' + esc(d.store || '') + '</span>' + flag + (d.abnormal ? '<span class="tag warn">有異常</span>' : '') + '</div></div>';
+}
+
+/* ---------- 人員管理（主管） ---------- */
+let staffData = [];
+async function loadStaff() {
+  $('staffList').innerHTML = skel('cards');
+  const r = await api({ action: 'q_staff' });
+  if (!r.ok) return $('staffList').innerHTML = '<div class="card">' + emptyBox(r.message) + '</div>';
+  renderStaff(r.people || []);
+}
+function setPendBadge(n) {
+  $('pendBadge').textContent = n; $('pendBadge').classList.toggle('hidden', !n);
+}
+function renderStaff(list) {
+  staffData = list;
+  const pend = list.filter(p => p.status === '待審核'), act = list.filter(p => p.status === '啟用'), off = list.filter(p => p.status === '停用');
+  setPendBadge(pend.length);
+  const grp = (title, n, body) => '<div class="card sg fadein"><h3><span>' + title + '</span><span class="num">' + n + '</span></h3>' + body + '</div>';
+  let h = '';
+  if (pend.length) h += grp('待開通', pend.length, pend.map(p =>
+    '<div class="srow pend"><div class="sinfo">' + avatar(p.lineName || '?') + '<div class="smeta"><b>' + esc(p.lineName || '（沒有 LINE 名稱）') + '</b><span>LINE 名稱・' + esc(p.since || '') + ' 登記</span></div></div>' +
+    '<div class="sact"><input class="sname" maxlength="20" placeholder="填寫姓名" value="' + esc(p.name || p.lineName || '') + '" data-k="' + esc(p.key) + '">' +
+    '<button class="sbtn go" data-act="on" data-k="' + esc(p.key) + '">開通</button></div></div>').join(''));
+  h += grp('啟用中', act.length, act.length ? act.map(p =>
+    '<div class="srow"><div class="sinfo">' + avatar(p.name) + '<div class="smeta"><b>' + esc(p.name) + '</b><span>' + esc(p.lineName) + '</span></div></div>' +
+    '<button class="sbtn" data-act="off" data-k="' + esc(p.key) + '">停用</button></div>').join('') : emptyBox('沒有啟用中的人員'));
+  if (off.length) h += grp('已停用', off.length, off.map(p =>
+    '<div class="srow dim"><div class="sinfo">' + avatar(p.name || p.lineName) + '<div class="smeta"><b>' + esc(p.name || p.lineName) + '</b><span>' + esc(p.lineName) + '</span></div></div>' +
+    '<button class="sbtn" data-act="re" data-k="' + esc(p.key) + '">重新啟用</button></div>').join(''));
+  $('staffList').innerHTML = h;
+  $('staffList').querySelectorAll('.sbtn').forEach(b => b.onclick = () => staffAction(b.dataset.act, b.dataset.k, b));
+}
+function staffAction(act, key, btn) {
+  const p = staffData.find(x => x.key === key); if (!p) return;
+  if (act === 'on') {
+    const name = $('staffList').querySelector('.sname[data-k="' + CSS.escape(key) + '"]').value.trim();
+    if (!name) return toast('請先填姓名');
+    return confirmBox('開通這位人員？', '姓名：' + esc(name), '開通', () => doSetStaff(key, '啟用', name));
+  }
+  if (act === 'off') return confirmBox('停用「' + esc(p.name) + '」？', '停用後就不能打卡；過去的紀錄會保留，之後也可以重新啟用', '停用', () => doSetStaff(key, '停用'), true);
+  if (act === 're') return confirmBox('重新啟用「' + esc(p.name || p.lineName) + '」？', '', '重新啟用', () => doSetStaff(key, '啟用', p.name));
+}
+async function doSetStaff(key, status, name) {
+  const r = await api({ action: 'q_setstaff', key: key, status: status, name: name || '' });
+  if (!r.ok) return toast(r.message || '儲存失敗');
+  toast(status === '停用' ? '已停用' : '已啟用');
+  renderStaff(r.people || []);
+  refreshNames();
+}
+async function refreshNames() {
+  const r = await api({ action: 'q_me' });
+  if (r.ok) { fillSelect($('fName'), r.staff, '全部人員'); fillSelect($('hName'), r.staff, '全部人員'); }
+}
+
+/* 確認視窗與提示 */
+function confirmBox(title, msg, okText, onOk, danger) {
+  const w = document.createElement('div'); w.className = 'cf';
+  w.innerHTML = '<div class="cf-card"><div class="cf-t">' + title + '</div>' + (msg ? '<div class="cf-m">' + msg + '</div>' : '') +
+    '<div class="cf-b"><button class="cf-no">取消</button><button class="cf-ok' + (danger ? ' danger' : '') + '">' + okText + '</button></div></div>';
+  document.body.appendChild(w);
+  w.onclick = e => { if (e.target === w || e.target.classList.contains('cf-no')) w.remove(); };
+  w.querySelector('.cf-ok').onclick = async e => { e.target.disabled = true; e.target.textContent = '處理中…'; await onOk(); w.remove(); };
+}
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.classList.add('out'), 1800); setTimeout(() => t.remove(), 2200);
 }
 
 /* ---------- 打卡照片（主管） ---------- */
@@ -716,6 +884,10 @@ function bindUI() {
     loadRecords();
   });
   ['fFrom', 'fTo', 'fName', 'fStore'].forEach(id => $(id).onchange = loadRecords);
+  const ch = $('rangeChips');
+  const fadeChk = () => ch.classList.toggle('fade-r', ch.scrollLeft + ch.clientWidth < ch.scrollWidth - 4);
+  ch.addEventListener('scroll', fadeChk, { passive: true }); window.addEventListener('resize', fadeChk);
+  setTimeout(fadeChk, 0); new MutationObserver(fadeChk).observe($('tab-records'), { attributes: true });
   $('fAbn').onclick = () => { abnOnly = !abnOnly; $('fAbn').classList.toggle('on', abnOnly); loadRecords(); };
   $('hName').onchange = loadHours;
   $('mPrev').onclick = () => shiftMonth(-1);
@@ -783,21 +955,30 @@ function demoPhoto(out) {
   g.font = '28px sans-serif'; g.fillText(out ? '下班照片（示範）' : '上班照片（示範）', 240, 610);
   return c.toDataURL('image/jpeg', .8);
 }
+const DEMO_LEAVE = {};
+const DEMO_STAFF = [
+  { key: 'U1', lineName: 'Amy 🌸', name: '', status: '待審核', since: '2026-10-15' },
+  { key: 'U2', lineName: 'Ryan', name: 'Ryan', status: '啟用' }, { key: 'U3', lineName: 'mei.wang', name: '王小美', status: '啟用' },
+  { key: 'U4', lineName: 'Jia Hui', name: '林佳慧', status: '啟用' }, { key: 'U5', lineName: '怡君', name: '陳怡君', status: '啟用' },
+  { key: 'U6', lineName: 'Tina', name: '張雅婷', status: '啟用' }, { key: 'U7', lineName: 'Peiyu', name: '李珮瑜', status: '停用' }];
 function demoApi(p) {
   const asStaff = new URLSearchParams(location.search).get('demo') === 'staff';
   const today = ymd(new Date());
   const people = ['王小美', '林佳慧', '陳怡君', '張雅婷', '李珮瑜', '黃詩涵'];
   const me = asStaff ? { name: '王小美', admin: false } : { name: 'Ryan', admin: true };
   return new Promise(res => setTimeout(() => {
-    if (p.action === 'q_me') return res({ ok: true, me, staff: asStaff ? ['王小美'] : people,
+    if (p.action === 'q_staff') return res({ ok: true, me, people: DEMO_STAFF });
+    if (p.action === 'q_setstaff') { const x = DEMO_STAFF.find(s => s.key === p.key); if (x) { x.status = p.status; if (p.name) x.name = p.name; } return res({ ok: true, people: DEMO_STAFF }); }
+    if (p.action === 'q_leave') { const k = p.name + p.date; if (p.on) DEMO_LEAVE[k] = 1; else delete DEMO_LEAVE[k]; return res({ ok: true }); }
+    if (p.action === 'q_me') return res({ ok: true, me, pending: asStaff ? 0 : DEMO_STAFF.filter(s => s.status === '待審核').length, staff: asStaff ? ['王小美'] : people,
       stores: ['UCHINO - SOGO復興', 'UCHINO - 信義A8', 'Berkemann - SOGO復興', 'HASSIA - 新光南西', 'IKEUCHI - 板橋大遠百'] });
-    if (p.action === 'q_today') return res({ ok: true, me, date: today, counts: { working: 3, off: 1, none: 2, abnormal: 2 }, people: [
+    if (p.action === 'q_today') return res({ ok: true, me, date: today, counts: { working: 3, off: 1, none: 1, leave: 1, abnormal: 2 }, people: [
       { name: '王小美', state: 'working', inTime: '10:52', outTime: '', store: 'UCHINO - SOGO復興', abnormal: [], inPhoto: 'demoIn01234' },
       { name: '林佳慧', state: 'working', inTime: '10:55', outTime: '', store: 'Berkemann - SOGO復興', abnormal: [] },
       { name: '陳怡君', state: 'working', inTime: '11:08', outTime: '', store: 'HASSIA - 新光南西', abnormal: ['11:08 上班：櫃點不符：UCHINO - 新光南西'] },
       { name: '張雅婷', state: 'off', inTime: '09:58', outTime: '14:02', store: 'UCHINO - 信義A8', abnormal: ['14:02 下班：定位可疑（誤差3m）'], inPhoto: 'demoIn01234', outPhoto: 'demoOut01234' },
       { name: '李珮瑜', state: 'none', inTime: '', outTime: '', store: '', abnormal: [] },
-      { name: '黃詩涵', state: 'none', inTime: '', outTime: '', store: '', abnormal: [] }] });
+      { name: '黃詩涵', state: 'leave', inTime: '', outTime: '', store: '', abnormal: [] }] });
     if (p.action === 'q_photo') return res({ ok: true, photos: p.ids.map(id => ({ id, data: demoPhoto(id.indexOf('Out') > 0) })) });
     if (p.action === 'q_records') {
       let recs = [
@@ -822,7 +1003,8 @@ function demoApi(p) {
           days.push({ date: d, in: '10:5' + (i % 9), out: flag ? '' : '21:' + pad(30 + (i % 20)), hours: h, flag, store: 'UCHINO - SOGO復興', abnormal: !asStaff && i === 9,
                       inPhoto: asStaff ? '' : 'demoIn01234', outPhoto: asStaff || flag ? '' : 'demoOut01234' });
         }
-        return { name, days: days.reverse(), workDays: days.length, totalHours: Math.round(total * 10) / 10, missing: miss };
+        const leaves = [p.month + '-03', p.month + '-10'].concat(Object.keys(DEMO_LEAVE).filter(k => k.indexOf(name) === 0).map(k => k.slice(name.length)));
+        return { name, days: days.reverse(), leaves, workDays: days.length, totalHours: Math.round(total * 10) / 10, missing: miss };
       };
       return res({ ok: true, me, month: p.month, people: asStaff || p.name ? [mk(p.name || '王小美', 3)] : people.slice(0, 4).map((n, i) => mk(n, i)) });
     }
