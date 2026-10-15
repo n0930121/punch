@@ -143,7 +143,7 @@
   .ratio-lg .r { margin-left: auto; font-weight: 600; color: var(--ink); }
   .chart { padding: 18px 18px 10px; }
   .chart-h { font-size: 14px; color: var(--ink-soft); letter-spacing: .15em; margin-bottom: 8px; }
-  .hbar { display: grid; grid-template-columns: auto 64px 1fr 44px; align-items: center; gap: 6px; padding: 7px 0; }
+  .hbar { display: grid; grid-template-columns: auto 92px 1fr 44px; align-items: center; gap: 6px; padding: 7px 0; }
   .hb-n { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hb-t { height: 10px; border-radius: 99px; background: var(--bg-2); overflow: hidden; }
   .hb-t span { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--rose), var(--rose-deep)); }
@@ -403,6 +403,40 @@
   .toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 45; background: var(--ink); color: var(--paper);
            font-size: 15px; padding: 10px 18px; border-radius: 999px; white-space: nowrap; transition: opacity .4s; }
   .toast.out { opacity: 0; }
+
+  /* ── 補卡申請 ── */
+  .tag.fix { background: var(--rose-tint); color: var(--rose-deep); }
+  .bar .fixbtn { margin-left: auto; margin-right: 8px; background: var(--rose-deep); color: #fff; }
+  .fixcard { padding: 16px 18px 8px; }
+  .fixcard h3 { margin: 0 0 4px; font-size: 15px; font-weight: 500; color: var(--ink-soft); letter-spacing: .1em; }
+  .fx { padding: 12px 0; border-top: 1px solid var(--hair); }
+  .fixcard h3 + .fx, .sg h3 + .fx, .sg summary + .fx { border-top: 0; }
+  .fx-h { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; font-size: 16px; }
+  .fx-h span { color: var(--ink-soft); font-size: 14px; }
+  .fx-h .fx-t { color: var(--ink); font-size: 16px; }
+  .fx-h .fx-n { color: var(--ink); font-size: 15px; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .fx-s { margin-left: auto; font-size: 13px !important; padding: 2px 9px; border-radius: 999px; flex: none; }
+  .fx-s.pend { background: var(--amber-tint); color: var(--amber) !important; }
+  .fx-s.ok { background: var(--sage-tint); color: var(--sage-deep) !important; }
+  .fx-s.no { background: var(--bad-tint); color: var(--bad) !important; }
+  .fx-who { display: flex; align-items: center; font-size: 17px; font-weight: 500; margin-bottom: 6px; white-space: nowrap; }
+  .fx-m, .fx-r { font-size: 14px; color: var(--ink-soft); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fx-b { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+  details.fxdone summary { list-style: none; display: flex; justify-content: space-between; font-size: 15px; font-weight: 500; color: var(--ink-soft); letter-spacing: .1em; cursor: pointer; padding-bottom: 8px; }
+  details.fxdone summary::-webkit-details-marker { display: none; }
+  .fxf { text-align: left; max-width: 360px; }
+  .fxf .cf-t, .fxf .cf-m { text-align: center; }
+  .fxf .field { display: block; margin-top: 12px; }
+  .fxf .field span { display: block; margin-bottom: 4px; }
+  .fxf input, .fxf select { width: 100%; font: inherit; font-size: 16px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--hair); background: var(--bg-2); color: var(--ink); box-sizing: border-box; }
+  .fxrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .seg { display: flex; background: var(--bg-2); border-radius: 14px; padding: 4px; margin-top: 14px; }
+  .seg button { flex: 1; border: 0; background: none; font: inherit; font-size: 16px; padding: 9px 0; border-radius: 10px; color: var(--ink-soft); cursor: pointer; }
+  .seg button.on { background: var(--paper); color: var(--ink); box-shadow: var(--shadow); font-weight: 500; }
+  .fxchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .fxchips button { border: 0; font: inherit; font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--rose-tint); color: var(--rose-deep); cursor: pointer; white-space: nowrap; }
+  @media (max-width: 370px) { .fx-h { font-size: 15px; gap: 5px; } .fx-h > span:not(.fx-t):not(.fx-s) { display: none; } .fx-h .fx-t { font-size: 15px; } }
+  .cf-in { display: block; width: 100%; margin-top: 12px; box-sizing: border-box; }
 </style>
 </head>
 <body>
@@ -460,7 +494,9 @@
       </div>
       <div class="toggle admin-only" id="fAbn"><span>只看異常紀錄</span><span class="sw"></span></div>
     </div>
+    <div class="card fixcard staff-only hidden" id="fixMine"></div>
     <div class="bar"><span id="recCount"></span>
+      <button class="btn fixbtn staff-only hidden" id="fixOpen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>申請補卡</button>
       <button class="btn" id="recExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>匯出</button>
     </div>
     <div id="recList"></div>
@@ -489,6 +525,7 @@
   <section id="tab-staff" class="hidden">
     <h1>人員管理</h1>
     <div class="sub">開通新登記、停用離職人員</div>
+    <div id="fixAdmin"></div>
     <div id="staffList"></div>
     <div class="note">停用後不能打卡，過去的紀錄會保留</div>
   </section>
@@ -547,7 +584,10 @@ let ME = null, curTab = '', range = 'today', abnOnly = false, month = '', lastRe
     let tab = ME.admin ? 'today' : 'records';
     try { tab = sessionStorage.getItem('qTab') || tab; } catch (e) {}
     if ((tab === 'today' || tab === 'staff') && !ME.admin) tab = 'records';
-    if (ME.admin && r.pending) setPendBadge(r.pending);
+    STORES = r.stores || [];
+    $('fixOpen').classList.toggle('hidden', ME.admin);
+    if (ME.admin) { badgeN.staff = r.pending || 0; badgeN.fix = r.fixPending || 0; setPendBadge(); }
+    if (new URLSearchParams(location.search).has('fix') && !ME.admin) { tab = 'records'; setTimeout(openFixForm, 300); }
     showTab(tab);
   } catch (e) {
     showState('無法啟動：' + esc(e.message || e));
@@ -633,6 +673,7 @@ function rangeDates() {
 }
 
 async function loadRecords() {
+  if (!ME.admin) loadFixMine();
   const [f, t] = rangeDates();
   $('recList').innerHTML = skel('cards');
   $('recCount').textContent = '';
@@ -652,8 +693,8 @@ async function loadRecords() {
 }
 
 function recRow(x) {
-  const bad = x.verdict && x.verdict !== '正常';
-  const tags = '<span class="tag' + (bad ? ' bad' : '') + '">' + esc(x.verdict || '—') + '</span>' +
+  const fix = x.verdict === '補登', bad = x.verdict && x.verdict !== '正常' && !fix;
+  const tags = '<span class="tag' + (bad ? ' bad' : fix ? ' fix' : '') + '">' + esc(x.verdict || '—') + '</span>' +
     (x.warn ? x.warn.split('、').map(w => '<span class="tag warn">' + esc(w) + '</span>').join('') : '');
   const ph = x.photoId ? photoBtn(x.name + '・' + x.date.slice(5).replace('-', '/'), [{ label: x.type, time: x.time, id: x.photoId }]).replace('class="pbtn"', 'class="pbtn ph"') : '<span></span>';
   return '<div class="rec"><div class="t">' + esc(x.time) + '</div>' +
@@ -725,7 +766,7 @@ function calendar(p) {
     if (key) cls += ' tap';
     cells += '<span class="' + cls + '" style="' + style + '"' + key + '>' + d + '</span>';
   }
-  return '<div class="cal">' + cells + '</div><div class="cal-lg"><span><i class="l1"></i>工時短</span><span><i class="l2"></i>工時長</span><span><i class="lm"></i>缺卡</span><span><i class="la"></i>有異常</span><span><i class="lv"></i>休假</span></div>' +
+  return '<div class="cal">' + cells + '</div><div class="cal-lg"><span><i class="l1"></i>工時短</span><span><i class="l2"></i>工時長</span><span><i class="lm"></i>缺卡</span>' + (ME.admin ? '<span><i class="la"></i>有異常</span>' : '') + '<span><i class="lv"></i>休假</span></div>' +
     (ME.admin ? '<div class="cal-tip">點沒有打卡的日期，可以標記或取消休假</div>' : '');
 }
 
@@ -743,17 +784,20 @@ function dayRow(d) {
 let staffData = [];
 async function loadStaff() {
   $('staffList').innerHTML = skel('cards');
+  loadFixAdmin();
   const r = await api({ action: 'q_staff' });
   if (!r.ok) return $('staffList').innerHTML = '<div class="card">' + emptyBox(r.message) + '</div>';
   renderStaff(r.people || []);
 }
-function setPendBadge(n) {
+const badgeN = { staff: 0, fix: 0 };
+function setPendBadge() {
+  const n = badgeN.staff + badgeN.fix;
   $('pendBadge').textContent = n; $('pendBadge').classList.toggle('hidden', !n);
 }
 function renderStaff(list) {
   staffData = list;
   const pend = list.filter(p => p.status === '待審核'), act = list.filter(p => p.status === '啟用'), off = list.filter(p => p.status === '停用');
-  setPendBadge(pend.length);
+  badgeN.staff = pend.length; setPendBadge();
   const grp = (title, n, body) => '<div class="card sg fadein"><h3><span>' + title + '</span><span class="num">' + n + '</span></h3>' + body + '</div>';
   let h = '';
   if (pend.length) h += grp('待開通', pend.length, pend.map(p =>
@@ -789,6 +833,81 @@ async function doSetStaff(key, status, name) {
 async function refreshNames() {
   const r = await api({ action: 'q_me' });
   if (r.ok) { fillSelect($('fName'), r.staff, '全部人員'); fillSelect($('hName'), r.staff, '全部人員'); }
+}
+
+/* ---------- 補卡申請 ---------- */
+let STORES = [];
+const FIX_REASONS = ['忘記打卡', '手機沒電', '網路不通', '定位或相機壞掉', '按錯上下班'];
+function fixItem(f, admin) {
+  const cls = f.status === '待審核' ? 'pend' : f.status === '已核准' ? 'ok' : 'no';
+  const d = new Date(f.date + 'T00:00:00');
+  return '<div class="fx ' + cls + '">' + (admin ? '<div class="fx-who">' + avatar(f.name, 'sm') + esc(f.name) + '</div>' : '') + '<div class="fx-h"><b class="num">' + esc(f.date.slice(5).replace('-', '/')) + '</b><span>週' + WEEK[d.getDay()] + '</span>' +
+    '<b class="num">' + esc(f.time) + '</b><span class="fx-t">' + esc(f.type) + '</span>' +
+    '<span class="fx-s ' + cls + '">' + esc(f.status) + '</span></div>' +
+    '<div class="fx-m">' + esc(f.store) + '</div><div class="fx-r">原因：' + esc(f.reason) + '</div>' +
+    (f.note ? '<div class="fx-r">主管：' + esc(f.note) + '</div>' : '') +
+    (admin && f.status === '待審核' ? '<div class="fx-b"><button class="sbtn" data-fx="no" data-id="' + esc(f.id) + '">退回</button><button class="sbtn go" data-fx="ok" data-id="' + esc(f.id) + '">核准</button></div>' : '') + '</div>';
+}
+async function loadFixMine() {
+  const r = await api({ action: 'q_fixlist' });
+  renderFixMine(r.ok ? r.list : []);
+}
+function renderFixMine(list) {
+  const box = $('fixMine');
+  box.classList.toggle('hidden', !list.length);
+  box.innerHTML = '<h3>我的補卡申請</h3>' + list.slice(0, 5).map(f => fixItem(f, false)).join('');
+}
+async function loadFixAdmin() {
+  const r = await api({ action: 'q_fixlist' });
+  if (!r.ok) return $('fixAdmin').innerHTML = '';
+  renderFixAdmin(r.list || []);
+}
+function renderFixAdmin(list) {
+  const pend = list.filter(f => f.status === '待審核'), done = list.filter(f => f.status !== '待審核');
+  badgeN.fix = pend.length; setPendBadge();
+  $('fixAdmin').innerHTML = (pend.length ? '<div class="card sg fadein"><h3><span>補卡申請・待審核</span><span class="num">' + pend.length + '</span></h3>' + pend.map(f => fixItem(f, true)).join('') + '</div>' : '') +
+    (done.length ? '<details class="card sg fxdone"><summary><span>補卡申請・已審核</span><span class="num">' + done.length + '</span></summary>' + done.slice(0, 10).map(f => fixItem(f, true)).join('') + '</details>' : '');
+  $('fixAdmin').querySelectorAll('[data-fx]').forEach(b => b.onclick = () => {
+    const f = list.find(x => x.id === b.dataset.id); if (!f) return;
+    const ok = b.dataset.fx === 'ok';
+    const sum = esc(f.name) + '・' + esc(f.date.slice(5).replace('-', '/')) + ' ' + esc(f.time) + ' ' + esc(f.type);
+    if (ok) confirmBox('核准補卡？', sum + '<br>會新增一筆「補登」到打卡紀錄', '核准', () => doFix(f.id, true, ''));
+    else confirmBox('退回補卡？', sum + '<br><input class="sname cf-in" id="fxNote" maxlength="100" placeholder="退回原因（選填）">', '退回', () => doFix(f.id, false, ($('fxNote') || {}).value || ''), true);
+  });
+}
+async function doFix(id, approve, note) {
+  const r = await api({ action: 'q_fixdo', id: id, approve: approve, note: note });
+  if (!r.ok) return toast(r.message || '儲存失敗');
+  toast(approve ? '已核准，已補登' : '已退回');
+  renderFixAdmin(r.list || []);
+}
+function openFixForm() {
+  const t = new Date(), min = new Date(); min.setDate(min.getDate() - 31);
+  const w = document.createElement('div'); w.className = 'cf';
+  w.innerHTML = '<div class="cf-card fxf"><div class="cf-t">申請補卡</div><div class="cf-m">送出後由主管審核</div>' +
+    '<div class="seg" id="fxType"><button class="on" data-v="上班">上班</button><button data-v="下班">下班</button></div>' +
+    '<div class="fxrow"><label class="field"><span>日期</span><input type="date" id="fxDate" value="' + ymd(t) + '" min="' + ymd(min) + '" max="' + ymd(t) + '"></label>' +
+    '<label class="field"><span>時間</span><input type="time" id="fxTime" value="' + pad(t.getHours()) + ':00"></label></div>' +
+    '<label class="field"><span>櫃點</span><select id="fxStore">' + STORES.map(n => '<option>' + esc(n) + '</option>').join('') + '</select></label>' +
+    '<label class="field"><span>原因</span><input id="fxReason" maxlength="100" placeholder="例如：忘記打卡"></label>' +
+    '<div class="fxchips">' + FIX_REASONS.map(x => '<button>' + x + '</button>').join('') + '</div>' +
+    '<div class="cf-b"><button class="cf-no">取消</button><button class="cf-ok">送出申請</button></div></div>';
+  document.body.appendChild(w);
+  const last = lastRecs.find(x => x.store); if (last) w.querySelector('#fxStore').value = last.store;
+  w.querySelectorAll('#fxType button').forEach(b => b.onclick = () => w.querySelectorAll('#fxType button').forEach(x => x.classList.toggle('on', x === b)));
+  w.querySelectorAll('.fxchips button').forEach(b => b.onclick = () => { w.querySelector('#fxReason').value = b.textContent; });
+  w.onclick = e => { if (e.target === w || e.target.classList.contains('cf-no')) w.remove(); };
+  w.querySelector('.cf-ok').onclick = async e => {
+    const btn = e.target;
+    const body = { action: 'q_fixreq', type: w.querySelector('#fxType .on').dataset.v, date: $('fxDate').value, time: $('fxTime').value,
+                   store: $('fxStore').value, reason: $('fxReason').value.trim() };
+    if (!body.reason) return toast('請填寫原因');
+    btn.disabled = true; btn.textContent = '送出中…';
+    const r = await api(body);
+    btn.disabled = false; btn.textContent = '送出申請';
+    if (!r.ok) return toast(r.message || '送出失敗');
+    w.remove(); toast('已送出，等主管審核'); renderFixMine(r.list || []);
+  };
 }
 
 /* 確認視窗與提示 */
@@ -893,6 +1012,7 @@ function bindUI() {
   $('mPrev').onclick = () => shiftMonth(-1);
   $('mNext').onclick = () => shiftMonth(1);
   $('recExport').onclick = exportRecords;
+  $('fixOpen').onclick = openFixForm;
   $('hrExport').onclick = exportHours;
   document.addEventListener('visibilitychange', () => { if (!document.hidden && curTab === 'today') loadToday(); });
 }
@@ -956,6 +1076,9 @@ function demoPhoto(out) {
   return c.toDataURL('image/jpeg', .8);
 }
 const DEMO_LEAVE = {};
+const DEMO_FIX = [
+  { id: 'F1', name: '林佳慧', date: ymd(new Date(Date.now() - 864e5)), time: '21:30', type: '下班', store: 'Berkemann - SOGO復興', reason: '手機沒電', status: '待審核', note: '' },
+  { id: 'F2', name: '王小美', date: ymd(new Date(Date.now() - 3 * 864e5)), time: '10:50', type: '上班', store: 'UCHINO - SOGO復興', reason: '忘記打卡', status: '已核准', note: '' }];
 const DEMO_STAFF = [
   { key: 'U1', lineName: 'Amy 🌸', name: '', status: '待審核', since: '2026-10-15' },
   { key: 'U2', lineName: 'Ryan', name: 'Ryan', status: '啟用' }, { key: 'U3', lineName: 'mei.wang', name: '王小美', status: '啟用' },
@@ -968,9 +1091,12 @@ function demoApi(p) {
   const me = asStaff ? { name: '王小美', admin: false } : { name: 'Ryan', admin: true };
   return new Promise(res => setTimeout(() => {
     if (p.action === 'q_staff') return res({ ok: true, me, people: DEMO_STAFF });
+    if (p.action === 'q_fixlist') return res({ ok: true, list: asStaff ? DEMO_FIX.filter(f => f.name === '王小美') : DEMO_FIX });
+    if (p.action === 'q_fixreq') { DEMO_FIX.unshift({ id: 'F' + Date.now(), name: '王小美', date: p.date, time: p.time, type: p.type, store: p.store, reason: p.reason, status: '待審核', note: '' }); return res({ ok: true, list: DEMO_FIX.filter(f => f.name === '王小美') }); }
+    if (p.action === 'q_fixdo') { const f = DEMO_FIX.find(x => x.id === p.id); if (f) { f.status = p.approve ? '已核准' : '已退回'; f.note = p.note || ''; } return res({ ok: true, list: DEMO_FIX }); }
     if (p.action === 'q_setstaff') { const x = DEMO_STAFF.find(s => s.key === p.key); if (x) { x.status = p.status; if (p.name) x.name = p.name; } return res({ ok: true, people: DEMO_STAFF }); }
     if (p.action === 'q_leave') { const k = p.name + p.date; if (p.on) DEMO_LEAVE[k] = 1; else delete DEMO_LEAVE[k]; return res({ ok: true }); }
-    if (p.action === 'q_me') return res({ ok: true, me, pending: asStaff ? 0 : DEMO_STAFF.filter(s => s.status === '待審核').length, staff: asStaff ? ['王小美'] : people,
+    if (p.action === 'q_me') return res({ ok: true, me, pending: asStaff ? 0 : DEMO_STAFF.filter(s => s.status === '待審核').length, fixPending: asStaff ? 0 : DEMO_FIX.filter(f => f.status === '待審核').length, staff: asStaff ? ['王小美'] : people,
       stores: ['UCHINO - SOGO復興', 'UCHINO - 信義A8', 'Berkemann - SOGO復興', 'HASSIA - 新光南西', 'IKEUCHI - 板橋大遠百'] });
     if (p.action === 'q_today') return res({ ok: true, me, date: today, counts: { working: 3, off: 1, none: 1, leave: 1, abnormal: 2 }, people: [
       { name: '王小美', state: 'working', inTime: '10:52', outTime: '', store: 'UCHINO - SOGO復興', abnormal: [], inPhoto: 'demoIn01234' },

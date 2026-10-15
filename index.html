@@ -433,6 +433,23 @@
     .store-hint .h1 { font-size: 15px; } .store-hint .h2 { font-size: 14px; }
     .sp-name { letter-spacing: .2em; text-indent: .2em; }
   }
+
+  /* ── 使用教學、申請補卡連結 ── */
+  .greet-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .greet { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .guide-link { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 5px 11px; border-radius: 999px; border: 0;
+                background: var(--bg); color: var(--ink-soft); font: inherit; font-size: 14px; letter-spacing: .04em; cursor: pointer;
+                box-shadow: none; flex-direction: row; white-space: nowrap; position: relative; z-index: 2; }
+  .guide-link svg { width: 15px; height: 15px; }
+  .today-card h2 { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .fix-link { font-family: "Noto Sans TC", sans-serif; font-weight: 400; font-size: 14px; letter-spacing: .02em; color: var(--ink-soft);
+              text-decoration: none; white-space: nowrap; }
+  @media (max-width: 370px) { .fix-link { font-size: 13px; } }
+  .gv { position: fixed; inset: 0; z-index: 40; background: rgba(30,34,38,.55); display: flex; flex-direction: column; animation: fade .2s ease; }
+  .gv-top { display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top)) 16px 10px; color: #fff; font-size: 16px; letter-spacing: .1em; }
+  .gv-x { width: 38px; height: 38px; padding: 0; border-radius: 50%; background: rgba(255,255,255,.2); color: #fff; font-size: 24px; line-height: 1; box-shadow: none; display: grid; place-items: center; }
+  .gv-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 12px calc(16px + env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+  .gv-body img { display: block; width: 100%; max-width: 560px; margin: 0 auto; border-radius: 18px; }
 </style>
 </head>
 <body>
@@ -462,7 +479,8 @@
   <!-- 打卡主畫面 -->
   <div id="punchView" class="hidden">
     <section class="card hero rise">
-      <div class="greet"><span id="greetWord">您好</span>，<b id="staffName"></b></div>
+      <div class="greet-row"><div class="greet"><span id="greetWord">您好</span>，<b id="staffName"></b></div>
+        <button class="guide-link" id="guideOpen" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>使用教學</button></div>
       <div class="clock"><span class="hm" id="clockHM">--:--</span><span class="s" id="clockS">--</span></div>
       <div class="date" id="clockDate"></div>
       <!-- 上班中：計時＋進度 -->
@@ -554,7 +572,7 @@
     </section>
 
     <section class="card today-card rise" style="animation-delay:.12s">
-      <h2>今日紀錄</h2>
+      <h2>今日紀錄<a class="fix-link" id="fixLink" href="query/?fix=1">漏打或打錯？申請補卡 ›</a></h2>
       <ul class="today" id="todayList"><li class="empty">尚無紀錄</li></ul>
     </section>
   </div>
@@ -1149,6 +1167,19 @@ function hint2(main, sub, relocate) {
   return '<span class="h1">' + main + '</span>' + (sub ? '<span class="h2">' + sub + '</span>' : '') +
     (relocate ? '<a class="relo" data-relocate="1">重新定位</a>' : '');
 }
+/* 使用教學：櫃姐版說明圖 */
+function openGuide() {
+  const w = document.createElement('div'); w.className = 'gv';
+  w.innerHTML = '<div class="gv-top"><span>使用教學</span><button class="gv-x" aria-label="關閉">×</button></div>' +
+    '<div class="gv-body"><img src="guide/staff.jpg?v=2" alt="櫃姐使用教學"></div>';
+  document.body.appendChild(w);
+  document.documentElement.style.overflow = 'hidden';
+  const close = () => { w.remove(); document.documentElement.style.overflow = ''; };
+  w.querySelector('.gv-x').onclick = close;
+  w.onclick = e => { if (e.target === w) close(); };
+}
+document.getElementById('guideOpen').onclick = openGuide;
+
 function setHint(html, kind) {
   const h = $('storeHint');
   h.innerHTML = html;
