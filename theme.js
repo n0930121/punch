@@ -41,8 +41,7 @@
     if (mode === 'dark') return true;
     if (mode === 'light') return false;
     var h = new Date().getHours();
-    var sys = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;   // 手機本身設成深色模式
-    return sys || h >= 19 || h < 7;
+    return h >= 19 || h < 7;   // 只看時間：晚上 7 點到早上 7 點
   }
 
   /* ── 顏色換算（深色版用） ── */
@@ -122,7 +121,6 @@
   // 自動模式：每分鐘檢查一次是否該切換
   var lastDark = isDark(mode);
   setInterval(function () { var d = isDark(mode); if (d !== lastDark) { lastDark = d; apply(cur); } }, 60000);
-  if (window.matchMedia) try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { lastDark = isDark(mode); apply(cur); }); } catch (e) {}
 
   var css =
     '.thm{position:relative;flex:none}' +
@@ -180,7 +178,7 @@
         '<button type="button" data-m="auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>自動</button>' +
         '<button type="button" data-m="light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>淺色</button>' +
         '<button type="button" data-m="dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/></svg>深色</button>' +
-      '</div><div class="thm-tip">自動：晚上 7 點後，或手機設成深色時</div>' +
+      '</div><div class="thm-tip">自動：晚上 7 點到早上 7 點顯示深色</div>' +
       '<div class="thm-h">選擇色系</div><div class="thm-g">' +
       ORDER.map(function (k) {
         var t = T[k];
