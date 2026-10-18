@@ -549,13 +549,6 @@
   .srch svg { width: 18px; height: 18px; flex: none; }
   .srch input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); outline: none; }
   .srch input::placeholder { color: var(--ink-faint); }
-
-  .sbtns { display: flex; gap: 6px; flex: none; }
-
-  .sheet-link { display: flex; align-items: center; gap: 10px; margin: -4px 0 14px; padding: 12px 16px; border-radius: 16px; background: var(--paper); box-shadow: var(--shadow);
-                color: var(--ink); text-decoration: none; font-size: 15px; white-space: nowrap; overflow: hidden; }
-  .sheet-link svg { width: 20px; height: 20px; flex: none; color: var(--sage-deep); }
-  .sheet-link span { margin-left: auto; color: var(--ink-faint); font-size: 18px; }
 </style>
 </head>
 <body>
@@ -646,7 +639,6 @@
   <section id="tab-staff" class="hidden">
     <h1>人員管理</h1>
     <div class="sub">開通新登記、停用離職人員</div>
-    <a class="sheet-link hidden" id="sheetLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M4 9h16M4 14.5h16M10 9v11.5"/></svg>開啟試算表・人員名單<span>›</span></a>
     <div id="fixAdmin"></div>
     <div class="srch card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="sSearch" type="search" placeholder="搜尋姓名或 LINE 名稱" autocomplete="off"></div>
     <div id="staffList"></div>
@@ -709,7 +701,6 @@ let ME = null, curTab = '', range = 'today', abnOnly = false, month = '', lastRe
     try { tab = sessionStorage.getItem('qTab') || tab; } catch (e) {}
     if ((tab === 'today' || tab === 'staff') && !ME.admin) tab = 'records';
     STORES = r.stores || [];
-    if (ME.admin && r.sheetUrl) { $('sheetLink').href = r.sheetUrl; $('sheetLink').classList.remove('hidden'); }
     $('fixOpen').classList.remove('hidden');
     if (ME.admin) { badgeN.staff = r.pending || 0; badgeN.fix = r.fixPending || 0; setPendBadge(); }
     let wantFix = new URLSearchParams(location.search).has('fix');
@@ -1104,7 +1095,7 @@ function renderStaff(list) {
     '<button class="sbtn go" data-act="on" data-k="' + esc(p.key) + '">開通</button></div></div>').join(''));
   h += grp('啟用中', act.length, act.length ? act.map(p =>
     '<div class="srow"><div class="sinfo">' + avatar(p.name) + '<div class="smeta"><b>' + esc(p.name) + '</b><span>' + esc(p.lineName) + '</span></div></div>' +
-    '<div class="sbtns"><button class="sbtn" data-act="ren" data-k="' + esc(p.key) + '">改名</button><button class="sbtn" data-act="off" data-k="' + esc(p.key) + '">停用</button></div></div>').join('') : emptyBox('沒有啟用中的人員'));
+    '<button class="sbtn" data-act="off" data-k="' + esc(p.key) + '">停用</button></div>').join('') : emptyBox('沒有啟用中的人員'));
   if (off.length) h += grp('已停用', off.length, off.map(p =>
     '<div class="srow dim"><div class="sinfo">' + avatar(p.name || p.lineName) + '<div class="smeta"><b>' + esc(p.name || p.lineName) + '</b><span>' + esc(p.lineName) + '</span></div></div>' +
     '<button class="sbtn" data-act="re" data-k="' + esc(p.key) + '">重新啟用</button></div>').join(''));
@@ -1119,17 +1110,12 @@ function staffAction(act, key, btn) {
     return confirmBox('開通這位人員？', '姓名：' + esc(name), '開通', () => doSetStaff(key, '啟用', name));
   }
   if (act === 'off') return confirmBox('停用「' + esc(p.name) + '」？', '停用後就不能打卡；過去的紀錄會保留，之後也可以重新啟用', '停用', () => doSetStaff(key, '停用'), true);
-  if (act === 'ren') return confirmBox('修改姓名', 'LINE 名稱：' + esc(p.lineName || '—') + '<input class="sname cf-in" id="renName" maxlength="20" value="' + esc(p.name) + '">', '儲存', () => {
-    const n = ($('renName') || {}).value ? $('renName').value.trim() : '';
-    if (!n || n === p.name) return;
-    return doSetStaff(key, '啟用', n);
-  });
   if (act === 're') return confirmBox('重新啟用「' + esc(p.name || p.lineName) + '」？', '', '重新啟用', () => doSetStaff(key, '啟用', p.name));
 }
 async function doSetStaff(key, status, name) {
   const r = await api({ action: 'q_setstaff', key: key, status: status, name: name || '' });
   if (!r.ok) return toast(r.message || '儲存失敗');
-  toast(status === '停用' ? '已停用' : name && staffData.some(x => x.key === key && x.status === '啟用' && x.name !== name) ? '已改名' : '已啟用');
+  toast(status === '停用' ? '已停用' : '已啟用');
   renderStaff(r.people || []);
   refreshNames();
 }
@@ -1437,7 +1423,7 @@ function demoApi(p) {
     if (p.action === 'q_fixdo') { const f = DEMO_FIX.find(x => x.id === p.id); if (f) { f.status = p.approve ? '已核准' : '已退回'; f.note = p.note || ''; } return res({ ok: true, list: DEMO_FIX }); }
     if (p.action === 'q_setstaff') { const x = DEMO_STAFF.find(s => s.key === p.key); if (x) { x.status = p.status; if (p.name) x.name = p.name; } return res({ ok: true, people: DEMO_STAFF }); }
     if (p.action === 'q_leave') { const k = p.name + p.date; if (p.on) DEMO_LEAVE[k] = 1; else delete DEMO_LEAVE[k]; return res({ ok: true }); }
-    if (p.action === 'q_me') return res({ ok: true, me, sheetUrl: asStaff ? '' : 'https://docs.google.com/spreadsheets/', pending: asStaff ? 0 : DEMO_STAFF.filter(s => s.status === '待審核').length, fixPending: asStaff ? 0 : DEMO_FIX.filter(f => f.status === '待審核').length, staff: asStaff ? ['王小美'] : people,
+    if (p.action === 'q_me') return res({ ok: true, me, pending: asStaff ? 0 : DEMO_STAFF.filter(s => s.status === '待審核').length, fixPending: asStaff ? 0 : DEMO_FIX.filter(f => f.status === '待審核').length, staff: asStaff ? ['王小美'] : people,
       stores: ['UCHINO - SOGO復興', 'UCHINO - 信義A8', 'Berkemann - SOGO復興', 'HASSIA - 新光南西', 'IKEUCHI - 板橋大遠百'] });
     if (p.action === 'q_today') return res({ ok: true, me, date: today, counts: { working: 3, off: 1, none: 1, leave: 1, abnormal: 2 }, people: [
       { name: '王小美', state: 'working', inTime: '10:52', outTime: '', store: 'UCHINO - SOGO復興', abnormal: [], inPhoto: 'demoIn01234' },
