@@ -549,6 +549,8 @@
   .srch svg { width: 18px; height: 18px; flex: none; }
   .srch input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); outline: none; }
   .srch input::placeholder { color: var(--ink-faint); }
+
+  .sbtns { display: flex; gap: 6px; flex: none; }
 </style>
 </head>
 <body>
@@ -1095,7 +1097,7 @@ function renderStaff(list) {
     '<button class="sbtn go" data-act="on" data-k="' + esc(p.key) + '">開通</button></div></div>').join(''));
   h += grp('啟用中', act.length, act.length ? act.map(p =>
     '<div class="srow"><div class="sinfo">' + avatar(p.name) + '<div class="smeta"><b>' + esc(p.name) + '</b><span>' + esc(p.lineName) + '</span></div></div>' +
-    '<button class="sbtn" data-act="off" data-k="' + esc(p.key) + '">停用</button></div>').join('') : emptyBox('沒有啟用中的人員'));
+    '<div class="sbtns"><button class="sbtn" data-act="ren" data-k="' + esc(p.key) + '">改名</button><button class="sbtn" data-act="off" data-k="' + esc(p.key) + '">停用</button></div></div>').join('') : emptyBox('沒有啟用中的人員'));
   if (off.length) h += grp('已停用', off.length, off.map(p =>
     '<div class="srow dim"><div class="sinfo">' + avatar(p.name || p.lineName) + '<div class="smeta"><b>' + esc(p.name || p.lineName) + '</b><span>' + esc(p.lineName) + '</span></div></div>' +
     '<button class="sbtn" data-act="re" data-k="' + esc(p.key) + '">重新啟用</button></div>').join(''));
@@ -1110,12 +1112,17 @@ function staffAction(act, key, btn) {
     return confirmBox('開通這位人員？', '姓名：' + esc(name), '開通', () => doSetStaff(key, '啟用', name));
   }
   if (act === 'off') return confirmBox('停用「' + esc(p.name) + '」？', '停用後就不能打卡；過去的紀錄會保留，之後也可以重新啟用', '停用', () => doSetStaff(key, '停用'), true);
+  if (act === 'ren') return confirmBox('修改姓名', 'LINE 名稱：' + esc(p.lineName || '—') + '<input class="sname cf-in" id="renName" maxlength="20" value="' + esc(p.name) + '">', '儲存', () => {
+    const n = ($('renName') || {}).value ? $('renName').value.trim() : '';
+    if (!n || n === p.name) return;
+    return doSetStaff(key, '啟用', n);
+  });
   if (act === 're') return confirmBox('重新啟用「' + esc(p.name || p.lineName) + '」？', '', '重新啟用', () => doSetStaff(key, '啟用', p.name));
 }
 async function doSetStaff(key, status, name) {
   const r = await api({ action: 'q_setstaff', key: key, status: status, name: name || '' });
   if (!r.ok) return toast(r.message || '儲存失敗');
-  toast(status === '停用' ? '已停用' : '已啟用');
+  toast(status === '停用' ? '已停用' : name && staffData.some(x => x.key === key && x.status === '啟用' && x.name !== name) ? '已改名' : '已啟用');
   renderStaff(r.people || []);
   refreshNames();
 }
