@@ -549,6 +549,20 @@
   .srch svg { width: 18px; height: 18px; flex: none; }
   .srch input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); outline: none; }
   .srch input::placeholder { color: var(--ink-faint); }
+
+  /* ── 昨天缺卡 ── */
+  .ymiss { padding: 14px 18px 8px; border: 1px solid color-mix(in srgb, var(--bad) 30%, transparent); }
+  .ym-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 15px; font-weight: 500; color: var(--bad); margin-bottom: 4px; white-space: nowrap; }
+  .ym-tip { font-size: 13px; font-weight: 400; color: var(--ink-faint); }
+  .ym-r { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-top: 1px solid var(--hair); font-size: 16px; white-space: nowrap; }
+  .ym-h + .ym-r { border-top: 0; }
+  .ym-r b { font-weight: 500; flex: none; }
+  .ym-r .tag { flex: none; }
+  .ym-t { margin-left: auto; font-size: 13px; color: var(--ink-soft); min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .ym-t b { font-weight: 400; color: var(--ink); font-size: 14px; }
+  .ym-l { font-style: normal; }
+  html.mq-max370 .ym-l { display: none; } html.mq-max370 .ym-t b { font-size: 13px; } html.mq-max370 .ym-r { gap: 6px; font-size: 15px; }
+  html.mq-max370 .ym-tip { display: none; }
 </style>
 </head>
 <body>
@@ -580,6 +594,7 @@
     </div>
     <div class="ratio" id="ratioBar"><span class="w"></span><span class="o"></span><span class="n"></span></div>
     <div class="ratio-lg"><span><i class="w"></i>上班中</span><span><i class="o"></i>已下班</span><span><i class="n"></i>未打卡</span><span class="lvc hidden" id="leaveTxt"></span><span class="r" id="ratioTxt"></span></div>
+    <div class="card ymiss hidden" id="yMiss"></div>
     <div class="card people"><div class="tl-head"><span>今日時間軸</span><div class="tl-scale" id="tlScale"></div></div><div id="peopleList"></div></div>
     <div class="note">回到 App 或切換分頁時會自動更新</div>
   </section>
@@ -772,10 +787,16 @@ async function loadToday() {
   $('peopleList').innerHTML = skel('people');
   const r = await api({ action: 'q_today' });
   if (!r.ok) return $('peopleList').innerHTML = emptyBox(r.message);
-  // 有下班卡、卻沒有上班卡：算一筆異常（提醒請她申請補卡）
+  // 缺卡也算異常：有下班卡卻沒有上班卡；上班超過 12 小時（或過了晚上 11 點）還沒打下班卡
+  const nowD = new Date(), nowMin = nowD.getHours() * 60 + nowD.getMinutes();
   r.people.forEach(p => {
     if (p.outTime && !p.inTime) { p.abnormal = (p.abnormal || []).concat([p.outTime + ' 下班：沒有上班打卡紀錄，可請她申請補卡']); r.counts.abnormal++; }
+    const m = /^(\d{1,2}):(\d{2})$/.exec(p.inTime || '');
+    if (p.state === 'working' && m && (nowMin - (+m[1] * 60 + +m[2]) >= 12 * 60 || nowMin >= 23 * 60)) {
+      p.abnormal = (p.abnormal || []).concat([p.inTime + ' 上班：已經很晚還沒打下班卡，可能忘記打了']); r.counts.abnormal++;
+    }
   });
+  loadYesterdayMissing();
   const d = new Date(r.date + 'T00:00:00');
   $('todayDate').textContent = r.date.replace(/-/g, '.') + '　週' + WEEK[d.getDay()];
   countUp($('cWorking'), r.counts.working); countUp($('cOff'), r.counts.off);
@@ -788,6 +809,24 @@ async function loadToday() {
   $('ratioTxt').textContent = '到班率 ' + Math.round((r.counts.working + r.counts.off) / tot * 100) + '%';
   lastToday = r;
   renderToday();
+}
+
+/* 昨天缺卡：上班沒打或下班沒打的人，列在今日頁上方（資料來自工時統計） */
+async function loadYesterdayMissing() {
+  const box = $('yMiss');
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  const ymdY = ymd(y), mon = ymdY.slice(0, 7);
+  const r = await api({ action: 'q_hours', month: mon });
+  if (!r.ok) { box.classList.add('hidden'); return; }
+  const miss = [];
+  (r.people || []).forEach(p => p.days.forEach(d => {
+    if (d.date === ymdY && (d.flag === '缺上班卡' || d.flag === '缺下班卡')) miss.push({ name: p.name, d: d });
+  }));
+  if (!miss.length) { box.classList.add('hidden'); return; }
+  box.innerHTML = '<div class="ym-h"><span>昨天（' + ymdY.slice(5).replace('-', '/') + '）缺卡・' + miss.length + ' 人</span><span class="ym-tip">可請她們申請補卡</span></div>' +
+    miss.map(x => '<div class="ym-r">' + avatar(x.name, 'sm') + '<b>' + esc(x.name) + '</b><span class="tag bad">' + esc(x.d.flag) + '</span>' +
+      '<span class="ym-t">' + (x.d.flag === '缺上班卡' ? '<i class="ym-l">下班 </i><b class="num">' + esc(x.d.out || '--:--') + '</b>' : '<i class="ym-l">上班 </i><b class="num">' + esc(x.d.in || '--:--') + '</b>') + '</span></div>').join('');
+  box.classList.remove('hidden');
 }
 
 /* 今日名單：分組（上班中／已下班／未打卡／休假）、時間軸、點數字格篩選 */
