@@ -563,6 +563,9 @@
   .day-sum .ds-ic svg { width: 46px; height: 43px; display: block; }
   .day-sum b { display: block; font-size: 17px; font-weight: 600; color: var(--ink); white-space: nowrap; }
   .day-sum span:not(.ds-ic) { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; white-space: nowrap; }
+
+  .day-sum.warn { background: var(--amber-tint, #F5EADF); }
+  .day-sum .ds-fix { color: var(--ink); font-weight: 600; text-decoration: none; margin-left: 4px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -1457,7 +1460,12 @@ function renderToday(list) {
     const toM = t => { const m = String(t || '').match(/(\d+):(\d+)/); return m ? +m[1] * 60 + +m[2] : null; };
     const fi = list.find(x => x.type === '上班'), lo = list[list.length - 1];
     const a = fi && toM(fi.time), b = toM(lo.time);
-    if (a !== null && b !== null && b > a) {
+    if (!fi) {
+      sum.innerHTML = '<span class="ds-ic">' + (window.UC_MASCOT ? UC_MASCOT('oops') : '') + '</span><div><b>今天沒有上班卡紀錄</b>' +
+        '<span>忘記打上班卡了嗎？<a href="query/?fix=1" class="ds-fix" onclick="try{sessionStorage.setItem(\'openFix\',\'1\')}catch(e){}">申請補卡 ›</a></span></div>';
+      sum.classList.remove('hidden'); sum.classList.add('warn');
+    } else if (a !== null && b !== null && b > a) {
+      sum.classList.remove('warn');
       const m = b - a;
       sum.innerHTML = '<span class="ds-ic">' + (window.UC_MASCOT ? UC_MASCOT('out') : '') + '</span><div><b>今天上班 ' + (m >= 60 ? Math.floor(m / 60) + ' 小時 ' : '') + (m % 60) + ' 分</b>' +
         '<span>' + esc(fi.time) + ' – ' + esc(lo.time) + '・辛苦了！</span></div>';

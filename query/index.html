@@ -772,6 +772,10 @@ async function loadToday() {
   $('peopleList').innerHTML = skel('people');
   const r = await api({ action: 'q_today' });
   if (!r.ok) return $('peopleList').innerHTML = emptyBox(r.message);
+  // 有下班卡、卻沒有上班卡：算一筆異常（提醒請她申請補卡）
+  r.people.forEach(p => {
+    if (p.outTime && !p.inTime) { p.abnormal = (p.abnormal || []).concat([p.outTime + ' 下班：沒有上班打卡紀錄，可請她申請補卡']); r.counts.abnormal++; }
+  });
   const d = new Date(r.date + 'T00:00:00');
   $('todayDate').textContent = r.date.replace(/-/g, '.') + '　週' + WEEK[d.getDay()];
   countUp($('cWorking'), r.counts.working); countUp($('cOff'), r.counts.off);
@@ -1431,7 +1435,8 @@ function demoApi(p) {
       { name: '陳怡君', state: 'working', inTime: '11:08', outTime: '', store: 'HASSIA - 新光南西', abnormal: ['11:08 上班：櫃點不符：UCHINO - 新光南西'] },
       { name: '張雅婷', state: 'off', inTime: '09:58', outTime: '14:02', store: 'UCHINO - 信義A8', abnormal: ['14:02 下班：定位可疑（誤差3m）'], inPhoto: 'demoIn01234', outPhoto: 'demoOut01234' },
       { name: '李珮瑜', state: 'none', inTime: '', outTime: '', store: '', abnormal: [] },
-      { name: '黃詩涵', state: 'leave', inTime: '', outTime: '', store: '', abnormal: [] }] });
+      { name: '黃詩涵', state: 'leave', inTime: '', outTime: '', store: '', abnormal: [] },
+      { name: '游碧薈', state: 'off', inTime: '', outTime: '16:56', store: 'UCHINO - 信義A8', abnormal: [], outPhoto: 'demoOut01234' }] });
     if (p.action === 'q_photo') return res({ ok: true, photos: p.ids.map(id => ({ id, data: demoPhoto(id.indexOf('Out') > 0) })) });
     if (p.action === 'q_records') {
       let recs = [
