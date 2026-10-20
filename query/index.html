@@ -948,18 +948,24 @@ function rangeDates() {
   if (range === '7d') return [add(t, -6), t];
   if (range === 'month') return [new Date(t.getFullYear(), t.getMonth(), 1), t];
   if (range === 'lastmonth') return [new Date(t.getFullYear(), t.getMonth() - 1, 1), new Date(t.getFullYear(), t.getMonth(), 0)];
-  return [new Date($('fFrom').value + 'T00:00:00'), new Date($('fTo').value + 'T00:00:00')];
+  let a = $('fFrom').value || $('fTo').value || ymd(t), b = $('fTo').value || a;
+  if (a > b) { [a, b] = [b, a]; $('fFrom').value = a; $('fTo').value = b; }
+  return [new Date(a + 'T00:00:00'), new Date(b + 'T00:00:00')];
 }
 
+// 目前畫面條件的代號：用來判斷匯出的資料是不是跟畫面選的一致
+function recKey() { const [f, t] = rangeDates(); return [ymd(f), ymd(t), $('fName').value, $('fStore').value, abnOnly].join('|'); }
+let recSeq = 0, lastRecKey = '';
 async function loadRecords() {
   if (!ME.admin) loadFixMine();
-  const [f, t] = rangeDates();
+  const [f, t] = rangeDates(), key = recKey(), seq = ++recSeq;
   $('recList').innerHTML = skel('cards');
   $('recCount').textContent = '';
   const r = await api({ action: 'q_records', from: ymd(f), to: ymd(t),
                         name: $('fName').value, store: $('fStore').value, abnormal: abnOnly });
-  if (!r.ok) return $('recList').innerHTML = emptyBox(r.message);
-  lastRecs = r.records || [];
+  if (seq !== recSeq) return;   // 較早送出的查詢比較晚回來，丟掉，避免蓋掉新結果
+  if (!r.ok) { lastRecs = []; lastRecKey = ''; return $('recList').innerHTML = emptyBox(r.message); }
+  lastRecs = r.records || []; lastRecKey = key;
   $('recCount').textContent = r.message ? r.message : '共 ' + lastRecs.length + ' 筆' + (r.truncated ? '（只顯示最近 1500 筆）' : '');
   if (!lastRecs.length) return $('recList').innerHTML = '<div class="card">' + (abnOnly ? emptyBox('這段期間沒有異常紀錄', 'happy') : emptyBox('這段期間沒有打卡紀錄')) + '</div>';
   const groups = {};
@@ -1310,8 +1316,14 @@ function downloadCSV(name, rows) {
   a.download = name; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-function exportRecords() {
-  if (!lastRecs.length) return;
+async function exportRecords() {
+  // 畫面條件跟已載入的資料不一致（例如日期剛改、還在載入）→ 先依目前條件重新查詢再匯出
+  if (recKey() !== lastRecKey) {
+    const b = $('recExport'); b.disabled = true;
+    try { await loadRecords(); } finally { b.disabled = false; }
+    if (recKey() !== lastRecKey) return;
+  }
+  if (!lastRecs.length) return toast('這段期間沒有紀錄可以匯出');
   const head = ['日期', '時間', '姓名', '櫃點', '類別', '位置判定'].concat(ME.admin ? ['距離(m)', 'GPS誤差(m)', '警示', '照片'] : []);
   const rows = lastRecs.map(x => [x.date, x.time, x.name, x.store, x.type, x.verdict].concat(ME.admin ? [x.distance, x.accuracy, x.warn, x.photo] : []));
   const [f, t] = rangeDates();
