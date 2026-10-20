@@ -48,8 +48,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="fonts/michroma.woff2" as="font" type="font/woff2" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@500;600&display=optional" rel="stylesheet">
-<style>@font-face{font-family:"Michroma";src:url("fonts/michroma.woff2") format("woff2");font-display:block}html{background:var(--bg,#D9DFE4)}@view-transition{navigation:auto}::view-transition-old(root){animation:vtOut .22s ease both}::view-transition-new(root){animation:vtIn .32s cubic-bezier(.2,.8,.2,1) both}@keyframes vtOut{to{opacity:0}}@keyframes vtIn{from{opacity:0;transform:translateY(10px)}}@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}</style>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=optional" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/serif-600.woff2?v=1" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:"UC Serif";src:url("fonts/serif-600.woff2?v=1") format("woff2");font-weight:600;font-display:block}@font-face{font-family:"UC Serif";src:url("fonts/serif-500.woff2?v=1") format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Michroma";src:url("fonts/michroma.woff2") format("woff2");font-display:block}html{background:var(--bg,#D9DFE4)}@view-transition{navigation:auto}::view-transition-old(root){animation:vtOut .22s ease both}::view-transition-new(root){animation:vtIn .32s cubic-bezier(.2,.8,.2,1) both}@keyframes vtOut{to{opacity:0}}@keyframes vtIn{from{opacity:0;transform:translateY(10px)}}@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}</style>
 <link rel="prefetch" href="query/">
 <script src="theme.js?v=10"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
@@ -95,7 +97,7 @@
 
   /* 頁首 */
   header { display: flex; align-items: center; justify-content: space-between; margin: 4px 4px 18px; }
-  .brand { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 15px; letter-spacing: .25em; color: var(--ink-soft); }
+  .brand { font-family: "UC Serif", "Noto Serif TC", serif; font-weight: 600; font-size: 15px; letter-spacing: .25em; color: var(--ink-soft); }
   .brand::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
                    background: var(--clay); margin-right: 9px; vertical-align: 2px; }
   .status-pill { font-size: 12px; padding: 5px 12px; border-radius: 999px; background: var(--paper); color: var(--ink-soft); }
@@ -114,7 +116,7 @@
   .hero::after { content: ""; position: absolute; right: -40px; top: -40px; width: 150px; height: 150px; border-radius: 50%;
                  background: radial-gradient(circle, color-mix(in srgb, var(--clay) 18%, transparent), transparent 70%); }
   .greet { font-size: 14px; color: var(--ink-soft); }
-  .greet b { font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 22px; color: var(--ink); margin-left: 4px; letter-spacing: .08em; }
+  .greet b { font-family: "UC Serif", "Noto Serif TC", serif; font-weight: 600; font-size: 22px; color: var(--ink); margin-left: 4px; letter-spacing: .08em; }
   .store { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--ink-soft);
            background: var(--bg); padding: 5px 11px; border-radius: 999px; }
   .store svg { width: 13px; height: 13px; }
@@ -183,7 +185,7 @@
 
   /* 今日紀錄 */
   .today-card { padding: 18px 20px 8px; }
-  .today-card h2 { margin: 0 0 6px; font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 14px;
+  .today-card h2 { margin: 0 0 6px; font-family: "UC Serif", "Noto Serif TC", serif; font-weight: 600; font-size: 14px;
                    letter-spacing: .25em; color: var(--ink-soft); }
   ul.today { list-style: none; padding: 0; margin: 0; }
   ul.today li { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-top: 1px solid var(--hair); }
@@ -201,7 +203,7 @@
   .state .ico { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: var(--bg);
                 display: grid; place-items: center; color: var(--clay); }
   .state .ico svg { width: 28px; height: 28px; }
-  .state b { font-family: "Noto Serif TC", serif; color: var(--ink); font-size: 18px; }
+  .state b { font-family: "UC Serif", "Noto Serif TC", serif; color: var(--ink); font-size: 18px; }
   .state small { color: var(--ink-faint); }
 
   .hidden { display: none !important; }
@@ -332,7 +334,7 @@
   .sp-in { text-align: center; padding: 24px; }
   .sp-logo { width: 104px; height: 104px; border-radius: 30px; box-shadow: var(--shadow-lg); animation: float 2.6s ease-in-out infinite; }
   @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-  .sp-name { margin-top: 22px; font-family: "Noto Serif TC", serif; font-weight: 600; font-size: 22px; letter-spacing: .3em; text-indent: .3em; }
+  .sp-name { margin-top: 22px; font-family: "UC Serif", "Noto Serif TC", serif; font-weight: 600; font-size: 22px; letter-spacing: .3em; text-indent: .3em; }
   .sp-sub { margin-top: 6px; font-size: 12px; color: var(--ink-soft); letter-spacing: .25em; text-indent: .25em; }
   .sp-dots { display: flex; gap: 6px; justify-content: center; margin-top: 28px; }
   .sp-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--mist); animation: dot 1.2s ease-in-out infinite; }
@@ -356,7 +358,7 @@
   .done-title { margin-top: 14px; font-size: 20px; font-weight: 600; letter-spacing: .15em; text-indent: .15em; }
   .done-time { margin-top: 10px; font-family: "Michroma", sans-serif; font-size: 44px; line-height: 1; }
   .done-store { margin-top: 12px; font-size: 14px; color: var(--ink-soft); }
-  .done-word { margin-top: 18px; font-family: "Noto Serif TC", serif; font-size: 17px; color: var(--sage-deep); letter-spacing: .12em; }
+  .done-word { margin-top: 18px; font-family: "UC Serif", "Noto Serif TC", serif; font-size: 17px; color: var(--sage-deep); letter-spacing: .12em; }
   .okview.out-type .done-word { color: var(--mist-deep); }
   .done-note { margin-top: 14px; font-size: 13px; color: #8E6B63; background: var(--rose-tint); padding: 8px 14px; border-radius: 99px; display: inline-block; }
   .done-tap { margin-top: 30px; font-size: 12px; color: var(--ink-faint); letter-spacing: .15em; }
